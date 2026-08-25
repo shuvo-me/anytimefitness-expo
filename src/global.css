@@ -12,16 +12,14 @@
     --color-blue-accent: #5b8def;
     --color-alert-red: #ff4b1f;
     --color-text-muted: #8a8a9a;
-
-    /* Custom line heights */
-    --text-xs--line-height: calc(1em / 0.75);
-    --text-sm--line-height: calc(1.25em / 0.875);
-    --text-base--line-height: calc(1.5em / 1);
+    --color-black: #000000;
+    --color-white: #ffffff;
 
     /* Fonts */
     --font-display: "Spline Sans", Inter, ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-mono:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --font-rounded: "SF Pro Rounded", "Hiragino Maru Gothic ProN", sans-serif;
     --font-serif: Georgia, "Times New Roman", serif;
   }

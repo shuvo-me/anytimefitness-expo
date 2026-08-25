@@ -11,6 +11,7 @@ export {
   ImageBackground,
   KeyboardAvoidingView,
   Pressable,
+  SafeAreaView,
   ScrollView,
   Switch,
   Text,
