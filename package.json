@@ -45,6 +45,7 @@
     "drizzle-orm": "^0.45.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.1",
+    "postgres": "^3.4.9",
     "typescript": "~6.0.3"
   },
   "overrides": {
