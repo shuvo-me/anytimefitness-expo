@@ -1,9 +1,47 @@
-:root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@layer theme {
+  @theme {
+    /* Ironclad palette */
+    --color-background: #0c0c0f;
+    --color-card: #141418;
+    --color-border-subtle: #1e1e26;
+    --color-lime-accent: #c8f135;
+    --color-blue-accent: #5b8def;
+    --color-alert-red: #ff4b1f;
+    --color-text-muted: #8a8a9a;
+
+    /* Custom line heights */
+    --text-xs--line-height: calc(1em / 0.75);
+    --text-sm--line-height: calc(1.25em / 0.875);
+    --text-base--line-height: calc(1.5em / 1);
+
+    /* Fonts */
+    --font-display: "Spline Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-rounded: "SF Pro Rounded", "Hiragino Maru Gothic ProN", sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
+  }
+}
+
+/* Platform-specific font families */
+@media android {
+  :root {
+    --font-mono: monospace;
+    --font-rounded: normal;
+    --font-serif: serif;
+    --font-sans: normal;
+  }
+}
+
+@media ios {
+  :root {
+    --font-mono: ui-monospace;
+    --font-serif: ui-serif;
+    --font-sans: system-ui;
+    --font-rounded: ui-rounded;
+  }
 }
