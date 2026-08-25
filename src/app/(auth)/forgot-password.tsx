@@ -78,7 +78,7 @@ export default function ForgotPasswordScreen() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         showsVerticalScrollIndicator={false}
-        className="px-6 pt-16 pb-4"
+        className="px-6 pt-40 pb-4"
       >
         <View className="w-full max-w-lg mx-auto gap-3">
           {/* Brand header */}
@@ -97,11 +97,7 @@ export default function ForgotPasswordScreen() {
           </View>
 
           {/* Auth card */}
-          <View className="bg-card border border-border-subtle rounded-3xl p-6 gap-4">
-            <Text className="text-sm font-mono text-text-muted text-center leading-relaxed">
-              Enter your email and we{"'"}ll send you a link to reset your password.
-            </Text>
-
+          <View className="bg-card border border-border-subtle rounded-3xl p-6 gap-4 mt-10">
             {error && (
               <View className="p-3 rounded-2xl flex-row items-center gap-2.5" style={{ backgroundColor: 'rgba(255, 75, 31, 0.15)', borderColor: 'rgba(255, 75, 31, 0.4)', borderWidth: 1 }}>
                 <AlertCircle size={16} color="#FF4B1F" />

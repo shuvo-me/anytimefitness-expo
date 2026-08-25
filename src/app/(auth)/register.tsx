@@ -93,7 +93,7 @@ export default function RegisterScreen() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
         showsVerticalScrollIndicator={false}
-        className="px-6 pt-16 pb-4"
+        className="px-6 pt-40 pb-4"
       >
         <View className="w-full max-w-lg mx-auto gap-3">
           {/* Brand header */}
@@ -112,7 +112,7 @@ export default function RegisterScreen() {
           </View>
 
           {/* Auth card */}
-          <View className="bg-card border border-border-subtle rounded-3xl p-6 gap-4">
+          <View className="bg-card border border-border-subtle rounded-3xl p-6 gap-4 mt-10">
             {error && (
               <View className="p-3 rounded-2xl flex-row items-center gap-2.5" style={{ backgroundColor: 'rgba(255, 75, 31, 0.15)', borderColor: 'rgba(255, 75, 31, 0.4)', borderWidth: 1 }}>
                 <AlertCircle size={16} color="#FF4B1F" />
