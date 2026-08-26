@@ -1,5 +1,6 @@
 export const queryKeys = {
   auth: {
+    session: ['auth', 'session'] as const,
     profile: (userId: string) => ['auth', 'profile', userId] as const,
   },
   members: {

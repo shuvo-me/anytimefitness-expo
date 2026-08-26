@@ -3,49 +3,27 @@ import { supabase } from '@/lib/supabase';
 import * as authService from '@/services/auth.service';
 import type { Session } from '@supabase/supabase-js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSyncExternalStore } from 'react';
-
-let _session: Session | null = null;
-let _sessionResolved = false;
-let _listeners: (() => void)[] = [];
-let _initialized = false;
-
-function initSessionListener() {
-  if (_initialized) return;
-  _initialized = true;
-
-  supabase.auth.getSession().then(({ data: { session: s } }) => {
-    _session = s;
-    _sessionResolved = true;
-    _listeners.forEach((l) => l());
-  });
-
-  supabase.auth.onAuthStateChange((_event, s) => {
-    _session = s;
-    _sessionResolved = true;
-    _listeners.forEach((l) => l());
-  });
-}
-
-function subscribe(callback: () => void) {
-  _listeners.push(callback);
-  return () => {
-    _listeners = _listeners.filter((l) => l !== callback);
-  };
-}
-
-function getSnapshot() {
-  return _session;
-}
-
-function getServerSnapshot() {
-  return null;
-}
+import { useEffect } from 'react';
 
 export function useAuth() {
-  initSessionListener();
+  const queryClient = useQueryClient();
 
-  const session = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { data: session, isLoading: isLoadingSession } = useQuery({
+    queryKey: queryKeys.auth.session,
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session;
+    },
+    staleTime: Infinity,
+  });
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      queryClient.setQueryData(queryKeys.auth.session, session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [queryClient]);
 
   const userId = session?.user?.id;
 
@@ -61,7 +39,7 @@ export function useAuth() {
     retry: 1,
   });
 
-  const isLoading = !_sessionResolved || (userId ? isLoadingProfile : false);
+  const isLoading = isLoadingSession || (userId ? isLoadingProfile : false);
 
   return {
     session,
@@ -80,13 +58,11 @@ export function useLogin() {
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authService.login(email, password),
-    onSuccess: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
+    onSuccess: () => {
+      const session = queryClient.getQueryData<Session>(queryKeys.auth.session);
+      if (session?.user?.id) {
         queryClient.invalidateQueries({
-          queryKey: queryKeys.auth.profile(user.id),
+          queryKey: queryKeys.auth.profile(session.user.id),
         });
       }
     },
@@ -120,7 +96,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: () => {
-      queryClient.clear();
+      queryClient.invalidateQueries();
     },
   });
 }

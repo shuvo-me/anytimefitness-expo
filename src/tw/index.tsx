@@ -11,7 +11,6 @@ export {
   ImageBackground,
   KeyboardAvoidingView,
   Pressable,
-  SafeAreaView,
   ScrollView,
   Switch,
   Text,
@@ -20,6 +19,8 @@ export {
   TouchableOpacity,
   View,
 } from 'react-native-css/components';
+
+export { SafeAreaView } from 'react-native-safe-area-context';
 
 type WithClassName<T> = T & { className?: string };
 
