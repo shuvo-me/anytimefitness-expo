@@ -1,19 +1,19 @@
-import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
-import { View, Text } from '@/tw';
+import { Redirect, Stack } from 'expo-router';
+import { View, ActivityIndicator } from '@/tw';
 
 export default function AdminLayout() {
-  const { role, isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <Text className="font-mono text-sm text-text-muted">Loading...</Text>
+        <ActivityIndicator size="large" color="#C8F135" />
       </View>
     );
   }
 
-  if (!isAuthenticated || role !== 'admin') {
+  if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
   }
 
