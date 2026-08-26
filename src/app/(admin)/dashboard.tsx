@@ -1,28 +1,41 @@
-import { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from '@/tw';
-import {
-  Minus,
-  Plus,
-  ArrowUpRight,
-  Activity,
-} from 'lucide-react-native';
+import { ScrollView, Text, TouchableOpacity, View } from "@/tw";
+import { useRouter } from "expo-router";
+import { Activity, ArrowUpRight, Minus, Plus } from "lucide-react-native";
+import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MOCK_MEMBERS = [
-  { id: '1', name: 'Sarah Johnson', initials: 'SJ', tier: 'Premium', status: 'active' as const },
-  { id: '2', name: 'Mike Chen', initials: 'MC', tier: 'Standard', status: 'active' as const },
-  { id: '3', name: 'Emma Davis', initials: 'ED', tier: 'Basic', status: 'expired' as const },
+  {
+    id: "1",
+    name: "Sarah Johnson",
+    initials: "SJ",
+    tier: "Premium",
+    status: "active" as const,
+  },
+  {
+    id: "2",
+    name: "Mike Chen",
+    initials: "MC",
+    tier: "Standard",
+    status: "active" as const,
+  },
+  {
+    id: "3",
+    name: "Emma Davis",
+    initials: "ED",
+    tier: "Basic",
+    status: "expired" as const,
+  },
 ];
 
 const WEEKLY_ACTIVITY = [
-  { day: 'Mon', percentage: 65, isToday: false },
-  { day: 'Tue', percentage: 78, isToday: false },
-  { day: 'Wed', percentage: 92, isToday: true },
-  { day: 'Thu', percentage: 71, isToday: false },
-  { day: 'Fri', percentage: 88, isToday: false },
-  { day: 'Sat', percentage: 45, isToday: false },
-  { day: 'Sun', percentage: 30, isToday: false },
+  { day: "Mon", percentage: 65, isToday: false },
+  { day: "Tue", percentage: 78, isToday: false },
+  { day: "Wed", percentage: 92, isToday: true },
+  { day: "Thu", percentage: 71, isToday: false },
+  { day: "Fri", percentage: 88, isToday: false },
+  { day: "Sat", percentage: 45, isToday: false },
+  { day: "Sun", percentage: 30, isToday: false },
 ];
 
 const MAX_CAPACITY = 120;
@@ -32,20 +45,25 @@ export default function AdminDashboard() {
   const [currentCount, setCurrentCount] = useState(47);
   const [totalRevenue] = useState(284500);
   const [revenueGrowth] = useState(12);
-
   const totalMembers = MOCK_MEMBERS.length + 242;
   const todayCheckIns = 18;
   const occupancyPercent = Math.round((currentCount / MAX_CAPACITY) * 100);
+  const inset = useSafeAreaInsets();
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <StatusBar style="light" />
+    <>
+      {/* <StatusBar /> */}
       <ScrollView
-        className="flex-1 px-4 py-6"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          backgroundColor: "#0C0C0F",
+          paddingTop: inset.top + 16,
+          paddingBottom: inset.bottom + 16,
+          flexGrow: 1,
+        }}
       >
-        <View className="max-w-4xl mx-auto w-full gap-6">
+        <View className="gap-6 flex-1 ">
           {/* Top Greeting Header */}
           <View className="flex-row items-center justify-between">
             <View>
@@ -57,7 +75,9 @@ export default function AdminDashboard() {
               </Text>
             </View>
             <View className="w-10 h-10 rounded-2xl bg-lime-accent items-center justify-center">
-              <Text className="font-display text-sm font-extrabold text-black">AM</Text>
+              <Text className="font-display text-sm font-extrabold text-black">
+                AM
+              </Text>
             </View>
           </View>
 
@@ -141,7 +161,9 @@ export default function AdminDashboard() {
                 </Text>
 
                 <TouchableOpacity
-                  onPress={() => setCurrentCount((c) => Math.min(MAX_CAPACITY, c + 1))}
+                  onPress={() =>
+                    setCurrentCount((c) => Math.min(MAX_CAPACITY, c + 1))
+                  }
                   activeOpacity={0.7}
                   className="w-7 h-7 rounded-lg bg-lime-accent items-center justify-center"
                 >
@@ -175,7 +197,7 @@ export default function AdminDashboard() {
 
             <View className="mt-4 pt-3 border-t border-border-subtle flex-row items-center justify-between">
               <TouchableOpacity
-                onPress={() => router.push('/(admin)/payments')}
+                onPress={() => router.push("/(admin)/payments")}
                 activeOpacity={0.7}
                 className="flex-row items-center gap-1"
               >
@@ -212,13 +234,15 @@ export default function AdminDashboard() {
                 >
                   <View
                     className={`w-full max-w-[24px] rounded-t-md ${
-                      item.isToday ? 'bg-lime-accent' : 'bg-border-subtle'
+                      item.isToday ? "bg-lime-accent" : "bg-border-subtle"
                     }`}
                     style={{ height: `${item.percentage}%` }}
                   />
                   <Text
                     className={`text-[11px] font-mono ${
-                      item.isToday ? 'text-lime-accent font-bold' : 'text-text-muted'
+                      item.isToday
+                        ? "text-lime-accent font-bold"
+                        : "text-text-muted"
                     }`}
                   >
                     {item.day}
@@ -235,7 +259,7 @@ export default function AdminDashboard() {
                 Recent Onboarding
               </Text>
               <TouchableOpacity
-                onPress={() => router.push('/(admin)/members')}
+                onPress={() => router.push("/(admin)/members")}
                 activeOpacity={0.7}
               >
                 <Text className="text-[10px] font-mono text-lime-accent underline">
@@ -248,7 +272,7 @@ export default function AdminDashboard() {
               {MOCK_MEMBERS.map((member) => (
                 <TouchableOpacity
                   key={member.id}
-                  onPress={() => router.push('/(admin)/members')}
+                  onPress={() => router.push("/(admin)/members")}
                   activeOpacity={0.8}
                   className="bg-card border border-border-subtle p-3 rounded-xl flex-row items-center justify-between"
                 >
@@ -263,40 +287,27 @@ export default function AdminDashboard() {
                         {member.name}
                       </Text>
                       <Text className="text-[11px] text-text-muted font-mono">
-                        {member.tier} •{' '}
-                        {member.status === 'active' ? 'Paid' : 'Pending'}
+                        {member.tier} •{" "}
+                        {member.status === "active" ? "Paid" : "Pending"}
                       </Text>
                     </View>
                   </View>
 
                   <Text
                     className={`text-[10px] font-mono font-bold ${
-                      member.status === 'active' ? 'text-lime-accent' : 'text-alert-red'
+                      member.status === "active"
+                        ? "text-lime-accent"
+                        : "text-alert-red"
                     }`}
                   >
-                    {member.status === 'active' ? '08:42 AM' : '07:15 AM'}
+                    {member.status === "active" ? "08:42 AM" : "07:15 AM"}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-
-          {/* System Reports Sync Footer */}
-          <View className="bg-card border border-border-subtle p-4 rounded-2xl flex-row items-center justify-between">
-            <Text className="text-[10px] font-mono text-text-muted uppercase font-bold tracking-widest">
-              System Reports Sync
-            </Text>
-            <View className="flex-row gap-2">
-              <View className="w-12 h-1.5 bg-border-subtle rounded-full overflow-hidden">
-                <View className="h-full bg-lime-accent w-3/4 rounded-full" />
-              </View>
-              <View className="w-12 h-1.5 bg-border-subtle rounded-full overflow-hidden">
-                <View className="h-full bg-lime-accent w-1/2 rounded-full" />
-              </View>
-            </View>
-          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }
