@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { useLogin } from "@/hooks/useAuth";
 import {
   SafeAreaView,
   ScrollView,
@@ -26,6 +26,7 @@ type LoginMode = "admin" | "member";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const loginMutation = useLogin();
 
   const [loginMode, setLoginMode] = useState<LoginMode>("admin");
   const [email, setEmail] = useState("");
@@ -34,7 +35,6 @@ export default function LoginScreen() {
   const [pinCode, setPinCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPin, setShowPin] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
@@ -46,19 +46,13 @@ export default function LoginScreen() {
         return;
       }
 
-      setIsLoading(true);
-
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      setIsLoading(false);
-
-      if (authError) {
-        setError(authError.message);
-        return;
-      }
+      loginMutation.mutate(
+        { email: email.trim(), password },
+        {
+          onError: (err: Error) => setError(err.message),
+          onSuccess: () => router.replace("/"),
+        },
+      );
     } else {
       if (!phone.trim() || !pinCode.trim()) {
         setError("Please fill in all fields.");
@@ -282,15 +276,15 @@ export default function LoginScreen() {
             {/* Submit */}
             <TouchableOpacity
               onPress={handleLogin}
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
               activeOpacity={0.8}
               className="w-full h-11 rounded-2xl bg-lime-accent flex-row items-center justify-center gap-2"
-              style={{ opacity: isLoading ? 0.6 : 1 }}
+              style={{ opacity: loginMutation.isPending ? 0.6 : 1 }}
             >
               <Text className="font-extrabold text-sm text-black uppercase tracking-wider">
-                {isLoading ? "Signing in..." : "Sign In"}
+                {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </Text>
-              {!isLoading && <ArrowRight size={16} color="#000000" />}
+              {!loginMutation.isPending && <ArrowRight size={16} color="#000000" />}
             </TouchableOpacity>
 
             {/* Register link — admin only */}

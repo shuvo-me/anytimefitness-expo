@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { useRegister } from '@/hooks/useAuth';
 import {
   View,
   Text,
@@ -13,13 +13,13 @@ import { Dumbbell, User, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, Check
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const registerMutation = useRegister();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -37,25 +37,15 @@ export default function RegisterScreen() {
       return;
     }
 
-    setIsLoading(true);
     setError(null);
 
-    const { error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: { full_name: fullName.trim() },
+    registerMutation.mutate(
+      { email: email.trim(), password, fullName: fullName.trim() },
+      {
+        onError: (err: Error) => setError(err.message),
+        onSuccess: () => setSuccess(true),
       },
-    });
-
-    setIsLoading(false);
-
-    if (authError) {
-      setError(authError.message);
-      return;
-    }
-
-    setSuccess(true);
+    );
   };
 
   if (success) {
@@ -201,15 +191,15 @@ export default function RegisterScreen() {
             {/* Submit */}
             <TouchableOpacity
               onPress={handleRegister}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               activeOpacity={0.8}
               className="w-full h-11 rounded-2xl bg-lime-accent flex-row items-center justify-center gap-2"
-              style={{ opacity: isLoading ? 0.6 : 1 }}
+              style={{ opacity: registerMutation.isPending ? 0.6 : 1 }}
             >
               <Text className="font-extrabold text-sm text-black uppercase tracking-wider">
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
               </Text>
-              {!isLoading && <ArrowRight size={16} color="#000000" />}
+              {!registerMutation.isPending && <ArrowRight size={16} color="#000000" />}
             </TouchableOpacity>
 
             {/* Login link */}

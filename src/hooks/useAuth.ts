@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import type { Profile } from '@/db/schema';
+import { queryKeys } from '@/hooks/queryKeys';
+import * as authService from '@/services/auth.service';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -26,17 +28,8 @@ export function useAuth() {
   const userId = session?.user?.id;
 
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ['user-profile', userId],
-    queryFn: async (): Promise<Profile | null> => {
-      if (!userId) return null;
-      const { data, error } = await supabase
-        .from('profiles' as any)
-        .select('*')
-        .eq('id', userId)
-        .single();
-      if (error) throw error;
-      return data as Profile;
-    },
+    queryKey: queryKeys.auth.profile(userId ?? ''),
+    queryFn: () => authService.getProfile(userId!),
     enabled: !!userId,
   });
 
@@ -48,4 +41,53 @@ export function useAuth() {
     isAuthenticated: !!session,
     isLoading: isLoadingSession || (userId ? isLoadingProfile : false),
   };
+}
+
+export function useLogin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      authService.login(email, password),
+    onSuccess: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.auth.profile(user.id),
+        });
+      }
+    },
+  });
+}
+
+export function useRegister() {
+  return useMutation({
+    mutationFn: ({
+      email,
+      password,
+      fullName,
+    }: {
+      email: string;
+      password: string;
+      fullName: string;
+    }) => authService.register(email, password, fullName),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: ({ email }: { email: string }) =>
+      authService.resetPassword(email),
+  });
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => authService.logout(),
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
 }

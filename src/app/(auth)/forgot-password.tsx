@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { useResetPassword } from '@/hooks/useAuth';
 import {
   View,
   Text,
@@ -13,9 +13,9 @@ import { Dumbbell, Mail, ArrowRight, AlertCircle, CheckCircle, ArrowLeft } from 
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const resetMutation = useResetPassword();
 
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -25,21 +25,15 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    setIsLoading(true);
     setError(null);
 
-    const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: 'anytimefitenss://reset-password',
-    });
-
-    setIsLoading(false);
-
-    if (authError) {
-      setError(authError.message);
-      return;
-    }
-
-    setSuccess(true);
+    resetMutation.mutate(
+      { email: email.trim() },
+      {
+        onError: (err: Error) => setError(err.message),
+        onSuccess: () => setSuccess(true),
+      },
+    );
   };
 
   if (success) {
@@ -128,15 +122,15 @@ export default function ForgotPasswordScreen() {
             {/* Submit */}
             <TouchableOpacity
               onPress={handleReset}
-              disabled={isLoading}
+              disabled={resetMutation.isPending}
               activeOpacity={0.8}
               className="w-full h-11 rounded-2xl bg-lime-accent flex-row items-center justify-center gap-2"
-              style={{ opacity: isLoading ? 0.6 : 1 }}
+              style={{ opacity: resetMutation.isPending ? 0.6 : 1 }}
             >
               <Text className="font-extrabold text-sm text-black uppercase tracking-wider">
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                {resetMutation.isPending ? 'Sending...' : 'Send Reset Link'}
               </Text>
-              {!isLoading && <ArrowRight size={16} color="#000000" />}
+              {!resetMutation.isPending && <ArrowRight size={16} color="#000000" />}
             </TouchableOpacity>
 
             {/* Back to login */}
