@@ -1,8 +1,8 @@
-import { StatusBar } from 'expo-status-bar';
-import { Redirect } from 'expo-router';
-import { View, Text, ActivityIndicator } from '@/tw';
-import { Dumbbell } from 'lucide-react-native';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from "@/hooks/useAuth";
+import { ActivityIndicator, Text, View } from "@/tw";
+import { Redirect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Dumbbell } from "lucide-react-native";
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -14,7 +14,7 @@ export default function Index() {
           <Dumbbell size={32} color="#000000" strokeWidth={2.5} />
         </View>
         <Text className="font-display text-2xl font-extrabold italic tracking-tighter uppercase text-white">
-          ANYTIME<Text className="text-lime-accent">FITNESS</Text>
+          ANYTIME<Text className="text-lime-accent">FITNESS bbbb</Text>
         </Text>
         <ActivityIndicator size="small" color="#C8F135" className="mt-4" />
         <StatusBar style="light" />

@@ -1,22 +1,302 @@
-import { View, Text } from '@/tw';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { LayoutDashboard } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from '@/tw';
+import {
+  Minus,
+  Plus,
+  ArrowUpRight,
+  Activity,
+} from 'lucide-react-native';
+
+const MOCK_MEMBERS = [
+  { id: '1', name: 'Sarah Johnson', initials: 'SJ', tier: 'Premium', status: 'active' as const },
+  { id: '2', name: 'Mike Chen', initials: 'MC', tier: 'Standard', status: 'active' as const },
+  { id: '3', name: 'Emma Davis', initials: 'ED', tier: 'Basic', status: 'expired' as const },
+];
+
+const WEEKLY_ACTIVITY = [
+  { day: 'Mon', percentage: 65, isToday: false },
+  { day: 'Tue', percentage: 78, isToday: false },
+  { day: 'Wed', percentage: 92, isToday: true },
+  { day: 'Thu', percentage: 71, isToday: false },
+  { day: 'Fri', percentage: 88, isToday: false },
+  { day: 'Sat', percentage: 45, isToday: false },
+  { day: 'Sun', percentage: 30, isToday: false },
+];
+
+const MAX_CAPACITY = 120;
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const [currentCount, setCurrentCount] = useState(47);
+  const [totalRevenue] = useState(284500);
+  const [revenueGrowth] = useState(12);
+
+  const totalMembers = MOCK_MEMBERS.length + 242;
+  const todayCheckIns = 18;
+  const occupancyPercent = Math.round((currentCount / MAX_CAPACITY) * 100);
+
   return (
-    <View className="flex-1 bg-background">
-      <View className="flex-1 items-center justify-center px-6">
-        <View className="w-16 h-16 rounded-2xl bg-card border border-border-subtle items-center justify-center mb-4">
-          <LayoutDashboard size={28} color="#C8F135" />
-        </View>
-        <Text className="font-display text-xl font-bold text-white text-center">
-          Dashboard
-        </Text>
-        <Text className="text-sm font-mono text-text-muted mt-2 text-center">
-          Live occupancy, metrics, and quick actions
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-background">
       <StatusBar style="light" />
-    </View>
+      <ScrollView
+        className="flex-1 px-4 py-6"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        <View className="max-w-4xl mx-auto w-full gap-6">
+          {/* Top Greeting Header */}
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-xs font-mono text-text-muted uppercase tracking-wider">
+                Good morning,
+              </Text>
+              <Text className="font-display text-2xl font-extrabold uppercase tracking-tight text-white mt-0.5 leading-none">
+                ALEX MORGAN
+              </Text>
+            </View>
+            <View className="w-10 h-10 rounded-2xl bg-lime-accent items-center justify-center">
+              <Text className="font-display text-sm font-extrabold text-black">AM</Text>
+            </View>
+          </View>
+
+          {/* 3 Metric Cards */}
+          <View className="flex-row gap-2.5">
+            <View className="flex-1 bg-card border border-border-subtle p-3.5 rounded-2xl">
+              <Text className="font-display text-2xl font-extrabold text-white leading-none">
+                {totalMembers}
+              </Text>
+              <Text className="text-[10px] font-mono text-text-muted mt-1.5 uppercase">
+                Members
+              </Text>
+            </View>
+
+            <View className="flex-1 bg-card border border-border-subtle p-3.5 rounded-2xl">
+              <Text className="font-display text-2xl font-extrabold text-white leading-none">
+                {todayCheckIns}
+              </Text>
+              <Text className="text-[10px] font-mono text-text-muted mt-1.5 uppercase">
+                Today
+              </Text>
+            </View>
+
+            <View className="flex-1 bg-card border border-border-subtle p-3.5 rounded-2xl">
+              <Text className="font-display text-2xl font-extrabold text-lime-accent leading-none">
+                94%
+              </Text>
+              <Text className="text-[10px] font-mono text-text-muted mt-1.5 uppercase">
+                Attend.
+              </Text>
+            </View>
+          </View>
+
+          {/* Live Gym Occupancy */}
+          <View className="bg-card border border-border-subtle p-4 rounded-2xl">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center gap-1.5">
+                <Activity size={14} color="#C8F135" />
+                <Text className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
+                  Gym Occupancy Rate
+                </Text>
+              </View>
+              <Text className="text-xs font-mono text-lime-accent font-bold">
+                {currentCount}/{MAX_CAPACITY} CAPACITY
+              </Text>
+            </View>
+
+            <View className="flex-row items-baseline gap-2">
+              <Text className="font-display text-4xl font-extrabold text-lime-accent leading-none">
+                {occupancyPercent}%
+              </Text>
+              <Text className="text-xs text-text-muted font-mono">
+                ({currentCount} Athletes On-Floor)
+              </Text>
+            </View>
+
+            {/* Progress bar */}
+            <View className="w-full bg-background h-2 rounded-full mt-3 overflow-hidden border border-border-subtle">
+              <View
+                className="h-full bg-lime-accent rounded-full"
+                style={{ width: `${occupancyPercent}%` }}
+              />
+            </View>
+
+            {/* Manual Gate Override */}
+            <View className="flex-row items-center justify-between mt-4 pt-3 border-t border-border-subtle">
+              <Text className="text-[11px] text-text-muted font-mono">
+                Manual Gate Override:
+              </Text>
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity
+                  onPress={() => setCurrentCount((c) => Math.max(0, c - 1))}
+                  activeOpacity={0.7}
+                  className="w-7 h-7 rounded-lg bg-border-subtle items-center justify-center"
+                >
+                  <Minus size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+
+                <Text className="font-mono font-bold text-white px-1">
+                  {currentCount}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => setCurrentCount((c) => Math.min(MAX_CAPACITY, c + 1))}
+                  activeOpacity={0.7}
+                  className="w-7 h-7 rounded-lg bg-lime-accent items-center justify-center"
+                >
+                  <Plus size={14} color="#000000" strokeWidth={2.5} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Monthly Revenue */}
+          <View className="bg-card border border-border-subtle p-4 rounded-2xl">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-[10px] font-mono text-text-muted uppercase tracking-widest">
+                Total Monthly Revenue
+              </Text>
+              <View className="bg-lime-accent/15 border border-lime-accent/30 px-2 py-0.5 rounded-full">
+                <Text className="text-[10px] font-mono text-lime-accent font-bold">
+                  +{revenueGrowth}% vs last mo
+                </Text>
+              </View>
+            </View>
+
+            <View>
+              <Text className="font-display text-3xl font-extrabold text-lime-accent leading-none">
+                ${totalRevenue.toLocaleString()}.00
+              </Text>
+              <Text className="text-[11px] text-text-muted font-mono mt-1">
+                Active subscriptions & personal training billings
+              </Text>
+            </View>
+
+            <View className="mt-4 pt-3 border-t border-border-subtle flex-row items-center justify-between">
+              <TouchableOpacity
+                onPress={() => router.push('/(admin)/payments')}
+                activeOpacity={0.7}
+                className="flex-row items-center gap-1"
+              >
+                <Text className="text-xs font-mono text-lime-accent underline">
+                  View Full Payment Hub
+                </Text>
+                <ArrowUpRight size={14} color="#C8F135" />
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.7}>
+                <Text className="text-[11px] font-mono text-text-muted">
+                  Export Report
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Weekly Activity Bar Chart */}
+          <View className="bg-card border border-border-subtle p-4 rounded-2xl">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-[10px] font-mono text-text-muted uppercase tracking-widest font-bold">
+                Weekly Activity
+              </Text>
+              <Text className="text-[10px] font-mono text-lime-accent">
+                PEAK: WED & FRI
+              </Text>
+            </View>
+
+            <View className="flex-row items-end justify-between h-28 pt-2 px-1">
+              {WEEKLY_ACTIVITY.map((item, index) => (
+                <View
+                  key={index}
+                  className="flex-1 items-center gap-2 h-full justify-end"
+                >
+                  <View
+                    className={`w-full max-w-[24px] rounded-t-md ${
+                      item.isToday ? 'bg-lime-accent' : 'bg-border-subtle'
+                    }`}
+                    style={{ height: `${item.percentage}%` }}
+                  />
+                  <Text
+                    className={`text-[11px] font-mono ${
+                      item.isToday ? 'text-lime-accent font-bold' : 'text-text-muted'
+                    }`}
+                  >
+                    {item.day}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Recent Onboarding */}
+          <View className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-[10px] font-mono text-text-muted uppercase tracking-widest font-bold">
+                Recent Onboarding
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/(admin)/members')}
+                activeOpacity={0.7}
+              >
+                <Text className="text-[10px] font-mono text-lime-accent underline">
+                  View All ({MOCK_MEMBERS.length})
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="gap-2">
+              {MOCK_MEMBERS.map((member) => (
+                <TouchableOpacity
+                  key={member.id}
+                  onPress={() => router.push('/(admin)/members')}
+                  activeOpacity={0.8}
+                  className="bg-card border border-border-subtle p-3 rounded-xl flex-row items-center justify-between"
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-border-subtle items-center justify-center">
+                      <Text className="font-mono font-bold text-xs text-white">
+                        {member.initials}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text className="text-sm font-bold text-white leading-tight">
+                        {member.name}
+                      </Text>
+                      <Text className="text-[11px] text-text-muted font-mono">
+                        {member.tier} •{' '}
+                        {member.status === 'active' ? 'Paid' : 'Pending'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text
+                    className={`text-[10px] font-mono font-bold ${
+                      member.status === 'active' ? 'text-lime-accent' : 'text-alert-red'
+                    }`}
+                  >
+                    {member.status === 'active' ? '08:42 AM' : '07:15 AM'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* System Reports Sync Footer */}
+          <View className="bg-card border border-border-subtle p-4 rounded-2xl flex-row items-center justify-between">
+            <Text className="text-[10px] font-mono text-text-muted uppercase font-bold tracking-widest">
+              System Reports Sync
+            </Text>
+            <View className="flex-row gap-2">
+              <View className="w-12 h-1.5 bg-border-subtle rounded-full overflow-hidden">
+                <View className="h-full bg-lime-accent w-3/4 rounded-full" />
+              </View>
+              <View className="w-12 h-1.5 bg-border-subtle rounded-full overflow-hidden">
+                <View className="h-full bg-lime-accent w-1/2 rounded-full" />
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

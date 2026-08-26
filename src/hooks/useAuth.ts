@@ -1,9 +1,9 @@
-import { useSyncExternalStore } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import type { Session } from '@supabase/supabase-js';
 import { queryKeys } from '@/hooks/queryKeys';
+import { supabase } from '@/lib/supabase';
 import * as authService from '@/services/auth.service';
+import type { Session } from '@supabase/supabase-js';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 
 let _session: Session | null = null;
 let _sessionResolved = false;
