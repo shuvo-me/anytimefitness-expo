@@ -2,10 +2,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { Redirect, Tabs } from 'expo-router';
 import { View, ActivityIndicator } from '@/tw';
 import {
-  LayoutDashboard,
+  Home,
   Users,
-  CreditCard,
-  User,
+  Calendar,
+  Settings,
 } from 'lucide-react-native';
 
 export default function AdminLayout() {
@@ -45,12 +45,10 @@ export default function AdminLayout() {
       }}
     >
       <Tabs.Screen
-        name="dashboard"
+        name="home"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }) => (
-            <LayoutDashboard size={20} color={color} />
-          ),
+          title: 'Home',
+          tabBarIcon: ({ color }) => <Home size={20} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -61,19 +59,17 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
-        name="payments"
+        name="schedule"
         options={{
-          title: 'Payments',
-          tabBarIcon: ({ color }) => (
-            <CreditCard size={20} color={color} />
-          ),
+          title: 'Schedule',
+          tabBarIcon: ({ color }) => <Calendar size={20} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <User size={20} color={color} />,
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <Settings size={20} color={color} />,
         }}
       />
     </Tabs>

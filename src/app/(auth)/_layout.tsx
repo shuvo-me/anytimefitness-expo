@@ -9,7 +9,7 @@ export default function AuthLayout() {
   }
 
   if (isAuthenticated) {
-    return <Redirect href="/(admin)/dashboard" />;
+    return <Redirect href="/(admin)/home" />;
   }
 
   return (

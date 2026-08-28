@@ -40,7 +40,7 @@ const WEEKLY_ACTIVITY = [
 
 const MAX_CAPACITY = 120;
 
-export default function AdminDashboard() {
+export default function AdminHome() {
   const router = useRouter();
   const [currentCount, setCurrentCount] = useState(47);
   const [totalRevenue] = useState(284500);
@@ -52,7 +52,6 @@ export default function AdminDashboard() {
 
   return (
     <>
-      {/* <StatusBar /> */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -197,7 +196,7 @@ export default function AdminDashboard() {
 
             <View className="mt-4 pt-3 border-t border-border-subtle flex-row items-center justify-between">
               <TouchableOpacity
-                onPress={() => router.push("/(admin)/payments")}
+                onPress={() => router.push("/(admin)/schedule")}
                 activeOpacity={0.7}
                 className="flex-row items-center gap-1"
               >
