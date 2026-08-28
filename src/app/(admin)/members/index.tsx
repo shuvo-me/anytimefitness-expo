@@ -1,46 +1,20 @@
 import { View, Text, ScrollView, TextInput, TouchableOpacity } from '@/tw';
 import { StatusBar } from 'expo-status-bar';
-import {
-  Search,
-  UserPlus,
-  ChevronRight,
-  X,
-  ShieldCheck,
-  Calendar,
-  CreditCard,
-} from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Search, UserPlus, ChevronRight } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-type MemberStatus = 'active' | 'expired' | 'pending';
-
-interface Member {
-  id: string;
-  name: string;
-  initials: string;
-  tier: string;
-  status: MemberStatus;
-  daysLeft: number;
-}
-
-const MOCK_MEMBERS: Member[] = [
-  { id: 'M-1001', name: 'Sarah Johnson', initials: 'SJ', tier: 'Premium', status: 'active', daysLeft: 214 },
-  { id: 'M-1002', name: 'Mike Chen', initials: 'MC', tier: 'Standard', status: 'active', daysLeft: 89 },
-  { id: 'M-1003', name: 'Emma Davis', initials: 'ED', tier: 'Basic', status: 'expired', daysLeft: 0 },
-  { id: 'M-1004', name: 'David Kim', initials: 'DK', tier: 'VIP Elite', status: 'active', daysLeft: 300 },
-  { id: 'M-1005', name: 'Olivia Brown', initials: 'OB', tier: 'Premium', status: 'pending', daysLeft: 28 },
-  { id: 'M-1006', name: 'Liam Wilson', initials: 'LW', tier: 'Standard', status: 'expired', daysLeft: 0 },
-  { id: 'M-1007', name: 'Sophia Garcia', initials: 'SG', tier: 'Basic', status: 'active', daysLeft: 120 },
-];
+import { MOCK_MEMBERS } from '@/types/member';
+import type { Member } from '@/types/member';
 
 const STATUS_FILTERS = ['All', 'Active', 'Expired', 'Pending'] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 export default function MembersList() {
+  const router = useRouter();
   const inset = useSafeAreaInsets();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
-  const [selected, setSelected] = useState<Member | null>(null);
 
   const filteredMembers = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -150,95 +124,35 @@ export default function MembersList() {
                 const isExpired = member.status === 'expired';
                 const isPending = member.status === 'pending';
                 return (
-                  <TouchableOpacity
+                  <Row
                     key={member.id}
-                    onPress={() => setSelected(member)}
-                    activeOpacity={0.8}
-                    className="bg-card border border-border-subtle p-3.5 rounded-2xl flex-row items-center justify-between"
-                  >
-                    <View className="flex-row items-center gap-3.5 flex-1">
-                      <View
-                        className={`w-11 h-11 rounded-full items-center justify-center border ${
-                          isExpired
-                            ? 'bg-[#2A1515] border-alert-red/30'
-                            : isPending
-                            ? 'bg-[#282210] border-[#E5B537]/30'
-                            : 'bg-[#1B2412] border-lime-accent/30'
-                        }`}
-                      >
-                        <Text
-                          className={`font-display font-black text-sm tracking-tight ${
-                            isExpired
-                              ? 'text-alert-red'
-                              : isPending
-                              ? 'text-[#E5B537]'
-                              : 'text-lime-accent'
-                          }`}
-                        >
-                          {member.initials}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="font-bold text-white text-sm leading-tight">
-                          {member.name}
-                        </Text>
-                        <Text className="text-xs font-mono text-text-muted mt-0.5">
-                          {member.tier} <Text className="text-[#555566]">•</Text>{' '}
-                          {member.id}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View className="items-end ml-2">
-                      <Text
-                        className={`text-xs font-mono font-bold capitalize ${
-                          isExpired
-                            ? 'text-alert-red'
-                            : isPending
-                            ? 'text-[#E5B537]'
-                            : 'text-lime-accent'
-                        }`}
-                      >
-                        {member.status}
-                      </Text>
-                      <Text className="text-[11px] font-mono text-text-muted">
-                        {isExpired ? '0d' : `${member.daysLeft}d left`}
-                      </Text>
-                    </View>
-                    <ChevronRight size={16} color="#555566" />
-                  </TouchableOpacity>
+                    member={member}
+                    isExpired={isExpired}
+                    isPending={isPending}
+                    onPress={() => router.push(`/(admin)/members/${member.id}`)}
+                  />
                 );
               })
             )}
           </View>
         </View>
       </ScrollView>
-
-      {selected && (
-        <MemberDetailModal member={selected} onClose={() => setSelected(null)} />
-      )}
       <StatusBar style="light" />
     </>
   );
 }
 
-/* ── Member Detail Bottom-Sheet Modal ─────────────────────────────── */
-
-function MemberDetailModal({
+function Row({
   member,
-  onClose,
+  isExpired,
+  isPending,
+  onPress,
 }: {
   member: Member;
-  onClose: () => void;
+  isExpired: boolean;
+  isPending: boolean;
+  onPress: () => void;
 }) {
-  const isExpired = member.status === 'expired';
-  const isPending = member.status === 'pending';
-
-  const statusColor = isExpired
-    ? 'text-alert-red'
-    : isPending
-    ? 'text-[#E5B537]'
-    : 'text-lime-accent';
   const avatarBg = isExpired
     ? 'bg-[#2A1515] border-alert-red/30'
     : isPending
@@ -249,96 +163,45 @@ function MemberDetailModal({
     : isPending
     ? 'text-[#E5B537]'
     : 'text-lime-accent';
+  const statusText = isExpired
+    ? 'text-alert-red'
+    : isPending
+    ? 'text-[#E5B537]'
+    : 'text-lime-accent';
 
   return (
-    <View className="absolute inset-0">
-      <TouchableOpacity
-        onPress={onClose}
-        activeOpacity={1}
-        className="absolute inset-0 bg-black/60"
-      />
-      <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl bg-card border-t border-border-subtle p-5 pb-8">
-        <View className="w-10 h-1 rounded-full bg-border-subtle self-center mb-4" />
-        <View className="flex-row items-start justify-between">
-          <View className="flex-row items-center gap-3.5 flex-1">
-            <View
-              className={`w-14 h-14 rounded-full items-center justify-center border ${avatarBg}`}
-            >
-              <Text
-                className={`font-display font-black text-base tracking-tight ${avatarText}`}
-              >
-                {member.initials}
-              </Text>
-            </View>
-            <View className="flex-1">
-              <Text className="font-display font-black text-lg uppercase tracking-tight text-white leading-none">
-                {member.name}
-              </Text>
-              <Text className="text-xs font-mono text-text-muted mt-1">
-                {member.tier} • {member.id}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={onClose} activeOpacity={0.7} className="p-1">
-            <X size={18} color="#8A8A9A" />
-          </TouchableOpacity>
-        </View>
-
-        <View className="flex-row items-center gap-2 mt-4">
-          <View
-            className={`px-3 py-1 rounded-full border ${
-              isExpired
-                ? 'bg-alert-red/15 border-alert-red/30'
-                : isPending
-                ? 'bg-[#E5B537]/15 border-[#E5B537]/30'
-                : 'bg-lime-accent/15 border-lime-accent/30'
-            }`}
-          >
-            <Text className={`text-xs font-mono font-bold capitalize ${statusColor}`}>
-              {member.status}
-            </Text>
-          </View>
-          <Text className="text-xs font-mono text-text-muted">
-            {isExpired ? '0 days left' : `${member.daysLeft} days left`}
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      className="bg-card border border-border-subtle p-3.5 rounded-2xl flex-row items-center justify-between"
+    >
+      <View className="flex-row items-center gap-3.5 flex-1">
+        <View
+          className={`w-11 h-11 rounded-full items-center justify-center border ${avatarBg}`}
+        >
+          <Text className={`font-display font-black text-sm tracking-tight ${avatarText}`}>
+            {member.initials}
           </Text>
         </View>
-
-        <View className="mt-5 gap-3">
-          <View className="flex-row items-center gap-3 bg-background border border-border-subtle p-3 rounded-xl">
-            <Calendar size={16} color="#C8F135" />
-            <View className="flex-1">
-              <Text className="text-[10px] font-mono text-text-muted uppercase">
-                Membership
-              </Text>
-              <Text className="text-xs font-bold text-white mt-0.5">
-                {member.tier} Plan
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-3 bg-background border border-border-subtle p-3 rounded-xl">
-            <CreditCard size={16} color="#C8F135" />
-            <View className="flex-1">
-              <Text className="text-[10px] font-mono text-text-muted uppercase">
-                Billing
-              </Text>
-              <Text className="text-xs font-bold text-white mt-0.5">
-                Auto-renew on file
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-3 bg-background border border-border-subtle p-3 rounded-xl">
-            <ShieldCheck size={16} color="#C8F135" />
-            <View className="flex-1">
-              <Text className="text-[10px] font-mono text-text-muted uppercase">
-                QR Pass
-              </Text>
-              <Text className="text-xs font-bold text-white mt-0.5">
-                Active check-in token
-              </Text>
-            </View>
-          </View>
+        <View className="flex-1">
+          <Text className="font-bold text-white text-sm leading-tight">
+            {member.name}
+          </Text>
+          <Text className="text-xs font-mono text-text-muted mt-0.5">
+            {member.tier} <Text className="text-[#555566]">•</Text> {member.id}
+          </Text>
         </View>
       </View>
-    </View>
+
+      <View className="items-end ml-2">
+        <Text className={`text-xs font-mono font-bold capitalize ${statusText}`}>
+          {member.status}
+        </Text>
+        <Text className="text-[11px] font-mono text-text-muted">
+          {isExpired ? '0d' : `${member.daysLeft}d left`}
+        </Text>
+      </View>
+      <ChevronRight size={16} color="#555566" />
+    </TouchableOpacity>
   );
 }
