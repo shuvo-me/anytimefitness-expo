@@ -5,7 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from '@/tw';
-import { Host, Switch as ExpoSwitch } from '@expo/ui';
+import { Switch } from '@/components/ui/switch';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -209,8 +209,7 @@ function SettingsContent({
           paddingBottom: inset.bottom + 24,
         }}
       >
-        <Host>
-          <View className="gap-6">
+        <View className="gap-6">
 
           {/* ================================================================= */}
           {/* SECTION 1: PROFILE */}
@@ -439,10 +438,12 @@ function SettingsContent({
                           {item.desc}
                         </Text>
                       </View>
-                      <ExpoSwitch
+                      <Switch
                         value={isEnabled}
                         disabled
                         onValueChange={() => {}}
+                        trackColor={{ true: '#C8F135', false: '#2A2A34' }}
+                        thumbColor="#FFFFFF"
                       />
                     </View>
                   );
@@ -485,7 +486,6 @@ function SettingsContent({
             </Section>
           )}
           </View>
-        </Host>
       </ScrollView>
       <StatusBar style="light" />
     </View>

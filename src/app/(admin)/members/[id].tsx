@@ -8,13 +8,24 @@ import type {
   WorkoutProgram,
 } from "@/types/routine";
 import { makeDietPlan, makeWorkoutProgram } from "@/types/routine";
-import { Host, Picker } from "@expo/ui";
+import {
+  Select,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+  SelectPortal,
+  SelectScrollView,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  ChevronDown,
   Dumbbell,
   Flame,
   Plus,
@@ -76,9 +87,8 @@ export default function MemberDetail() {
           flexGrow: 1,
         }}
       >
-        <Host>
-          <View className="gap-5">
-            {/* Header */}
+        <View className="gap-5">
+          {/* Header */}
             <View className="flex-row items-center justify-between">
               <TouchableOpacity
                 onPress={() => router.back()}
@@ -166,7 +176,6 @@ export default function MemberDetail() {
             {activeTab === "routine" && <RoutineTab member={member} />}
             {activeTab === "edit" && <EditTab member={member} />}
           </View>
-        </Host>
       </ScrollView>
       <StatusBar style="light" />
     </>
@@ -908,42 +917,34 @@ function EditTab({ member }: { member: Member }) {
       <View className="flex-row gap-3 pt-1">
         <View className="flex-1">
           <FieldLabel>Tier</FieldLabel>
-          <Picker
-            selectedValue={editTier}
-            onValueChange={(v) => setEditTier(v as MembershipTier)}
-            appearance="menu"
-          >
-            {TIER_OPTIONS.map((o) => (
-              <Picker.Item key={o.value} label={o.label} value={o.value} />
-            ))}
-          </Picker>
+          <FormSelect
+            value={editTier}
+            options={TIER_OPTIONS}
+            onChange={(v) => setEditTier(v as MembershipTier)}
+          />
         </View>
         <View className="flex-1">
           <FieldLabel>Status</FieldLabel>
-          <Picker
-            selectedValue={editStatus}
-            onValueChange={(v) => setEditStatus(v as MemberStatus)}
-            appearance="menu"
-          >
-            <Picker.Item label="Active" value="active" />
-            <Picker.Item label="Expired" value="expired" />
-            <Picker.Item label="Pending" value="pending" />
-          </Picker>
+          <FormSelect
+            value={editStatus}
+            options={[
+              { label: "Active", value: "active" },
+              { label: "Expired", value: "expired" },
+              { label: "Pending", value: "pending" },
+            ]}
+            onChange={(v) => setEditStatus(v as MemberStatus)}
+          />
         </View>
       </View>
 
       <View className="flex-row gap-3 pt-1">
         <View className="flex-1">
           <FieldLabel>Assigned Trainer</FieldLabel>
-          <Picker
-            selectedValue={editTrainer}
-            onValueChange={setEditTrainer}
-            appearance="menu"
-          >
-            {TRAINERS.map((t) => (
-              <Picker.Item key={t} label={t} value={t} />
-            ))}
-          </Picker>
+          <FormSelect
+            value={editTrainer}
+            options={TRAINERS.map((t) => ({ label: t, value: t }))}
+            onChange={setEditTrainer}
+          />
         </View>
         <View className="flex-1">
           <FieldLabel>Pending Dues ($)</FieldLabel>
@@ -1030,5 +1031,46 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
     <Text className="text-text-muted font-mono text-[10px] uppercase mb-1">
       {children}
     </Text>
+  );
+}
+
+function FormSelect<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { label: string; value: T }[];
+  onChange: (v: T) => void;
+}) {
+  const selected = options.find((o) => o.value === value);
+  return (
+    <Select selectedValue={value} onValueChange={(v) => onChange(v as T)}>
+      <SelectTrigger
+        variant="outline"
+        size="md"
+        className="bg-background border-border-subtle rounded-xl px-3 min-h-10"
+      >
+        <View className="flex-1 flex-row items-center justify-between">
+          <Text className="text-xs font-mono text-white">
+            {selected?.label ?? "Select"}
+          </Text>
+          <ChevronDown size={14} color="#8A8A9A" />
+        </View>
+      </SelectTrigger>
+      <SelectPortal>
+        <SelectBackdrop />
+        <SelectContent className="bg-card">
+          <SelectDragIndicatorWrapper>
+            <SelectDragIndicator />
+          </SelectDragIndicatorWrapper>
+          <SelectScrollView>
+            {options.map((o) => (
+              <SelectItem key={o.value} label={o.label} value={o.value} />
+            ))}
+          </SelectScrollView>
+        </SelectContent>
+      </SelectPortal>
+    </Select>
   );
 }

@@ -15,6 +15,26 @@
     --color-black: #000000;
     --color-white: #ffffff;
 
+    /* gluestack-ui shadcn-style semantic tokens */
+    --color-primary: #c8f135;
+    --color-primary-foreground: #000000;
+    --color-secondary: #1e1e26;
+    --color-secondary-foreground: #ffffff;
+    --color-destructive: #ff4b1f;
+    --color-destructive-foreground: #ffffff;
+    --color-foreground: #ffffff;
+    --color-card-foreground: #ffffff;
+    --color-popover: #141418;
+    --color-popover-foreground: #ffffff;
+    --color-muted: #1e1e26;
+    --color-muted-foreground: #8a8a9a;
+    --color-accent: #2a2a34;
+    --color-accent-foreground: #ffffff;
+    --color-border: #1e1e26;
+    --color-input: #1e1e26;
+    --color-ring: #c8f135;
+    --text-2xs: 10px;
+
     /* Fonts */
     --font-display: "Spline Sans", Inter, ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
