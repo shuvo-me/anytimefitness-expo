@@ -57,7 +57,7 @@ export default function MembersList() {
               </Text>
             </View>
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={() => router.push('/(admin)/members/onboard')}
               activeOpacity={0.7}
               className="bg-lime-accent px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
             >
