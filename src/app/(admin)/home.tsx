@@ -230,7 +230,7 @@ export default function AdminHome() {
                 <Text className="font-display font-bold text-sm uppercase tracking-wider text-white">
                   Audit Invoices
                 </Text>
-                <TouchableOpacity onPress={() => router.push('/(admin)/schedule')} activeOpacity={0.7}>
+                <TouchableOpacity onPress={() => router.push('/(admin)/payments')} activeOpacity={0.7}>
                   <Text className="text-[10px] font-mono text-lime-accent">
                     View All ({MOCK_TRANSACTIONS.length})
                   </Text>

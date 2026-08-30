@@ -1,4 +1,4 @@
-export type AdminTab = 'home' | 'members' | 'schedule' | 'settings';
+export type AdminTab = 'home' | 'members' | 'payments' | 'settings';
 
 export type SettingCategory =
   | 'all'

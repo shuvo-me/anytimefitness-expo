@@ -4,7 +4,7 @@ import { View, ActivityIndicator } from '@/tw';
 import {
   Home,
   Users,
-  Calendar,
+  DollarSign,
   Settings,
 } from 'lucide-react-native';
 
@@ -59,10 +59,10 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
-        name="schedule"
+        name="payments"
         options={{
-          title: 'Schedule',
-          tabBarIcon: ({ color }) => <Calendar size={20} color={color} />,
+          title: 'Payments',
+          tabBarIcon: ({ color }) => <DollarSign size={20} color={color} />,
         }}
       />
       <Tabs.Screen
