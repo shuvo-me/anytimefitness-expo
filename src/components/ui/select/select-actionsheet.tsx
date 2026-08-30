@@ -7,13 +7,13 @@ import { createActionsheet } from '@gluestack-ui/core/actionsheet/creator';
 import {
   Pressable,
   View,
-  Text,
   ScrollView,
   VirtualizedList,
   FlatList,
   SectionList,
   ViewStyle,
 } from 'react-native';
+import { Pressable as TWPressable, View as TWView, Text as TWText } from '@/tw';
 import { UIIcon } from '@gluestack-ui/core/icon/creator';
 import { tva , withStyleContext } from '@gluestack-ui/utils/nativewind-utils';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
@@ -84,12 +84,12 @@ const StyledSectionList = styled(SectionList, { className: 'style' });
 const StyledSectionHeaderText = styled(H4, { className: 'style' });
 
 export const UIActionsheet = createActionsheet({
-  Root: View,
+  Root: TWView,
   Content: withStyleContext(StyledMotionView),
-  Item: withStyleContext(Pressable),
-  ItemText: Text,
-  DragIndicator: View,
-  IndicatorWrapper: View,
+  Item: withStyleContext(TWPressable),
+  ItemText: TWText,
+  DragIndicator: TWView,
+  IndicatorWrapper: TWView,
   Backdrop: StyledAnimatedPressable,
   ScrollView: StyledScrollView,
   VirtualizedList: StyledVirtualizedList,

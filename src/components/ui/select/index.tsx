@@ -23,13 +23,14 @@ import {
   ActionsheetSectionList,
   ActionsheetSectionHeaderText,
 } from './select-actionsheet';
-import { Pressable, View, TextInput } from 'react-native';
+import { Pressable } from 'react-native';
+import { Pressable as TWPressable, View as TWView, TextInput as TWTextInput } from '@/tw';
 
 const SelectTriggerWrapper = React.forwardRef<
   React.ComponentRef<typeof Pressable>,
   React.ComponentProps<typeof Pressable>
 >(function SelectTriggerWrapper({ ...props }, ref) {
-  return <Pressable {...props} ref={ref} />;
+  return <TWPressable {...props} ref={ref} />;
 });
 
 const selectIconStyle = tva({
@@ -95,9 +96,9 @@ const StyledIcon = styled(UIIcon, {
 
 const UISelect = createSelect(
   {
-    Root: View,
+    Root: TWView,
     Trigger: withStyleContext(SelectTriggerWrapper),
-    Input: TextInput,
+    Input: TWTextInput,
     Icon: StyledIcon,
   },
   {
