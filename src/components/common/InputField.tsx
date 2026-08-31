@@ -15,6 +15,7 @@ type InputFieldProps = Pick<
 > & {
   label: string;
   icon?: React.ReactNode;
+  inputClassName?: string;
 };
 
 export function InputField({
@@ -29,6 +30,7 @@ export function InputField({
   secureTextEntry,
   autoCapitalize,
   editable,
+  inputClassName,
 }: InputFieldProps) {
   return (
     <View className="flex-1">
@@ -47,9 +49,9 @@ export function InputField({
           secureTextEntry={secureTextEntry}
           autoCapitalize={autoCapitalize}
           editable={editable}
-          className={`w-full bg-background border border-[#252532] rounded-xl h-11 text-sm text-white font-mono ${
+          className={`w-full bg-background border border-border rounded-xl h-11 text-sm text-white font-mono ${
             icon ? 'pl-9 pr-3.5' : 'px-3.5'
-          } ${multiline ? 'text-xs resize-none' : ''}`}
+          } ${multiline ? 'text-xs resize-none' : ''} ${inputClassName ?? ''}`}
           placeholderTextColor="#666675"
         />
       </View>
