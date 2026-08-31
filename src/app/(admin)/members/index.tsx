@@ -73,16 +73,16 @@ export default function MembersList() {
           </Box>
 
           {/* Search */}
-          <Input className="w-full bg-card border-border-subtle rounded-2xl pr-4 py-3">
+          <Input className="w-full bg-card border-border rounded-xl pr-3 py-1.5">
             <InputSlot>
-              <InputIcon as={Search} className="text-muted-foreground w-4 h-4" />
+              <InputIcon as={Search} className="text-muted-foreground w-3.5 h-3.5" />
             </InputSlot>
             <InputField
               value={searchTerm}
               onChangeText={setSearchTerm}
               placeholder="Search members..."
               placeholderTextColor="#555566"
-              className="text-sm text-foreground font-mono"
+              className="w-full text-xs text-foreground font-mono"
             />
           </Input>
 

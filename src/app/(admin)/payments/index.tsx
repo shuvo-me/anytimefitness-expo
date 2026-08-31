@@ -1,20 +1,15 @@
 import { Box } from "@/components/ui/box";
-import { ScrollView } from "@/components/ui/scroll-view";
-import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import {
-  AlertCircle,
-  Plus,
-  Receipt,
-  Search,
-} from "lucide-react-native";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
 import { MOCK_MEMBERS } from "@/types/member";
 import { MOCK_TRANSACTIONS } from "@/types/transaction";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { AlertCircle, Plus, Receipt, Search } from "lucide-react-native";
+import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MONTHLY_REVENUE = 284500;
 
@@ -62,10 +57,12 @@ export default function AdminPayments() {
             </Box>
             <Button
               onPress={() => router.push("/(admin)/payments/record")}
-
               className="bg-primary px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
             >
-              <ButtonIcon as={Plus} className="text-primary-foreground w-4 h-4" />
+              <ButtonIcon
+                as={Plus}
+                className="text-primary-foreground w-4 h-4"
+              />
               <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                 Record Payment
               </ButtonText>
@@ -135,7 +132,6 @@ export default function AdminPayments() {
                     </Box>
                     <Button
                       onPress={() => router.push("/(admin)/payments/record")}
-
                       className="bg-primary px-3 py-1.5 rounded-lg"
                     >
                       <ButtonText className="font-display font-bold text-[11px] uppercase tracking-wider text-primary-foreground">
@@ -154,9 +150,12 @@ export default function AdminPayments() {
               <Text className="text-xs font-mono text-muted-foreground uppercase tracking-widest font-bold">
                 Recent Transactions
               </Text>
-              <Input className="flex-1 max-w-[52%] bg-card border-border rounded-xl pr-3 py-1.5">
+              <Input className="flex-1 max-w-[52%] bg-card border-border rounded-xl pr-3 ">
                 <InputSlot>
-                  <InputIcon as={Search} className="text-muted-foreground w-3.5 h-3.5" />
+                  <InputIcon
+                    as={Search}
+                    className="text-muted-foreground w-3.5 h-3.5"
+                  />
                 </InputSlot>
                 <InputField
                   value={searchTerm}
@@ -184,7 +183,6 @@ export default function AdminPayments() {
                       onPress={() =>
                         router.push(`/(admin)/payments/invoice/${tx.id}`)
                       }
-
                       className="bg-card border border-border p-3.5 rounded-2xl flex-row items-center justify-between"
                     >
                       <Box className="flex-row items-center gap-3 flex-1">
@@ -197,9 +195,7 @@ export default function AdminPayments() {
                         >
                           <Text
                             className={`font-display font-black text-xs ${
-                              isNegative
-                                ? "text-destructive"
-                                : "text-primary"
+                              isNegative ? "text-destructive" : "text-primary"
                             }`}
                           >
                             {tx.initials.slice(0, 1)}
@@ -211,16 +207,15 @@ export default function AdminPayments() {
                           </Text>
                           <Text className="text-[11px] font-mono text-muted-foreground mt-0.5">
                             {tx.tier}{" "}
-                            <Text className="text-muted-foreground">•</Text> {tx.date}
+                            <Text className="text-muted-foreground">•</Text>{" "}
+                            {tx.date}
                           </Text>
                         </Box>
                       </Box>
                       <Box className="flex-row items-center gap-2 ml-2">
                         <Text
                           className={`font-display font-black text-base tracking-tight ${
-                            isNegative
-                              ? "text-destructive"
-                              : "text-primary"
+                            isNegative ? "text-destructive" : "text-primary"
                           }`}
                         >
                           {isNegative
