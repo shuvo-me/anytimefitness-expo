@@ -1,4 +1,7 @@
-import { ScrollView, Text, TouchableOpacity, View } from '@/tw';
+import { Box } from '@/components/ui/box';
+import { ScrollView } from '@/components/ui/scroll-view';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import {
   CheckCircle2,
@@ -81,258 +84,264 @@ export default function AdminHome() {
   const occupancyPercent = Math.round((currentCount / maxCapacity) * 100);
 
   return (
-    <>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          backgroundColor: '#0C0C0F',
-          paddingTop: inset.top + 16,
-          paddingBottom: inset.bottom + 24,
-          flexGrow: 1,
-        }}
-      >
-        <View className="gap-5">
-          {/* Executive Greeting */}
-          <View className="pb-3 border-b border-border-subtle">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1 pr-3">
-                <Text className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
-                  {greeting}
-                </Text>
-                <Text className="font-display font-black text-2xl uppercase tracking-tight text-white mt-0.5 leading-none">
-                  {adminName}
-                </Text>
-              </View>
-              <View className="w-10 h-10 rounded-2xl bg-lime-accent items-center justify-center">
-                <Text className="font-display font-extrabold text-sm text-black">
-                  {adminInitials}
-                </Text>
-              </View>
-            </View>
-          </View>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        backgroundColor: '#0C0C0F',
+        paddingTop: inset.top + 16,
+        paddingBottom: inset.bottom + 24,
+        flexGrow: 1,
+      }}
+    >
+      <Box className="gap-5">
+        {/* Executive Greeting */}
+        <Box className="pb-3 border-b border-border">
+          <Box className="flex-row items-center justify-between">
+            <Box className="flex-1 pr-3">
+              <Text className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
+                {greeting}
+              </Text>
+              <Text size="2xl" className="font-display font-black uppercase tracking-tight mt-0.5 leading-none">
+                {adminName}
+              </Text>
+            </Box>
+            <Box className="w-10 h-10 rounded-2xl bg-primary items-center justify-center">
+              <Text className="font-display font-extrabold text-sm text-primary-foreground">
+                {adminInitials}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
 
-          {/* Primary Metrics */}
-          <View className="flex-row gap-3">
-            {/* Total Attendance of Today */}
-            <View className="flex-1 bg-card border border-border-subtle p-4 rounded-3xl">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-2">
-                  <Text className="text-[10px] font-mono text-text-muted uppercase tracking-wider font-semibold">
-                    Today Attendance
-                  </Text>
-                </View>
-                <View className="w-8 h-8 rounded-xl bg-lime-accent/15 border border-lime-accent/30 items-center justify-center">
-                  <CheckCircle2 size={16} color="#C8F135" />
-                </View>
-              </View>
-              <View className="flex-row items-baseline gap-2 mt-2">
-                <Text className="font-display font-black text-3xl text-white tracking-tight leading-none">
-                  {todayCheckIns}
+        {/* Primary Metrics */}
+        <Box className="flex-row gap-3">
+          {/* Total Attendance of Today */}
+          <Box className="flex-1 bg-card border border-border p-4 rounded-3xl">
+            <Box className="flex-row items-center justify-between">
+              <Box className="flex-1 pr-2">
+                <Text size="xs" className="font-mono uppercase tracking-wider font-semibold text-muted-foreground">
+                  Today Attendance
                 </Text>
-                <Text className="text-[10px] font-mono text-text-muted">
-                  checked-in
-                </Text>
-              </View>
-              <View className="mt-3 pt-3 border-t border-border-subtle flex-row items-center justify-between">
-                <Text className="text-[10px] font-mono text-lime-accent font-bold">
-                  ● Active Floor
-                </Text>
-                <Text className="text-[10px] font-mono text-text-muted">
-                  {occupancyPercent}% Capacity
-                </Text>
-              </View>
-            </View>
+              </Box>
+              <Box className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 items-center justify-center">
+                <CheckCircle2 size={16} color="#C8F135" />
+              </Box>
+            </Box>
+            <Box className="flex-row items-baseline gap-2 mt-2">
+              <Text size="3xl" className="font-display font-black tracking-tight leading-none">
+                {todayCheckIns}
+              </Text>
+              <Text size="xs" className="font-mono text-muted-foreground">
+                checked-in
+              </Text>
+            </Box>
+            <Box className="mt-3 pt-3 border-t border-border flex-row items-center justify-between">
+              <Text size="xs" className="font-mono font-bold text-primary">
+                ● Active Floor
+              </Text>
+              <Text size="xs" className="font-mono text-muted-foreground">
+                {occupancyPercent}% Capacity
+              </Text>
+            </Box>
+          </Box>
 
-            {/* Monthly Active Subscription Amount */}
-            <View className="flex-1 bg-card border border-border-subtle p-4 rounded-3xl">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-2">
-                  <Text className="text-[10px] font-mono text-text-muted uppercase tracking-wider font-semibold">
-                    Monthly Revenue
-                  </Text>
-                </View>
-                <View className="w-8 h-8 rounded-xl bg-lime-accent/15 border border-lime-accent/30 items-center justify-center">
-                  <DollarSign size={16} color="#C8F135" />
-                </View>
-              </View>
-              <View className="flex-row items-baseline gap-1 mt-2">
-                <Text className="font-display font-black text-3xl text-lime-accent tracking-tight leading-none">
-                  $284,500
+          {/* Monthly Active Subscription Amount */}
+          <Box className="flex-1 bg-card border border-border p-4 rounded-3xl">
+            <Box className="flex-row items-center justify-between">
+              <Box className="flex-1 pr-2">
+                <Text size="xs" className="font-mono uppercase tracking-wider font-semibold text-muted-foreground">
+                  Monthly Revenue
                 </Text>
-                <Text className="text-[10px] font-mono text-text-muted">/ mo</Text>
-              </View>
-              <View className="mt-3 pt-3 border-t border-border-subtle flex-row items-center justify-between">
-                <Text className="text-[10px] font-mono text-lime-accent font-bold">
-                  +12% MoM
-                </Text>
-                <Text className="text-[10px] font-mono text-text-muted">
-                  {totalMembers} Subs
-                </Text>
-              </View>
-            </View>
-          </View>
+              </Box>
+              <Box className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 items-center justify-center">
+                <DollarSign size={16} color="#C8F135" />
+              </Box>
+            </Box>
+            <Box className="flex-row items-baseline gap-1 mt-2">
+              <Text size="3xl" className="font-display font-black text-primary tracking-tight leading-none">
+                $284,500
+              </Text>
+              <Text size="xs" className="font-mono text-muted-foreground">/ mo</Text>
+            </Box>
+            <Box className="mt-3 pt-3 border-t border-border flex-row items-center justify-between">
+              <Text size="xs" className="font-mono font-bold text-primary">
+                +12% MoM
+              </Text>
+              <Text size="xs" className="font-mono text-muted-foreground">
+                {totalMembers} Subs
+              </Text>
+            </Box>
+          </Box>
+        </Box>
 
-          {/* Monthly Attendance Trend */}
-          <View className="bg-card border border-border-subtle p-5 rounded-3xl gap-4">
-            <View className="flex-row items-center justify-between gap-2">
-              <View className="flex-row items-center gap-2.5 flex-1">
-                <View className="w-8 h-8 rounded-xl bg-lime-accent/15 border border-lime-accent/30 items-center justify-center">
-                  <TrendingUp size={16} color="#C8F135" />
-                </View>
-                <Text className="font-display font-black text-lg uppercase tracking-tight text-white">
-                  Attendance Trend
-                </Text>
-              </View>
-              <View className="bg-lime-accent/10 border border-lime-accent/20 px-3 py-1 rounded-xl">
-                <Text className="text-xs font-mono text-lime-accent font-bold">
-                  Avg 4,820 / Mo
-                </Text>
-              </View>
-            </View>
-            <Text className="text-xs font-mono text-text-muted -mt-2">
-              Total check-in volume and athlete engagement
-            </Text>
+        {/* Monthly Attendance Trend */}
+        <Box className="bg-card border border-border p-5 rounded-3xl gap-4">
+          <Box className="flex-row items-center justify-between gap-2">
+            <Box className="flex-row items-center gap-2.5 flex-1">
+              <Box className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 items-center justify-center">
+                <TrendingUp size={16} color="#C8F135" />
+              </Box>
+              <Text size="lg" className="font-display font-black uppercase tracking-tight">
+                Attendance Trend
+              </Text>
+            </Box>
+            <Box className="bg-primary/10 border border-primary/20 px-3 py-1 rounded-xl">
+              <Text size="xs" className="font-mono font-bold text-primary">
+                Avg 4,820 / Mo
+              </Text>
+            </Box>
+          </Box>
+          <Text size="xs" className="font-mono text-muted-foreground -mt-2">
+            Total check-in volume and athlete engagement
+          </Text>
 
-            {/* Monthly Check-in Bars */}
-            <View className="flex-row items-end justify-between h-36 pt-4 px-2">
-              {MONTHLY_TREND.map((item) => (
-                <View
-                  key={item.month}
-                  className="flex-1 items-center gap-2 h-full justify-end"
+          {/* Monthly Check-in Bars */}
+          <Box className="flex-row items-end justify-between h-36 pt-4 px-2">
+            {MONTHLY_TREND.map((item) => (
+              <Box
+                key={item.month}
+                className="flex-1 items-center gap-2 h-full justify-end"
+              >
+                <Text size="xs" className="font-mono text-muted-foreground">
+                  {(item.count / 1000).toFixed(1)}k
+                </Text>
+                <Box
+                  className={`w-full max-w-[48px] rounded-t-lg ${
+                    item.isCurrent ? 'bg-primary' : 'bg-border'
+                  }`}
+                  style={{ height: `${item.heightPercent}%` }}
+                />
+                <Text
+                  size="xs"
+                  className={`font-mono ${
+                    item.isCurrent ? 'text-primary font-bold' : 'text-muted-foreground'
+                  }`}
                 >
-                  <Text className="text-[11px] font-mono text-text-muted">
-                    {(item.count / 1000).toFixed(1)}k
-                  </Text>
-                  <View
-                    className={`w-full max-w-[48px] rounded-t-lg ${
-                      item.isCurrent ? 'bg-lime-accent' : 'bg-border-subtle'
-                    }`}
-                    style={{ height: `${item.heightPercent}%` }}
-                  />
-                  <Text
-                    className={`text-xs font-mono ${
-                      item.isCurrent ? 'text-lime-accent font-bold' : 'text-text-muted'
-                    }`}
-                  >
-                    {item.month}
-                  </Text>
-                </View>
+                  {item.month}
+                </Text>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Recent Audit Transactions + Quick Digest */}
+        <Box className="flex-col gap-4">
+          {/* Recent Audit Invoices */}
+          <Box className="bg-card border border-border p-5 rounded-3xl gap-3">
+            <Box className="flex-row items-center justify-between">
+              <Text className="font-display font-bold text-sm uppercase tracking-wider">
+                Audit Invoices
+              </Text>
+              <Button
+                variant="link"
+                size="sm"
+                onPress={() => router.push('/(admin)/payments')}
+              >
+                <ButtonText className="text-[10px] font-mono text-primary">
+                  View All ({MOCK_TRANSACTIONS.length})
+                </ButtonText>
+              </Button>
+            </Box>
+
+            <Box className="gap-1">
+              {MOCK_TRANSACTIONS.map((t) => (
+                <Box
+                  key={t.id}
+                  className="py-2.5 flex-row items-center justify-between"
+                >
+                  <Box>
+                    <Box className="flex-row items-center gap-2">
+                      <Text className="text-primary font-bold font-mono text-xs">
+                        {t.invoiceNumber}
+                      </Text>
+                      <Text className="font-medium text-xs">
+                        {t.memberName}
+                      </Text>
+                    </Box>
+                    <Text size="xs" className="text-muted-foreground font-mono">
+                      {t.tier} • {t.category}
+                    </Text>
+                  </Box>
+                  <Box className="items-end">
+                    <Text className="font-bold text-xs">
+                      ${t.amount}.00
+                    </Text>
+                    <Text size="xs" className="text-muted-foreground font-mono">
+                      {t.date}
+                    </Text>
+                  </Box>
+                </Box>
               ))}
-            </View>
-          </View>
+            </Box>
+          </Box>
 
-          {/* Recent Audit Transactions + Quick Digest */}
-          <View className="flex-col gap-4">
-            {/* Recent Audit Invoices */}
-            <View className="bg-card border border-border-subtle p-5 rounded-3xl gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="font-display font-bold text-sm uppercase tracking-wider text-white">
-                  Audit Invoices
-                </Text>
-                <TouchableOpacity onPress={() => router.push('/(admin)/payments')} activeOpacity={0.7}>
-                  <Text className="text-[10px] font-mono text-lime-accent">
-                    View All ({MOCK_TRANSACTIONS.length})
-                  </Text>
-                </TouchableOpacity>
-              </View>
+          {/* Recent Athletes Onboarded */}
+          <Box className="bg-card border border-border p-5 rounded-3xl gap-3">
+            <Box className="flex-row items-center justify-between">
+              <Text className="font-display font-bold text-sm uppercase tracking-wider">
+                Athlete Onboarding
+              </Text>
+              <Button
+                variant="link"
+                size="sm"
+                onPress={() => router.push('/(admin)/members')}
+              >
+                <ButtonText className="text-[10px] font-mono text-primary">
+                  Directory ({MOCK_MEMBERS.length})
+                </ButtonText>
+              </Button>
+            </Box>
 
-              <View className="gap-1">
-                {MOCK_TRANSACTIONS.map((t) => (
-                  <View
-                    key={t.id}
-                    className="py-2.5 flex-row items-center justify-between"
-                  >
-                    <View>
-                      <View className="flex-row items-center gap-2">
-                        <Text className="text-lime-accent font-bold font-mono text-xs">
-                          {t.invoiceNumber}
-                        </Text>
-                        <Text className="text-white font-medium text-xs">
-                          {t.memberName}
-                        </Text>
-                      </View>
-                      <Text className="text-[10px] text-text-muted font-mono">
-                        {t.tier} • {t.category}
+            <Box className="gap-2">
+              {MOCK_MEMBERS.map((member) => (
+                <Button
+                  key={member.id}
+                  variant="outline"
+                  onPress={() => router.push('/(admin)/members')}
+                  className="bg-background border-border p-2.5 rounded-xl flex-row items-center justify-between"
+                >
+                  <Box className="flex-row items-center gap-2.5">
+                    <Box className="w-8 h-8 rounded-lg bg-border items-center justify-center">
+                      <Text className="font-mono font-bold text-xs">
+                        {member.initials}
                       </Text>
-                    </View>
-                    <View className="items-end">
-                      <Text className="text-white font-bold text-xs">
-                        ${t.amount}.00
+                    </Box>
+                    <Box>
+                      <Text className="text-xs font-bold leading-tight">
+                        {member.name}
                       </Text>
-                      <Text className="text-[10px] text-text-muted font-mono">
-                        {t.date}
+                      <Text size="xs" className="text-muted-foreground font-mono">
+                        {member.tier} • {member.id}
                       </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
+                    </Box>
+                  </Box>
 
-            {/* Recent Athletes Onboarded */}
-            <View className="bg-card border border-border-subtle p-5 rounded-3xl gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="font-display font-bold text-sm uppercase tracking-wider text-white">
-                  Athlete Onboarding
-                </Text>
-                <TouchableOpacity onPress={() => router.push('/(admin)/members')} activeOpacity={0.7}>
-                  <Text className="text-[10px] font-mono text-lime-accent">
-                    Directory ({MOCK_MEMBERS.length})
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="gap-2">
-                {MOCK_MEMBERS.map((member) => (
-                  <TouchableOpacity
-                    key={member.id}
-                    onPress={() => router.push('/(admin)/members')}
-                    activeOpacity={0.7}
-                    className="bg-background border border-border-subtle p-2.5 rounded-xl flex-row items-center justify-between"
-                  >
-                    <View className="flex-row items-center gap-2.5">
-                      <View className="w-8 h-8 rounded-lg bg-border-subtle items-center justify-center border border-[#2A2A38]">
-                        <Text className="font-mono font-bold text-xs text-white">
-                          {member.initials}
-                        </Text>
-                      </View>
-                      <View>
-                        <Text className="text-xs font-bold text-white leading-tight">
-                          {member.name}
-                        </Text>
-                        <Text className="text-[10px] text-text-muted font-mono">
-                          {member.tier} • {member.id}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View className="flex-row items-center gap-2">
-                      <View
-                        className={`px-2 py-0.5 rounded ${
-                          member.status === 'active'
-                            ? 'bg-lime-accent/15 border border-lime-accent/30'
-                            : 'bg-alert-red/15 border border-alert-red/30'
+                  <Box className="flex-row items-center gap-2">
+                    <Box
+                      className={`px-2 py-0.5 rounded ${
+                        member.status === 'active'
+                          ? 'bg-primary/15 border border-primary/30'
+                          : 'bg-destructive/15 border border-destructive/30'
+                      }`}
+                    >
+                      <Text
+                        size="xs"
+                        className={`font-mono ${
+                          member.status === 'active' ? 'text-primary' : 'text-destructive'
                         }`}
                       >
-                        <Text
-                          className={`text-[10px] font-mono ${
-                            member.status === 'active'
-                              ? 'text-lime-accent'
-                              : 'text-alert-red'
-                          }`}
-                        >
-                          {member.status === 'active' ? 'Active' : 'Pending'}
-                        </Text>
-                      </View>
-                      <ChevronRight size={14} color="#666675" />
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </>
+                        {member.status === 'active' ? 'Active' : 'Pending'}
+                      </Text>
+                    </Box>
+                    <ChevronRight size={14} color="#666675" />
+                  </Box>
+                </Button>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </ScrollView>
   );
 }

@@ -1,10 +1,23 @@
 import {
-  View,
+  Box,
+} from '@/components/ui/box';
+import {
   Text,
+} from '@/components/ui/text';
+import {
   ScrollView,
-  TextInput,
-  TouchableOpacity,
-} from '@/tw';
+} from '@/components/ui/scroll-view';
+import {
+  Button,
+  ButtonIcon,
+  ButtonText,
+} from '@/components/ui/button';
+import {
+  Input,
+  InputIcon,
+  InputSlot,
+  InputField as GInputField,
+} from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -84,12 +97,12 @@ export default function AdminSettings() {
 
   if (loadingProfile || loadingFacility) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-sm font-mono text-text-muted">
+      <Box className="flex-1 bg-background items-center justify-center">
+        <Text className="text-sm font-mono text-muted-foreground">
           Loading settings...
         </Text>
         <StatusBar style="light" />
-      </View>
+      </Box>
     );
   }
 
@@ -153,52 +166,52 @@ function SettingsContent({
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <Box className="flex-1 bg-background">
       {/* Fixed top: header + category filter chips */}
-      <View
+      <Box
         style={{ paddingTop: inset.top + 16, paddingHorizontal: 16 }}
         className="bg-background"
       >
-        <View className="gap-3">
-          <View className="gap-1">
-            <Text className="font-display font-black text-2xl uppercase tracking-tight text-white">
+        <Box className="gap-3">
+          <Box className="gap-1">
+            <Text className="font-display font-black text-2xl uppercase tracking-tight text-foreground">
               Settings
             </Text>
-            <Text className="text-xs font-mono text-text-muted">
+            <Text className="text-xs font-mono text-muted-foreground">
               {profileForm.name} · {profileForm.title}
             </Text>
-          </View>
+          </Box>
 
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 6 }}
+            contentContainerStyle={{ gap: 6, flexDirection: 'row' }}
           >
             {CATEGORY_CHIPS.map((chip) => (
-              <TouchableOpacity
+              <Button
                 key={chip.id}
                 onPress={() => setActiveCategory(chip.id)}
-                activeOpacity={0.7}
+
                 className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl ${
                   activeCategory === chip.id
-                    ? 'bg-lime-accent'
-                    : 'bg-card border border-border-subtle'
+                    ? 'bg-primary'
+                    : 'bg-card border border-border'
                 }`}
               >
-                <Text
-                  className={`text-xs font-mono whitespace-nowrap ${
+                <ButtonText
+                  className={`text-xs font-mono ${
                     activeCategory === chip.id
-                      ? 'text-black font-bold'
-                      : 'text-text-muted'
+                      ? 'text-primary-foreground font-bold'
+                      : 'text-muted-foreground'
                   }`}
                 >
                   {chip.label}
-                </Text>
-              </TouchableOpacity>
+                </ButtonText>
+              </Button>
             ))}
           </ScrollView>
-        </View>
-      </View>
+        </Box>
+      </Box>
 
       {/* Scrollable sections */}
       <ScrollView
@@ -209,7 +222,7 @@ function SettingsContent({
           paddingBottom: inset.bottom + 24,
         }}
       >
-        <View className="gap-6">
+        <Box className="gap-6">
 
           {/* ================================================================= */}
           {/* SECTION 1: PROFILE */}
@@ -219,11 +232,11 @@ function SettingsContent({
               title="Profile"
               subtitle="Name and contact information"
               icon={<User size={16} color="#C8F135" />}
-              iconBg="bg-lime-accent/15 border-lime-accent/30"
+              iconBg="bg-primary/15 border-primary/30"
               expanded={expandedSections.profile}
               onToggle={() => toggleSection('profile')}
             >
-              <View className="gap-4">
+              <Box className="gap-4">
                 <InputField
                   label="Full Legal Name"
                   value={profileForm.name}
@@ -233,7 +246,7 @@ function SettingsContent({
                   placeholder="e.g. Alex Morgan"
                 />
 
-                <View className="flex-col sm:flex-row gap-4">
+                <Box className="flex-col gap-4">
                   <InputField
                     label="Executive Email"
                     value={profileForm.email}
@@ -254,8 +267,8 @@ function SettingsContent({
                     keyboardType="phone-pad"
                     icon={<Phone size={16} color="#666675" />}
                   />
-                </View>
-              </View>
+                </Box>
+              </Box>
               <SectionSave onSave={saveProfile} saved={!!saved.profile} />
             </Section>
           )}
@@ -268,13 +281,13 @@ function SettingsContent({
               title="Membership & Billing"
               subtitle="Plan prices by billing cadence"
               icon={<CreditCard size={16} color="#C8F135" />}
-              iconBg="bg-lime-accent/15 border-lime-accent/30"
+              iconBg="bg-primary/15 border-primary/30"
               expanded={expandedSections.billing}
               onToggle={() => toggleSection('billing')}
             >
-              <View className="gap-4">
+              <Box className="gap-4">
                 {/* Billing Cadence Selector */}
-                <View className="flex-row gap-2 p-1 bg-card border border-border-subtle rounded-2xl">
+                <Box className="flex-row gap-2 p-1 bg-card border border-border rounded-2xl">
                   {(
                     [
                       { key: 'monthly', label: 'Monthly' },
@@ -282,74 +295,76 @@ function SettingsContent({
                       { key: 'yearly', label: 'Yearly' },
                     ] as const
                   ).map((opt) => (
-                    <TouchableOpacity
+                    <Button
                       key={opt.key}
                       onPress={() => setCadence(opt.key)}
-                      activeOpacity={0.7}
+
                       className={`flex-1 py-2 rounded-xl ${
                         cadence === opt.key
-                          ? 'bg-lime-accent'
+                          ? 'bg-primary'
                           : 'bg-transparent'
                       }`}
                     >
-                      <Text
+                      <ButtonText
                         className={`text-xs font-mono font-bold text-center ${
                           cadence === opt.key
-                            ? 'text-black'
-                            : 'text-text-muted'
+                            ? 'text-primary-foreground'
+                            : 'text-muted-foreground'
                         }`}
                       >
                         {opt.label}
-                      </Text>
-                    </TouchableOpacity>
+                      </ButtonText>
+                    </Button>
                   ))}
-                </View>
+                </Box>
 
                 {/* Pricing Cards per Tier */}
-                <View className="flex-row flex-wrap gap-3">
+                <Box className="flex-row flex-wrap gap-3">
                   {(
                     [
-                      { key: 'basic', label: 'Basic Access', color: 'text-white' },
-                      { key: 'premium', label: 'Premium Tier', color: 'text-[#5B8DEF]' },
-                      { key: 'vip', label: 'VIP Elite', color: 'text-lime-accent' },
+                      { key: 'basic', label: 'Basic Access', color: 'text-foreground' },
+                      { key: 'premium', label: 'Premium Tier', color: 'text-blue-accent' },
+                      { key: 'vip', label: 'VIP Elite', color: 'text-primary' },
                     ] as const
                   ).map((tier) => (
-                    <View
+                    <Box
                       key={tier.key}
-                      className="bg-background border border-[#22222E] p-3.5 rounded-2xl flex-1 min-w-[140px]"
+                      className="bg-background border border-border p-3.5 rounded-2xl flex-1 min-w-[140px]"
                     >
                       <Text className={`text-[10px] font-mono uppercase ${tier.color}`}>
                         {tier.label}
                       </Text>
-                      <View className="flex-row items-center gap-1 mt-1">
+                      <Box className="flex-row items-center gap-1 mt-1">
                         <Text className={`font-mono font-bold ${tier.color}`}>
                           $
                         </Text>
-                        <TextInput
-                          value={String(facilityForm.pricing[tier.key][cadence])}
-                          onChangeText={(v) =>
-                            setFacilityForm({
-                              ...facilityForm,
-                              pricing: {
-                                ...facilityForm.pricing,
-                                [tier.key]: {
-                                  ...facilityForm.pricing[tier.key],
-                                  [cadence]: Number(v) || 0,
+                        <Input className="flex-1 flex-row items-center bg-transparent">
+                          <GInputField
+                            value={String(facilityForm.pricing[tier.key][cadence])}
+                            onChangeText={(v) =>
+                              setFacilityForm({
+                                ...facilityForm,
+                                pricing: {
+                                  ...facilityForm.pricing,
+                                  [tier.key]: {
+                                    ...facilityForm.pricing[tier.key],
+                                    [cadence]: Number(v) || 0,
+                                  },
                                 },
-                              },
-                            })
-                          }
-                          keyboardType="numeric"
-                          className="flex-1 text-lg font-display font-black text-white bg-transparent"
-                        />
-                      </View>
-                      <Text className="text-[9px] font-mono text-[#666675]">
+                              })
+                            }
+                            keyboardType="numeric"
+                            className={`flex-1 text-lg font-display font-black bg-transparent ${tier.color}`}
+                          />
+                        </Input>
+                      </Box>
+                      <Text className="text-[9px] font-mono text-muted-foreground">
                         per athlete / {cadence === 'semiAnnual' ? '6 mo' : cadence}
                       </Text>
-                    </View>
+                    </Box>
                   ))}
-                </View>
-              </View>
+                </Box>
+              </Box>
               <SectionSave onSave={saveBilling} saved={!!saved.billing} />
             </Section>
           )}
@@ -362,43 +377,38 @@ function SettingsContent({
               title="Security"
               subtitle="Terminal access PIN"
               icon={<KeyRound size={16} color="#C8F135" />}
-              iconBg="bg-lime-accent/15 border-lime-accent/30"
+              iconBg="bg-primary/15 border-primary/30"
               expanded={expandedSections.security}
               onToggle={() => toggleSection('security')}
             >
-              <View className="gap-4">
-                <View className="flex-1">
-                  <Text className="text-[11px] font-mono text-text-muted uppercase">
+              <Box className="gap-4">
+                <Box className="flex-1">
+                  <Text className="text-[11px] font-mono text-muted-foreground uppercase">
                     Master Terminal Security PIN
                   </Text>
-                  <View className="flex-row items-center mt-1 bg-background border border-[#252532] rounded-xl">
-                    <TextInput
+                  <Input className="flex-row items-center mt-1 bg-background border-border rounded-xl px-3.5 h-11">
+                    <GInputField
                       value={profileForm.securityPin}
                       onChangeText={(v) =>
                         setProfileForm({ ...profileForm, securityPin: v })
                       }
                       secureTextEntry={!showPin}
                       maxLength={6}
-                      className="flex-1 px-3.5 py-2.5 text-base text-white font-mono tracking-widest"
+                      className="flex-1 text-base text-foreground font-mono tracking-widest"
                       placeholderTextColor="#666675"
                     />
-                    <TouchableOpacity
-                      onPress={() => setShowPin(!showPin)}
-                      activeOpacity={0.7}
-                      className="pr-3"
-                    >
-                      {showPin ? (
-                        <EyeOff size={16} color="#8A8A9A" />
-                      ) : (
-                        <Eye size={16} color="#8A8A9A" />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                  <Text className="text-[10px] font-mono text-[#666675] mt-1">
+                    <InputSlot onPress={() => setShowPin(!showPin)}>
+                      <InputIcon
+                        as={showPin ? EyeOff : Eye}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                  </Input>
+                  <Text className="text-[10px] font-mono text-muted-foreground mt-1">
                     Used to unlock restricted admin actions.
                   </Text>
-                </View>
-              </View>
+                </Box>
+              </Box>
               <SectionSave onSave={saveSecurity} saved={!!saved.security} />
             </Section>
           )}
@@ -411,33 +421,33 @@ function SettingsContent({
               title="Notifications"
               subtitle="Automated alerts and reminders"
               icon={<Bell size={16} color="#5B8DEF" />}
-              iconBg="bg-[#5B8DEF]/15 border-[#5B8DEF]/30"
+              iconBg="bg-blue-accent/15 border-blue-accent/30"
               expanded={expandedSections.notifications}
               onToggle={() => toggleSection('notifications')}
             >
-              <View className="gap-3">
-                <View className="flex-row items-center gap-2 rounded-xl bg-[#5B8DEF]/10 border border-[#5B8DEF]/25 px-3 py-2 self-start">
+              <Box className="gap-3">
+                <Box className="flex-row items-center gap-2 rounded-xl bg-blue-accent/10 border border-blue-accent/25 px-3 py-2 self-start">
                   <Bell size={13} color="#8A8A9A" />
-                  <Text className="text-[11px] font-mono font-bold uppercase tracking-wide text-text-muted">
+                  <Text className="text-[11px] font-mono font-bold uppercase tracking-wide text-muted-foreground">
                     Coming soon
                   </Text>
-                </View>
+                </Box>
                 {NOTIFICATION_ITEMS.map((item) => {
                   const isEnabled =
                     facilityForm.notifications[item.key];
                   return (
-                    <View
+                    <Box
                       key={item.key}
-                      className="p-3.5 bg-background border border-[#22222E] rounded-2xl flex-row items-center justify-between gap-4 opacity-50"
+                      className="p-3.5 bg-background border border-border rounded-2xl flex-row items-center justify-between gap-4 opacity-50"
                     >
-                      <View className="flex-1 mr-2">
-                        <Text className="text-xs font-bold text-white">
+                      <Box className="flex-1 mr-2">
+                        <Text className="text-xs font-bold text-foreground">
                           {item.title}
                         </Text>
-                        <Text className="text-[11px] font-mono text-text-muted mt-0.5">
+                        <Text className="text-[11px] font-mono text-muted-foreground mt-0.5">
                           {item.desc}
                         </Text>
-                      </View>
+                      </Box>
                       <Switch
                         value={isEnabled}
                         disabled
@@ -445,10 +455,10 @@ function SettingsContent({
                         trackColor={{ true: '#C8F135', false: '#2A2A34' }}
                         thumbColor="#FFFFFF"
                       />
-                    </View>
+                    </Box>
                   );
                 })}
-              </View>
+              </Box>
             </Section>
           )}
 
@@ -460,35 +470,36 @@ function SettingsContent({
               title="Maintenance"
               subtitle="Session"
               icon={<RotateCcw size={16} color="#FF4B1F" />}
-              iconBg="bg-[#FF4B1F]/15 border-[#FF4B1F]/30"
+              iconBg="bg-destructive/15 border-destructive/30"
               expanded={expandedSections.maintenance}
               onToggle={() => toggleSection('maintenance')}
               danger
             >
-              <TouchableOpacity
+              <Button
                 onPress={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-                activeOpacity={0.7}
-                className="p-4 bg-background border border-[#252532] rounded-2xl flex-row items-start gap-3"
+                isDisabled={logoutMutation.isPending}
+
+                variant="ghost"
+                className="p-4 bg-background border border-border rounded-2xl flex-row items-start gap-3 w-full"
               >
-                <LogOut size={20} color="#FF4B1F" />
-                <View className="flex-1">
-                  <Text className="text-xs font-bold text-white">
+                <ButtonIcon as={LogOut} className="text-destructive w-5 h-5" />
+                <Box className="flex-1">
+                  <Text className="text-xs font-bold text-foreground">
                     Lock & Log Out Admin Session
                   </Text>
-                  <Text className="text-[10px] font-mono text-text-muted">
+                  <Text className="text-[10px] font-mono text-muted-foreground">
                     {logoutMutation.isPending
                       ? 'Signing out...'
                       : 'Terminates session and returns to login.'}
                   </Text>
-                </View>
-              </TouchableOpacity>
+                </Box>
+              </Button>
             </Section>
           )}
-          </View>
+          </Box>
       </ScrollView>
       <StatusBar style="light" />
-    </View>
+    </Box>
   );
 }
 
@@ -514,42 +525,43 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <View
+    <Box
       className={`rounded-3xl overflow-hidden ${
-        danger ? 'border border-[#FF4B1F]/30' : 'border border-border-subtle'
+        danger ? 'border border-destructive/30' : 'border border-border'
       } bg-card`}
     >
-      <TouchableOpacity
+      <Button
         onPress={onToggle}
-        activeOpacity={0.7}
+
+        variant="ghost"
         className="px-5 py-4 flex-row items-center justify-between"
       >
-        <View className="flex-row items-center gap-3 flex-1 mr-2">
-          <View
+        <Box className="flex-row items-center gap-3 flex-1 mr-2">
+          <Box
             className={`w-8 h-8 rounded-xl border items-center justify-center ${iconBg}`}
           >
             {icon}
-          </View>
-          <View className="flex-1">
-            <Text className="font-display text-base font-bold text-white">
+          </Box>
+          <Box className="flex-1">
+            <Text className="font-display text-base font-bold text-foreground">
               {title}
             </Text>
-            <Text className="text-[11px] font-mono text-text-muted mt-0.5">
+            <Text className="text-[11px] font-mono text-muted-foreground mt-0.5">
               {subtitle}
             </Text>
-          </View>
-        </View>
+          </Box>
+        </Box>
         <ChevronDown
           size={16}
           color="#8A8A9A"
           style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}
         />
-      </TouchableOpacity>
+      </Button>
 
       {expanded && (
-        <View className="px-5 pb-5 border-t border-border-subtle">{children}</View>
+        <Box className="px-5 pb-5 border-t border-border">{children}</Box>
       )}
-    </View>
+    </Box>
   );
 }
 
@@ -561,28 +573,28 @@ function SectionSave({
   saved: boolean;
 }) {
   return (
-    <View className="flex-row items-center justify-between pt-4 mt-4 border-t border-border-subtle">
+    <Box className="flex-row items-center justify-between pt-4 mt-4 border-t border-border">
       {saved ? (
-        <View className="flex-row items-center gap-1.5">
+        <Box className="flex-row items-center gap-1.5">
           <CheckCircle2 size={14} color="#C8F135" />
-          <Text className="text-xs font-mono font-bold text-lime-accent">
+          <Text className="text-xs font-mono font-bold text-primary">
             Saved
           </Text>
-        </View>
+        </Box>
       ) : (
-        <View />
+        <Box />
       )}
-      <TouchableOpacity
+      <Button
         onPress={onSave}
-        activeOpacity={0.7}
-        className="flex-row items-center gap-1.5 bg-lime-accent px-4 py-2 rounded-xl"
+
+        className="flex-row items-center gap-1.5 bg-primary px-4 py-2 rounded-xl"
       >
-        <Save size={14} color="#000" />
-        <Text className="font-display font-bold text-xs uppercase text-black">
+        <ButtonIcon as={Save} className="text-primary-foreground w-3.5 h-3.5" />
+        <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
           Save
-        </Text>
-      </TouchableOpacity>
-    </View>
+        </ButtonText>
+      </Button>
+    </Box>
   );
 }
 
@@ -604,27 +616,29 @@ function InputField({
   multiline?: boolean;
 }) {
   return (
-    <View className="flex-1">
-      <Text className="text-[11px] font-mono text-text-muted uppercase">
+    <Box className="flex-1">
+      <Text className="text-[11px] font-mono text-muted-foreground uppercase">
         {label}
       </Text>
-      <View className="flex-row items-center mt-1">
-        {icon && (
-          <View className="absolute left-3 z-10">{icon}</View>
-        )}
-        <TextInput
+      <Input
+        className={`w-full bg-background border-border rounded-xl h-11 ${
+          icon ? 'pr-3.5' : 'px-3.5'
+        }`}
+      >
+        {icon && <InputSlot>{icon}</InputSlot>}
+        <GInputField
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
           keyboardType={keyboardType}
           multiline={multiline}
           numberOfLines={multiline ? 2 : undefined}
-          className={`w-full bg-background border border-[#252532] rounded-xl py-2.5 text-sm text-white font-mono ${
-            icon ? 'pl-9 pr-3.5' : 'px-3.5'
-          } ${multiline ? 'text-xs resize-none' : ''}`}
+          className={`w-full text-sm text-foreground font-mono ${
+            multiline ? 'text-xs' : ''
+          }`}
           placeholderTextColor="#666675"
         />
-      </View>
-    </View>
+      </Input>
+    </Box>
   );
 }

@@ -1,12 +1,19 @@
 import { useLogin } from "@/hooks/useAuth";
+import { Box } from "@/components/ui/box";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
 import {
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "@/tw";
+  Input,
+  InputField,
+  InputIcon,
+  InputSlot,
+} from "@/components/ui/input";
+import {
+  Button,
+  ButtonIcon,
+  ButtonText,
+} from "@/components/ui/button";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
@@ -65,11 +72,11 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View
+      <Box
         className="absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none"
         style={{ backgroundColor: "rgba(200, 241, 53, 0.05)" }}
       />
-      <View
+      <Box
         className="absolute bottom-10 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none"
         style={{ backgroundColor: "rgba(91, 141, 239, 0.05)" }}
       />
@@ -77,78 +84,86 @@ export default function LoginScreen() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
-        className="px-6 pt-40 pb-4"
       >
-        <View className="w-full max-w-lg mx-auto gap-3">
+        <Box className="w-full max-w-lg mx-auto gap-3 px-6 pt-40 pb-4">
           {/* Brand header */}
-          <View className="items-center gap-1">
-            <View className="w-14 h-14 rounded-2xl bg-lime-accent items-center justify-center mb-1">
+          <Box className="items-center gap-1">
+            <Box className="w-14 h-14 rounded-2xl bg-primary items-center justify-center mb-1">
               <Dumbbell size={28} color="#000000" strokeWidth={2.5} />
-            </View>
-            <View className="items-center">
-              <Text className="font-display text-3xl font-extrabold italic tracking-tighter uppercase text-white">
-                ANYTIME<Text className="text-lime-accent">FITNESS</Text>
+            </Box>
+            <Box className="items-center">
+              <Text
+                size="3xl"
+                className="font-display font-extrabold italic tracking-tighter uppercase"
+              >
+                ANYTIME<Text className="text-primary">FITNESS</Text>
               </Text>
-              <Text className="text-xs font-mono text-text-muted tracking-wider uppercase leading-none">
+              <Text className="text-xs font-mono text-muted-foreground tracking-wider uppercase leading-none">
                 Welcome back to your journey
               </Text>
-            </View>
-          </View>
+            </Box>
+          </Box>
 
           {/* Auth card */}
-          <View className="bg-card border border-border-subtle rounded-3xl p-6 gap-4 mt-10">
+          <Box className="bg-card border border-border rounded-3xl p-6 gap-4 mt-10">
             {/* Role tabs */}
-            <View className="flex-row bg-background p-1 rounded-2xl border border-border-subtle">
-              <TouchableOpacity
+            <Box className="flex-row bg-background p-1 rounded-2xl border border-border">
+              <Button
+                variant="ghost"
+                size="sm"
                 onPress={() => {
                   setLoginMode("admin");
                   setError(null);
                 }}
-                activeOpacity={0.8}
                 className={`flex-1 flex-row items-center justify-center gap-2 py-2.5 rounded-xl ${
-                  loginMode === "admin" ? "bg-lime-accent" : "bg-transparent"
+                  loginMode === "admin" ? "bg-primary" : "bg-transparent"
                 }`}
               >
                 <Shield
                   size={14}
                   color={loginMode === "admin" ? "#000000" : "#8A8A9A"}
                 />
-                <Text
+                <ButtonText
                   className={`font-bold text-[11px] uppercase tracking-wider ${
-                    loginMode === "admin" ? "text-black" : "text-text-muted"
+                    loginMode === "admin"
+                      ? "text-primary-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   Admin
-                </Text>
-              </TouchableOpacity>
+                </ButtonText>
+              </Button>
 
-              <TouchableOpacity
+              <Button
+                variant="ghost"
+                size="sm"
                 onPress={() => {
                   setLoginMode("member");
                   setError(null);
                 }}
-                activeOpacity={0.8}
                 className={`flex-1 flex-row items-center justify-center gap-2 py-2.5 rounded-xl ${
-                  loginMode === "member" ? "bg-lime-accent" : "bg-transparent"
+                  loginMode === "member" ? "bg-primary" : "bg-transparent"
                 }`}
               >
                 <User
                   size={14}
                   color={loginMode === "member" ? "#000000" : "#8A8A9A"}
                 />
-                <Text
+                <ButtonText
                   className={`font-bold text-[11px] uppercase tracking-wider ${
-                    loginMode === "member" ? "text-black" : "text-text-muted"
+                    loginMode === "member"
+                      ? "text-primary-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   Member
-                </Text>
-              </TouchableOpacity>
-            </View>
+                </ButtonText>
+              </Button>
+            </Box>
 
             {/* Error */}
             {error && (
-              <View
+              <Box
                 className="p-3 rounded-2xl flex-row items-center gap-2.5"
                 style={{
                   backgroundColor: "rgba(255, 75, 31, 0.15)",
@@ -157,22 +172,22 @@ export default function LoginScreen() {
                 }}
               >
                 <AlertCircle size={16} color="#FF4B1F" />
-                <Text className="text-xs font-mono text-white flex-1">
-                  {error}
-                </Text>
-              </View>
+                <Text className="text-xs font-mono flex-1">{error}</Text>
+              </Box>
             )}
 
             {loginMode === "admin" ? (
               <>
                 {/* Email */}
-                <View className="gap-1.5">
-                  <Text className="text-[11px] font-mono uppercase tracking-wider text-text-muted">
+                <Box className="gap-1.5">
+                  <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                     Email Address
                   </Text>
-                  <View className="flex-row items-center bg-background border border-border-subtle rounded-xl px-3.5 h-11 gap-2.5">
-                    <Mail size={16} color="#8A8A9A" />
-                    <TextInput
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon as={Mail} className="text-muted-foreground w-4 h-4" />
+                    </InputSlot>
+                    <InputField
                       value={email}
                       onChangeText={setEmail}
                       keyboardType="email-address"
@@ -180,78 +195,83 @@ export default function LoginScreen() {
                       autoComplete="email"
                       placeholder="you@example.com"
                       placeholderTextColor="#666675"
-                      className="flex-1 text-white font-mono text-xs"
+                      className="font-mono text-xs"
                     />
-                  </View>
-                </View>
+                  </Input>
+                </Box>
 
                 {/* Password */}
-                <View className="gap-1.5">
-                  <Text className="text-[11px] font-mono uppercase tracking-wider text-text-muted">
+                <Box className="gap-1.5">
+                  <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                     Password
                   </Text>
-                  <View className="flex-row items-center bg-background border border-border-subtle rounded-xl px-3.5 h-11 gap-2.5">
-                    <Lock size={16} color="#8A8A9A" />
-                    <TextInput
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                    </InputSlot>
+                    <InputField
                       value={password}
                       onChangeText={setPassword}
                       secureTextEntry={!showPassword}
                       placeholder="••••••••"
                       placeholderTextColor="#666675"
-                      className="flex-1 text-white font-mono text-xs font-bold"
+                      className="font-mono text-xs font-bold"
                     />
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff size={16} color="#8A8A9A" />
-                      ) : (
-                        <Eye size={16} color="#8A8A9A" />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                    <InputSlot onPress={() => setShowPassword(!showPassword)}>
+                      <InputIcon
+                        as={showPassword ? EyeOff : Eye}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                  </Input>
+                </Box>
 
                 {/* Forgot password */}
-                <View className="items-end">
-                  <TouchableOpacity
+                <Box className="items-end">
+                  <Button
+                    variant="link"
+                    size="sm"
                     onPress={() => router.push("/(auth)/forgot-password")}
                   >
-                    <Text className="text-[11px] font-mono text-lime-accent underline">
+                    <ButtonText className="text-[11px] font-mono underline font-bold">
                       Forgot password?
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                    </ButtonText>
+                  </Button>
+                </Box>
               </>
             ) : (
               <>
                 {/* Phone */}
-                <View className="gap-1.5">
-                  <Text className="text-[11px] font-mono uppercase tracking-wider text-text-muted">
+                <Box className="gap-1.5">
+                  <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                     Phone Number
                   </Text>
-                  <View className="flex-row items-center bg-background border border-border-subtle rounded-xl px-3.5 h-11 gap-2.5">
-                    <Phone size={16} color="#8A8A9A" />
-                    <TextInput
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon as={Phone} className="text-muted-foreground w-4 h-4" />
+                    </InputSlot>
+                    <InputField
                       value={phone}
                       onChangeText={setPhone}
                       keyboardType="phone-pad"
                       autoComplete="tel"
                       placeholder="+880 1XXX-XXXXXX"
                       placeholderTextColor="#666675"
-                      className="flex-1 text-white font-mono text-xs"
+                      className="font-mono text-xs"
                     />
-                  </View>
-                </View>
+                  </Input>
+                </Box>
 
                 {/* PIN Code */}
-                <View className="gap-1.5">
-                  <Text className="text-[11px] font-mono uppercase tracking-wider text-text-muted">
+                <Box className="gap-1.5">
+                  <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                     PIN Code
                   </Text>
-                  <View className="flex-row items-center bg-background border border-border-subtle rounded-xl px-3.5 h-11 gap-2.5">
-                    <Lock size={16} color="#8A8A9A" />
-                    <TextInput
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                    </InputSlot>
+                    <InputField
                       value={pinCode}
                       onChangeText={setPinCode}
                       secureTextEntry={!showPin}
@@ -259,58 +279,61 @@ export default function LoginScreen() {
                       maxLength={6}
                       placeholder="••••"
                       placeholderTextColor="#666675"
-                      className="flex-1 text-white font-mono text-xs font-bold"
+                      className="font-mono text-xs font-bold"
                     />
-                    <TouchableOpacity onPress={() => setShowPin(!showPin)}>
-                      {showPin ? (
-                        <EyeOff size={16} color="#8A8A9A" />
-                      ) : (
-                        <Eye size={16} color="#8A8A9A" />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                    <InputSlot onPress={() => setShowPin(!showPin)}>
+                      <InputIcon
+                        as={showPin ? EyeOff : Eye}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                  </Input>
+                </Box>
               </>
             )}
 
             {/* Submit */}
-            <TouchableOpacity
+            <Button
+              variant="default"
+              size="lg"
               onPress={handleLogin}
-              disabled={loginMutation.isPending}
-              activeOpacity={0.8}
-              className="w-full h-11 rounded-2xl bg-lime-accent flex-row items-center justify-center gap-2"
-              style={{ opacity: loginMutation.isPending ? 0.6 : 1 }}
+              isDisabled={loginMutation.isPending}
+              className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >
-              <Text className="font-extrabold text-sm text-black uppercase tracking-wider">
+              <ButtonText className="font-extrabold text-sm uppercase tracking-wider text-primary-foreground">
                 {loginMutation.isPending ? "Signing in..." : "Sign In"}
-              </Text>
-              {!loginMutation.isPending && <ArrowRight size={16} color="#000000" />}
-            </TouchableOpacity>
+              </ButtonText>
+              {!loginMutation.isPending && (
+                <ButtonIcon as={ArrowRight} className="text-primary-foreground w-4 h-4" />
+              )}
+            </Button>
 
             {/* Register link — admin only */}
             {loginMode === "admin" && (
-              <View className="flex-row items-center justify-center gap-1">
-                <Text className="text-xs font-mono text-text-muted">
-                  Don{"'"}t have an account?
+              <Box className="flex-row items-center justify-center gap-1">
+                <Text className="text-xs font-mono text-muted-foreground">
+                  {'Don\u2019t have an account?'}
                 </Text>
-                <TouchableOpacity
+                <Button
+                  variant="link"
+                  size="sm"
                   onPress={() => router.push("/(auth)/register")}
                 >
-                  <Text className="text-xs font-mono text-lime-accent font-bold underline">
+                  <ButtonText className="text-xs font-mono font-bold underline">
                     Create one
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                  </ButtonText>
+                </Button>
+              </Box>
             )}
-          </View>
+          </Box>
 
           {/* Footer */}
-          <View className="items-center gap-1">
-            <Text className="font-mono text-[10px] text-text-muted">
+          <Box className="items-center gap-1">
+            <Text className="font-mono text-[10px] text-muted-foreground">
               ANYTIMEFITNESS • SECURE ACCESS GATE
             </Text>
-          </View>
-        </View>
+          </Box>
+        </Box>
       </ScrollView>
     </SafeAreaView>
   );

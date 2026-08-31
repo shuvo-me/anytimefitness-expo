@@ -10,7 +10,9 @@ import {
   SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Text, TouchableOpacity, View } from "@/tw";
+import { Box } from "@/components/ui/box";
+import { Text } from "@/components/ui/text";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { MOCK_MEMBERS } from "@/types/member";
 import { CATEGORIES, METHODS, TxCategory, TxMethod } from "@/types/transaction";
 import { useRouter } from "expo-router";
@@ -37,19 +39,19 @@ function FormSelect<T extends string>({
         size="md"
         className="bg-background border-border rounded-xl px-3.5 h-11"
       >
-        <View className="flex-1 flex-row items-center justify-between">
+        <Box className="flex-1 flex-row items-center justify-between">
           <Text
             numberOfLines={1}
-            className="text-sm font-mono text-white flex-1 pr-2"
+            className="text-sm font-mono text-foreground flex-1 pr-2"
           >
             {selectedLabel}
           </Text>
           <ChevronDown size={14} color="#8A8A9A" />
-        </View>
+        </Box>
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />
-        <SelectContent className="bg-card border-border-subtle">
+        <SelectContent className="bg-card border-border">
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
@@ -73,15 +75,15 @@ export default function RecordPayment() {
   const [method, setMethod] = useState<TxMethod>("Credit Card");
 
   return (
-    <View className="flex-1 bg-card px-5 pt-6 pb-8">
-      <View className="gap-3">
-        <Text className="font-display font-black text-xl uppercase tracking-tight text-white">
+    <Box className="flex-1 bg-card px-5 pt-6 pb-8">
+      <Box className="gap-3">
+        <Text className="font-display font-black text-xl uppercase tracking-tight text-foreground">
           Record Member Payment
         </Text>
 
-        <View className="gap-5">
-          <View className="gap-2.5">
-            <Text className="text-[11px] font-mono text-text-muted uppercase">
+        <Box className="gap-5">
+          <Box className="gap-2.5">
+            <Text className="text-[11px] font-mono text-muted-foreground uppercase">
               Select Member
             </Text>
             <FormSelect
@@ -93,26 +95,26 @@ export default function RecordPayment() {
               onChange={setMemberId}
               placeholder="Select member"
             />
-          </View>
+          </Box>
 
-          <View>
-            <Text className="text-[11px] font-mono text-text-muted uppercase mb-2">
+          <Box>
+            <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-2">
               Amount
             </Text>
-            <Input>
+            <Input className="w-full bg-background border-border rounded-xl px-3 h-11">
               <InputField
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="Amount"
                 keyboardType="numeric"
-                className="h-11 border border-red-300 rounded-md"
+                className="w-full text-sm font-mono text-foreground"
               />
             </Input>
-          </View>
+          </Box>
 
-          <View className="flex-row gap-4">
-            <View className="flex-1">
-              <Text className="text-[11px] font-mono text-text-muted uppercase mb-2">
+          <Box className="flex-row gap-4">
+            <Box className="flex-1">
+              <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-2">
                 Category
               </Text>
               <FormSelect
@@ -121,9 +123,9 @@ export default function RecordPayment() {
                 onChange={setCategory}
                 placeholder="Category"
               />
-            </View>
-            <View className="flex-1">
-              <Text className="text-[11px] font-mono text-text-muted uppercase mb-2">
+            </Box>
+            <Box className="flex-1">
+              <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-2">
                 Payment Method
               </Text>
               <FormSelect
@@ -132,32 +134,32 @@ export default function RecordPayment() {
                 onChange={setMethod}
                 placeholder="Method"
               />
-            </View>
-          </View>
+            </Box>
+          </Box>
 
-          <View className="flex-row items-center justify-end gap-3 border-t border-[#1E1E26] pt-5 mt-2">
-            <TouchableOpacity
+          <Box className="flex-row items-center justify-end gap-3 border-t border-border pt-5 mt-2">
+            <Button
               onPress={() => router.back()}
-              activeOpacity={0.7}
-              className="px-4 py-2.5 rounded-xl bg-[#1E1E26] items-center justify-center"
+
+              className="px-4 py-2.5 rounded-xl bg-border items-center justify-center"
             >
-              <Text className="text-xs font-mono font-bold text-white">
+              <ButtonText className="text-xs font-mono font-bold text-foreground">
                 Cancel
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              </ButtonText>
+            </Button>
+            <Button
               onPress={() => router.back()}
-              activeOpacity={0.7}
-              className="px-5 py-2.5 rounded-xl bg-[#C8F135] flex-row items-center justify-center gap-2"
+
+              className="px-5 py-2.5 rounded-xl bg-primary flex-row items-center justify-center gap-2"
             >
-              <CheckCircle2 size={15} color="#000000" />
-              <Text className="font-display font-bold text-xs uppercase tracking-wider text-black">
+              <ButtonIcon as={CheckCircle2} className="text-primary-foreground w-4 h-4" />
+              <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                 Confirm & Receipt
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </View>
+              </ButtonText>
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }

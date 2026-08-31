@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Redirect, Tabs } from 'expo-router';
-import { View, ActivityIndicator } from '@/tw';
+import { Box } from '@/components/ui/box';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Home,
   Users,
@@ -13,9 +14,9 @@ export default function AdminLayout() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#C8F135" />
-      </View>
+      <Box className="flex-1 items-center justify-center bg-background">
+        <Spinner size="large" color="#C8F135" />
+      </Box>
     );
   }
 

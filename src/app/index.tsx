@@ -1,5 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
-import { ActivityIndicator, Text, View } from "@/tw";
+import { Box } from "@/components/ui/box";
+import { Text } from "@/components/ui/text";
+import { Spinner } from "@/components/ui/spinner";
 import { Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Dumbbell } from "lucide-react-native";
@@ -9,16 +11,19 @@ export default function Index() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background gap-4">
-        <View className="w-16 h-16 rounded-2xl bg-lime-accent items-center justify-center">
+      <Box className="flex-1 items-center justify-center bg-background gap-4">
+        <Box className="w-16 h-16 rounded-2xl bg-primary items-center justify-center">
           <Dumbbell size={32} color="#000000" strokeWidth={2.5} />
-        </View>
-        <Text className="font-display text-2xl font-extrabold italic tracking-tighter uppercase text-white">
-          ANYTIME<Text className="text-lime-accent">FITNESS</Text>
+        </Box>
+        <Text
+          className="font-display text-2xl font-extrabold italic tracking-tighter uppercase"
+          size="2xl"
+        >
+          ANYTIME<Text className="text-primary">FITNESS</Text>
         </Text>
-        <ActivityIndicator size="small" color="#C8F135" className="mt-4" />
+        <Spinner size="small" color="#C8F135" className="mt-4" />
         <StatusBar style="light" />
-      </View>
+      </Box>
     );
   }
 

@@ -1,4 +1,8 @@
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "@/tw";
+import { Box } from "@/components/ui/box";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -45,178 +49,178 @@ export default function AdminPayments() {
           flexGrow: 1,
         }}
       >
-        <View className="gap-5">
+        <Box className="gap-5">
           {/* Header */}
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1 pr-3">
-              <Text className="font-display font-black text-3xl uppercase tracking-tight text-white leading-none">
+          <Box className="flex-row items-center justify-between">
+            <Box className="flex-1 pr-3">
+              <Text className="font-display font-black text-3xl uppercase tracking-tight text-foreground leading-none">
                 Payments
               </Text>
-              <Text className="text-xs font-mono text-text-muted mt-1">
+              <Text className="text-xs font-mono text-muted-foreground mt-1">
                 Financial command & fee collection
               </Text>
-            </View>
-            <TouchableOpacity
+            </Box>
+            <Button
               onPress={() => router.push("/(admin)/payments/record")}
-              activeOpacity={0.7}
-              className="bg-lime-accent px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
+
+              className="bg-primary px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
             >
-              <Plus size={16} color="#000000" />
-              <Text className="font-display font-bold text-xs uppercase tracking-wider text-black">
+              <ButtonIcon as={Plus} className="text-primary-foreground w-4 h-4" />
+              <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                 Record Payment
-              </Text>
-            </TouchableOpacity>
-          </View>
+              </ButtonText>
+            </Button>
+          </Box>
 
           {/* Monthly Revenue Banner */}
-          <View className="relative overflow-hidden bg-lime-accent p-5 rounded-3xl">
-            <View className="absolute -right-2 -bottom-8 pointer-events-none">
-              <Text className="font-display font-black text-[120px] leading-none text-black/10 opacity-5">
+          <Box className="relative overflow-hidden bg-primary p-5 rounded-3xl">
+            <Box className="absolute -right-2 -bottom-8 pointer-events-none">
+              <Text className="font-display font-black text-[120px] leading-none text-primary-foreground/10">
                 $
               </Text>
-            </View>
-            <Text className="text-[11px] font-mono font-black uppercase tracking-widest text-black/80">
+            </Box>
+            <Text className="text-[11px] font-mono font-black uppercase tracking-widest text-primary-foreground/80">
               Monthly Revenue
             </Text>
-            <Text className="font-display font-black text-4xl tracking-tight text-black mt-1 leading-none">
+            <Text className="font-display font-black text-4xl tracking-tight text-primary-foreground mt-1 leading-none">
               ${MONTHLY_REVENUE.toLocaleString()}.00
             </Text>
-            <View className="flex-row items-center justify-between mt-5 pt-3 border-t border-black/15">
-              <View className="bg-black/10 px-2.5 py-1 rounded-full">
-                <Text className="text-xs font-mono font-bold text-black/90">
+            <Box className="flex-row items-center justify-between mt-5 pt-3 border-t border-primary-foreground/15">
+              <Box className="bg-primary-foreground/10 px-2.5 py-1 rounded-full">
+                <Text className="text-xs font-mono font-bold text-primary-foreground/90">
                   +12% vs last month
                 </Text>
-              </View>
-              <Text className="text-[11px] font-mono font-bold uppercase text-black/70">
+              </Box>
+              <Text className="text-[11px] font-mono font-bold uppercase text-primary-foreground/70">
                 Auto-Deposit Active
               </Text>
-            </View>
-          </View>
+            </Box>
+          </Box>
 
           {/* Outstanding Dues */}
           {pendingMembers.length > 0 && (
-            <View className="bg-card border border-border-subtle p-4 rounded-2xl gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-mono text-alert-red font-bold uppercase tracking-wider flex-row items-center gap-1.5">
+            <Box className="bg-card border border-border p-4 rounded-2xl gap-3">
+              <Box className="flex-row items-center justify-between">
+                <Text className="text-xs font-mono text-destructive font-bold uppercase tracking-wider flex-row items-center gap-1.5">
                   <AlertCircle size={14} color="#FF4B1F" /> Outstanding Dues (
                   {pendingMembers.length})
                 </Text>
-                <Text className="text-xs font-mono text-text-muted">
+                <Text className="text-xs font-mono text-muted-foreground">
                   Total Due: ${totalDue}
                 </Text>
-              </View>
-              <View className="gap-2">
+              </Box>
+              <Box className="gap-2">
                 {pendingMembers.map((m) => (
-                  <View
+                  <Box
                     key={m.id}
-                    className="bg-background border border-border-subtle p-3 rounded-xl flex-row items-center justify-between"
+                    className="bg-background border border-border p-3 rounded-xl flex-row items-center justify-between"
                   >
-                    <View className="flex-row items-center gap-2.5 flex-1">
-                      <View className="w-8 h-8 rounded-lg bg-alert-red/15 border border-alert-red/30 items-center justify-center">
-                        <Text className="font-mono font-bold text-xs text-alert-red">
+                    <Box className="flex-row items-center gap-2.5 flex-1">
+                      <Box className="w-8 h-8 rounded-lg bg-destructive/15 border border-destructive/30 items-center justify-center">
+                        <Text className="font-mono font-bold text-xs text-destructive">
                           {m.initials}
                         </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-xs font-bold text-white leading-none">
+                      </Box>
+                      <Box className="flex-1">
+                        <Text className="text-xs font-bold text-foreground leading-none">
                           {m.name}
                         </Text>
-                        <Text className="text-[10px] font-mono text-text-muted mt-0.5">
+                        <Text className="text-[10px] font-mono text-muted-foreground mt-0.5">
                           {m.tier} • Due:{" "}
-                          <Text className="text-alert-red font-bold">
+                          <Text className="text-destructive font-bold">
                             ${m.duesAmount}
                           </Text>
                         </Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity
+                      </Box>
+                    </Box>
+                    <Button
                       onPress={() => router.push("/(admin)/payments/record")}
-                      activeOpacity={0.7}
-                      className="bg-lime-accent px-3 py-1.5 rounded-lg"
+
+                      className="bg-primary px-3 py-1.5 rounded-lg"
                     >
-                      <Text className="font-display font-bold text-[11px] uppercase tracking-wider text-black">
+                      <ButtonText className="font-display font-bold text-[11px] uppercase tracking-wider text-primary-foreground">
                         Collect Fee
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                      </ButtonText>
+                    </Button>
+                  </Box>
                 ))}
-              </View>
-            </View>
+              </Box>
+            </Box>
           )}
 
           {/* Recent Transactions */}
-          <View className="gap-3">
-            <View className="flex-row items-center justify-between gap-3">
-              <Text className="text-xs font-mono text-text-muted uppercase tracking-widest font-bold">
+          <Box className="gap-3">
+            <Box className="flex-row items-center justify-between gap-3">
+              <Text className="text-xs font-mono text-muted-foreground uppercase tracking-widest font-bold">
                 Recent Transactions
               </Text>
-              <View className="relative flex-1 max-w-[52%]">
-                <View className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-                  <Search size={14} color="#8A8A9A" />
-                </View>
-                <TextInput
+              <Input className="flex-1 max-w-[52%] bg-card border-border rounded-xl pr-3 py-1.5">
+                <InputSlot>
+                  <InputIcon as={Search} className="text-muted-foreground w-3.5 h-3.5" />
+                </InputSlot>
+                <InputField
                   value={searchTerm}
                   onChangeText={setSearchTerm}
                   placeholder="Search payments..."
                   placeholderTextColor="#555566"
-                  className="w-full bg-card border border-border-subtle rounded-xl pl-8 pr-3 py-1.5 text-xs text-white font-mono"
+                  className="w-full text-xs text-foreground font-mono"
                 />
-              </View>
-            </View>
+              </Input>
+            </Box>
 
-            <View className="gap-2">
+            <Box className="gap-2">
               {filteredTransactions.length === 0 ? (
-                <View className="p-8 items-center bg-card border border-border-subtle rounded-2xl">
-                  <Text className="text-sm text-text-muted font-mono text-center">
+                <Box className="p-8 items-center bg-card border border-border rounded-2xl">
+                  <Text className="text-sm text-muted-foreground font-mono text-center">
                     No transactions found
                   </Text>
-                </View>
+                </Box>
               ) : (
                 filteredTransactions.map((tx) => {
                   const isNegative = tx.amount < 0;
                   return (
-                    <TouchableOpacity
+                    <Button
                       key={tx.id}
                       onPress={() =>
                         router.push(`/(admin)/payments/invoice/${tx.id}`)
                       }
-                      activeOpacity={0.8}
-                      className="bg-card border border-border-subtle p-3.5 rounded-2xl flex-row items-center justify-between"
+
+                      className="bg-card border border-border p-3.5 rounded-2xl flex-row items-center justify-between"
                     >
-                      <View className="flex-row items-center gap-3 flex-1">
-                        <View
+                      <Box className="flex-row items-center gap-3 flex-1">
+                        <Box
                           className={`w-9 h-9 rounded-full items-center justify-center border ${
                             isNegative
-                              ? "bg-alert-red/15 border-alert-red/30"
-                              : "bg-[#1B2412] border-lime-accent/30"
+                              ? "bg-destructive/15 border-destructive/30"
+                              : "bg-primary/15 border-primary/30"
                           }`}
                         >
                           <Text
                             className={`font-display font-black text-xs ${
                               isNegative
-                                ? "text-alert-red"
-                                : "text-lime-accent"
+                                ? "text-destructive"
+                                : "text-primary"
                             }`}
                           >
                             {tx.initials.slice(0, 1)}
                           </Text>
-                        </View>
-                        <View className="flex-1">
-                          <Text className="font-bold text-white text-sm leading-tight">
+                        </Box>
+                        <Box className="flex-1">
+                          <Text className="font-bold text-foreground text-sm leading-tight">
                             {tx.memberName}
                           </Text>
-                          <Text className="text-[11px] font-mono text-text-muted mt-0.5">
+                          <Text className="text-[11px] font-mono text-muted-foreground mt-0.5">
                             {tx.tier}{" "}
-                            <Text className="text-[#555566]">•</Text> {tx.date}
+                            <Text className="text-muted-foreground">•</Text> {tx.date}
                           </Text>
-                        </View>
-                      </View>
-                      <View className="flex-row items-center gap-2 ml-2">
+                        </Box>
+                      </Box>
+                      <Box className="flex-row items-center gap-2 ml-2">
                         <Text
                           className={`font-display font-black text-base tracking-tight ${
                             isNegative
-                              ? "text-alert-red"
-                              : "text-lime-accent"
+                              ? "text-destructive"
+                              : "text-primary"
                           }`}
                         >
                           {isNegative
@@ -224,14 +228,14 @@ export default function AdminPayments() {
                             : `+$${tx.amount}`}
                         </Text>
                         <Receipt size={14} color="#555566" />
-                      </View>
-                    </TouchableOpacity>
+                      </Box>
+                    </Button>
                   );
                 })
               )}
-            </View>
-          </View>
-        </View>
+            </Box>
+          </Box>
+        </Box>
       </ScrollView>
     </>
   );

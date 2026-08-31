@@ -1,4 +1,8 @@
-import { View, Text, ScrollView, TextInput, TouchableOpacity } from '@/tw';
+import { Box } from '@/components/ui/box';
+import { ScrollView } from '@/components/ui/scroll-view';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Search, UserPlus, ChevronRight } from 'lucide-react-native';
@@ -42,83 +46,83 @@ export default function MembersList() {
           flexGrow: 1,
         }}
       >
-        <View className="gap-5">
+        <Box className="gap-5">
           {/* Header */}
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1 pr-3">
-              <Text className="font-display font-black text-3xl uppercase tracking-tight text-white leading-none">
+          <Box className="flex-row items-center justify-between">
+            <Box className="flex-1 pr-3">
+              <Text className="font-display font-black text-3xl uppercase tracking-tight text-foreground leading-none">
                 Members
               </Text>
-              <Text className="text-xs font-mono text-text-muted mt-1">
+              <Text className="text-xs font-mono text-muted-foreground mt-1">
                 Total Enrolled:{' '}
-                <Text className="text-lime-accent font-bold">
+                <Text className="text-primary font-bold">
                   {MOCK_MEMBERS.length} Athletes
                 </Text>
               </Text>
-            </View>
-            <TouchableOpacity
+            </Box>
+            <Button
               onPress={() => router.push('/(admin)/members/onboard')}
-              activeOpacity={0.7}
-              className="bg-lime-accent px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
+
+              className="bg-primary px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
             >
-              <UserPlus size={16} color="#000000" />
-              <Text className="font-display font-bold text-xs uppercase tracking-wider text-black">
+              <ButtonIcon as={UserPlus} />
+              <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                 + Add Member
-              </Text>
-            </TouchableOpacity>
-          </View>
+              </ButtonText>
+            </Button>
+          </Box>
 
           {/* Search */}
-          <View className="relative">
-            <View className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
-              <Search size={16} color="#8A8A9A" />
-            </View>
-            <TextInput
+          <Input className="w-full bg-card border-border-subtle rounded-2xl pr-4 py-3">
+            <InputSlot>
+              <InputIcon as={Search} className="text-muted-foreground w-4 h-4" />
+            </InputSlot>
+            <InputField
               value={searchTerm}
               onChangeText={setSearchTerm}
               placeholder="Search members..."
               placeholderTextColor="#555566"
-              className="w-full bg-card border border-border-subtle rounded-2xl pl-10 pr-4 py-3 text-sm text-white font-mono"
+              className="text-sm text-foreground font-mono"
             />
-          </View>
+          </Input>
 
           {/* Filter Tabs */}
-          <View className="flex-row items-center gap-2">
+          <Box className="flex-row items-center gap-2">
             {STATUS_FILTERS.map((filter) => {
               const isActive = statusFilter === filter;
               return (
-                <TouchableOpacity
+                <Button
                   key={filter}
                   onPress={() => setStatusFilter(filter)}
-                  activeOpacity={0.7}
+
                   className={`px-4 py-1.5 rounded-full ${
                     isActive
-                      ? 'bg-lime-accent'
+                      ? 'bg-primary'
                       : 'bg-card border border-border-subtle'
                   }`}
                 >
-                  <Text
+                  <ButtonText
                     className={`text-xs font-bold font-sans uppercase tracking-wider ${
-                      isActive ? 'text-black' : 'text-text-muted'
+                      isActive ? 'text-primary-foreground' : 'text-muted-foreground'
                     }`}
                   >
                     {filter}
-                  </Text>
-                </TouchableOpacity>
+                  </ButtonText>
+                </Button>
               );
             })}
-          </View>
+          </Box>
 
           {/* Members List */}
-          <View className="gap-2.5">
+          <Box className="gap-2.5">
             {filteredMembers.length === 0 ? (
-              <View className="p-8 items-center bg-card border border-border-subtle rounded-2xl">
-                <Text className="text-sm text-text-muted font-mono text-center">
+              <Box className="p-8 items-center bg-card border border-border-subtle rounded-2xl">
+                <Text className="text-sm text-muted-foreground font-mono text-center">
                   {searchTerm.trim()
                     ? `No members found matching "${searchTerm}"`
                     : 'No members in this status'}
                 </Text>
-              </View>
+              </Box>
             ) : (
               filteredMembers.map((member) => {
                 const isExpired = member.status === 'expired';
@@ -134,8 +138,8 @@ export default function MembersList() {
                 );
               })
             )}
-          </View>
-        </View>
+          </Box>
+        </Box>
       </ScrollView>
       <StatusBar style="light" />
     </>
@@ -154,54 +158,54 @@ function Row({
   onPress: () => void;
 }) {
   const avatarBg = isExpired
-    ? 'bg-[#2A1515] border-alert-red/30'
+    ? 'bg-destructive/15 border-destructive/30'
     : isPending
-    ? 'bg-[#282210] border-[#E5B537]/30'
-    : 'bg-[#1B2412] border-lime-accent/30';
+    ? 'bg-warning/15 border-warning/30'
+    : 'bg-primary/15 border-primary/30';
   const avatarText = isExpired
-    ? 'text-alert-red'
+    ? 'text-destructive'
     : isPending
-    ? 'text-[#E5B537]'
-    : 'text-lime-accent';
+    ? 'text-warning'
+    : 'text-primary';
   const statusText = isExpired
-    ? 'text-alert-red'
+    ? 'text-destructive'
     : isPending
-    ? 'text-[#E5B537]'
-    : 'text-lime-accent';
+    ? 'text-warning'
+    : 'text-primary';
 
   return (
-    <TouchableOpacity
+    <Button
       onPress={onPress}
-      activeOpacity={0.8}
+
       className="bg-card border border-border-subtle p-3.5 rounded-2xl flex-row items-center justify-between"
     >
-      <View className="flex-row items-center gap-3.5 flex-1">
-        <View
+      <Box className="flex-row items-center gap-3.5 flex-1">
+        <Box
           className={`w-11 h-11 rounded-full items-center justify-center border ${avatarBg}`}
         >
           <Text className={`font-display font-black text-sm tracking-tight ${avatarText}`}>
             {member.initials}
           </Text>
-        </View>
-        <View className="flex-1">
-          <Text className="font-bold text-white text-sm leading-tight">
+        </Box>
+        <Box className="flex-1">
+          <Text className="font-bold text-foreground text-sm leading-tight">
             {member.name}
           </Text>
-          <Text className="text-xs font-mono text-text-muted mt-0.5">
-            {member.tier} <Text className="text-[#555566]">•</Text> {member.id}
+          <Text className="text-xs font-mono text-muted-foreground mt-0.5">
+            {member.tier} <Text className="text-muted-foreground">•</Text> {member.id}
           </Text>
-        </View>
-      </View>
+        </Box>
+      </Box>
 
-      <View className="items-end ml-2">
+      <Box className="items-end ml-2">
         <Text className={`text-xs font-mono font-bold capitalize ${statusText}`}>
           {member.status}
         </Text>
-        <Text className="text-[11px] font-mono text-text-muted">
+        <Text className="text-[11px] font-mono text-muted-foreground">
           {isExpired ? '0d' : `${member.daysLeft}d left`}
         </Text>
-      </View>
+      </Box>
       <ChevronRight size={16} color="#555566" />
-    </TouchableOpacity>
+    </Button>
   );
 }

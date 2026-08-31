@@ -10,6 +10,7 @@
   --color-lime-accent: var(--primary);
   --color-blue-accent: #5b8def;
   --color-alert-red: var(--destructive);
+  --color-warning: #E5B537;
   --color-text-muted: var(--muted-foreground);
   --color-black: #000000;
   --color-white: #ffffff;

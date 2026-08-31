@@ -1,15 +1,16 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Redirect, Stack } from 'expo-router';
-import { View, ActivityIndicator } from '@/tw';
+import { Box } from '@/components/ui/box';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function MemberLayout() {
   const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#C8F135" />
-      </View>
+      <Box className="flex-1 items-center justify-center bg-background">
+        <Spinner size="large" color="#C8F135" />
+      </Box>
     );
   }
 

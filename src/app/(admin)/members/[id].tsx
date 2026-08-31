@@ -1,4 +1,8 @@
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "@/tw";
+import { Box } from "@/components/ui/box";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Input, InputField } from "@/components/ui/input";
 import type { Member, MembershipTier, MemberStatus } from "@/types/member";
 import { getMemberById, TIER_OPTIONS, TRAINERS } from "@/types/member";
 import type {
@@ -48,32 +52,32 @@ export default function MemberDetail() {
 
   if (!member) {
     return (
-      <View className="flex-1 bg-background items-center justify-center px-6">
-        <Text className="text-sm font-mono text-text-muted text-center">
+      <Box className="flex-1 bg-background items-center justify-center px-6">
+        <Text className="text-sm font-mono text-muted-foreground text-center">
           Member not found.
         </Text>
         <StatusBar style="light" />
-      </View>
+      </Box>
     );
   }
 
   const isExpired = member.status === "expired";
   const isPending = member.status === "pending";
   const statusColor = isExpired
-    ? "text-alert-red"
+    ? "text-destructive"
     : isPending
-      ? "text-[#E5B537]"
-      : "text-lime-accent";
+      ? "text-warning"
+      : "text-primary";
   const avatarBg = isExpired
-    ? "bg-[#2A1515] border-alert-red/30"
+    ? "bg-destructive/15 border-destructive/30"
     : isPending
-      ? "bg-[#282210] border-[#E5B537]/30"
-      : "bg-lime-accent";
+      ? "bg-warning/15 border-warning/30"
+      : "bg-primary";
   const avatarText = isExpired
-    ? "text-alert-red"
+    ? "text-destructive"
     : isPending
-      ? "text-[#E5B537]"
-      : "text-black";
+      ? "text-warning"
+      : "text-primary-foreground";
 
   return (
     <>
@@ -87,95 +91,95 @@ export default function MemberDetail() {
           flexGrow: 1,
         }}
       >
-        <View className="gap-5">
+        <Box className="gap-5">
           {/* Header */}
-            <View className="flex-row items-center justify-between">
-              <TouchableOpacity
-                onPress={() => router.back()}
-                activeOpacity={0.7}
-                className="w-10 h-10 rounded-xl bg-card border border-border-subtle items-center justify-center"
+          <Box className="flex-row items-center justify-between">
+            <Button
+              onPress={() => router.back()}
+
+              className="w-10 h-10 rounded-xl bg-card border border-border items-center justify-center"
+            >
+              <ButtonIcon as={ArrowLeft} />
+            </Button>
+            <Text className="font-display font-black text-lg uppercase tracking-tight text-foreground">
+              Member Profile
+            </Text>
+            <Box className="w-10 h-10" />
+          </Box>
+
+          {/* Title block */}
+          <Box className="bg-card border border-border p-4 rounded-2xl">
+            <Box className="flex-row items-center gap-3">
+              <Box
+                className={`w-12 h-12 rounded-full items-center justify-center border ${avatarBg}`}
               >
-                <ArrowLeft size={18} color="#FFFFFF" />
-              </TouchableOpacity>
-              <Text className="font-display font-black text-lg uppercase tracking-tight text-white">
-                Member Profile
-              </Text>
-              <View className="w-10 h-10" />
-            </View>
-
-            {/* Title block */}
-            <View className="bg-card border border-border-subtle p-4 rounded-2xl">
-              <View className="flex-row items-center gap-3">
-                <View
-                  className={`w-12 h-12 rounded-full items-center justify-center border ${avatarBg}`}
+                <Text
+                  className={`font-display font-black text-base tracking-tight ${avatarText}`}
                 >
-                  <Text
-                    className={`font-display font-black text-base tracking-tight ${avatarText}`}
-                  >
-                    {member.initials}
+                  {member.initials}
+                </Text>
+              </Box>
+              <Box className="flex-1">
+                <Box className="flex-row items-center gap-2">
+                  <Text className="font-display font-black text-xl uppercase tracking-tight text-foreground leading-none">
+                    {member.name}
                   </Text>
-                </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center gap-2">
-                    <Text className="font-display font-black text-xl uppercase tracking-tight text-white leading-none">
-                      {member.name}
-                    </Text>
-                    <View
-                      className={`px-2 py-0.5 rounded-full border ${
-                        isExpired
-                          ? "bg-alert-red/15 border-alert-red/30"
-                          : isPending
-                            ? "bg-[#E5B537]/15 border-[#E5B537]/30"
-                            : "bg-lime-accent/15 border-lime-accent/30"
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-mono font-bold ${statusColor}`}
-                      >
-                        {member.status.toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text className="text-xs font-mono text-text-muted mt-1">
-                    {member.id} • {member.tier} Plan • {member.assignedTrainer}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Tab bar */}
-            <View className="flex-row items-center border-b border-border-subtle">
-              {(
-                [
-                  { key: "profile", label: "Overview" },
-                  { key: "routine", label: "Routine" },
-                  { key: "edit", label: "Edit" },
-                ] as { key: DetailTab; label: string }[]
-              ).map((tab) => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <TouchableOpacity
-                    key={tab.key}
-                    onPress={() => setActiveTab(tab.key)}
-                    activeOpacity={0.7}
-                    className={`flex-1 pb-2.5 ${isActive ? "border-b-2 border-lime-accent" : ""}`}
+                  <Box
+                    className={`px-2 py-0.5 rounded-full border ${
+                      isExpired
+                        ? "bg-destructive/15 border-destructive/30"
+                        : isPending
+                          ? "bg-warning/15 border-warning/30"
+                          : "bg-primary/15 border-primary/30"
+                    }`}
                   >
                     <Text
-                      className={`text-xs font-mono font-bold uppercase tracking-wider text-center ${
-                        isActive ? "text-lime-accent" : "text-text-muted"
-                      }`}
+                      className={`text-[10px] font-mono font-bold ${statusColor}`}
                     >
-                      {tab.label}
+                      {member.status.toUpperCase()}
                     </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+                  </Box>
+                </Box>
+                <Text className="text-xs font-mono text-muted-foreground mt-1">
+                  {member.id} • {member.tier} Plan • {member.assignedTrainer}
+                </Text>
+              </Box>
+            </Box>
+          </Box>
 
-            {activeTab === "profile" && <OverviewTab member={member} />}
-            {activeTab === "routine" && <RoutineTab member={member} />}
-            {activeTab === "edit" && <EditTab member={member} />}
-          </View>
+          {/* Tab bar */}
+          <Box className="flex-row items-center border-b border-border">
+            {(
+              [
+                { key: "profile", label: "Overview" },
+                { key: "routine", label: "Routine" },
+                { key: "edit", label: "Edit" },
+              ] as { key: DetailTab; label: string }[]
+            ).map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <Button
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key)}
+
+                  className={`flex-1 pb-2.5 ${isActive ? "border-b-2 border-primary" : ""}`}
+                >
+                  <ButtonText
+                    className={`text-xs font-mono font-bold uppercase tracking-wider text-center ${
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </ButtonText>
+                </Button>
+              );
+            })}
+          </Box>
+
+          {activeTab === "profile" && <OverviewTab member={member} />}
+          {activeTab === "routine" && <RoutineTab member={member} />}
+          {activeTab === "edit" && <EditTab member={member} />}
+        </Box>
       </ScrollView>
       <StatusBar style="light" />
     </>
@@ -193,46 +197,46 @@ function OverviewTab({ member }: { member: Member }) {
   };
 
   return (
-    <View className="gap-4">
+    <Box className="gap-4">
       {feedbackMsg && (
-        <View className="p-3 bg-lime-accent/15 border border-lime-accent/40 rounded-xl flex-row items-center gap-2">
+        <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
           <CheckCircle2 size={16} color="#C8F135" />
-          <Text className="text-xs font-mono text-white flex-1">
+          <Text className="text-xs font-mono text-foreground flex-1">
             {feedbackMsg}
           </Text>
-        </View>
+        </Box>
       )}
 
       {/* 3 Metric Cards */}
-      <View className="flex-row gap-3">
-        <View className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-text-muted uppercase">
+      <Box className="flex-row gap-3">
+        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Total Sessions
           </Text>
-          <Text className="font-display font-black text-2xl text-white mt-1">
+          <Text className="font-display font-black text-2xl text-foreground mt-1">
             {member.totalSessions}
           </Text>
-        </View>
-        <View className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-text-muted uppercase">
+        </Box>
+        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Days Left
           </Text>
-          <Text className="font-display font-black text-2xl text-lime-accent mt-1">
+          <Text className="font-display font-black text-2xl text-primary mt-1">
             {member.daysLeft}d
           </Text>
-        </View>
-        <View className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-text-muted uppercase">
+        </Box>
+        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Rating
           </Text>
-          <Text className="font-display font-black text-2xl text-white mt-1">
+          <Text className="font-display font-black text-2xl text-foreground mt-1">
             {member.rating} ★
           </Text>
-        </View>
-      </View>
+        </Box>
+      </Box>
 
       {/* Goal & Details */}
-      <View className="bg-background border border-border-subtle p-4 rounded-2xl gap-2">
+      <Box className="bg-background border border-border p-4 rounded-2xl gap-2">
         <DetailRow label="Primary Goal" value={member.goal} bold />
         <DetailRow label="Email" value={member.email} />
         <DetailRow label="Phone" value={member.phone} />
@@ -246,67 +250,67 @@ function OverviewTab({ member }: { member: Member }) {
           value={`${member.emergencyContact.name} (${member.emergencyContact.relation}) - ${member.emergencyContact.phone}`}
           last
         />
-      </View>
+      </Box>
 
       {/* Financial & Dues */}
-      <View className="bg-background border border-border-subtle p-4 rounded-2xl flex-row items-center justify-between">
-        <View>
-          <Text className="text-[10px] font-mono text-text-muted uppercase">
+      <Box className="bg-background border border-border p-4 rounded-2xl flex-row items-center justify-between">
+        <Box>
+          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Outstanding Balance
           </Text>
           <Text
             className={`font-display font-black text-2xl mt-0.5 ${
-              member.duesAmount > 0 ? "text-alert-red" : "text-lime-accent"
+              member.duesAmount > 0 ? "text-destructive" : "text-primary"
             }`}
           >
             ${member.duesAmount}.00
           </Text>
-        </View>
+        </Box>
         {member.duesAmount > 0 ? (
-          <TouchableOpacity
+          <Button
             onPress={() =>
               flash(`Collected $${member.duesAmount} fee successfully!`)
             }
-            activeOpacity={0.7}
-            className="bg-lime-accent px-4 py-2 rounded-xl"
+
+            className="bg-primary px-4 py-2 rounded-xl"
           >
-            <Text className="font-display font-bold text-xs uppercase text-black">
+            <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
               Collect Payment (${member.duesAmount})
-            </Text>
-          </TouchableOpacity>
+            </ButtonText>
+          </Button>
         ) : (
-          <View className="bg-lime-accent/15 px-3 py-1 rounded-lg border border-lime-accent/30">
-            <Text className="text-xs font-mono text-lime-accent">
+          <Box className="bg-primary/15 px-3 py-1 rounded-lg border border-primary/30">
+            <Text className="text-xs font-mono text-primary">
               All Fees Settled
             </Text>
-          </View>
+          </Box>
         )}
-      </View>
+      </Box>
 
       {/* Quick Actions */}
-      <View className="flex-row gap-3 pt-1">
-        <TouchableOpacity
+      <Box className="flex-row gap-3 pt-1">
+        <Button
           onPress={() => flash(`${member.name} checked in to gym`)}
-          activeOpacity={0.7}
-          className="flex-1 bg-border-subtle py-2.5 rounded-xl flex-row items-center justify-center gap-2"
+
+          className="flex-1 bg-border py-2.5 rounded-xl flex-row items-center justify-center gap-2"
         >
-          <CheckCircle2 size={16} color="#C8F135" />
-          <Text className="text-xs font-mono font-bold text-white">
+          <ButtonIcon as={CheckCircle2} className="text-primary w-4 h-4" />
+          <ButtonText className="text-xs font-mono font-bold text-foreground">
             Check In to Gym
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+          </ButtonText>
+        </Button>
+        <Button
           onPress={() => flash("Member deck view (coming soon)")}
-          activeOpacity={0.7}
-          className="flex-1 bg-border-subtle py-2.5 rounded-xl flex-row items-center justify-center gap-2"
+
+          className="flex-1 bg-border py-2.5 rounded-xl flex-row items-center justify-center gap-2"
         >
-          <Sparkles size={16} color="#C8F135" />
-          <Text className="text-xs font-mono font-bold text-lime-accent">
+          <ButtonIcon as={Sparkles} className="text-primary w-4 h-4" />
+          <ButtonText className="text-xs font-mono font-bold text-primary">
             View Deck
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          </ButtonText>
+        </Button>
+      </Box>
+    </Box>
   );
 }
 
@@ -322,16 +326,16 @@ function DetailRow({
   last?: boolean;
 }) {
   return (
-    <View
-      className={`flex-row justify-between py-1 ${last ? "" : "border-b border-border-subtle"}`}
+    <Box
+      className={`flex-row justify-between py-1 ${last ? "" : "border-b border-border"}`}
     >
-      <Text className="text-text-muted font-mono text-xs">{label}:</Text>
+      <Text className="text-muted-foreground font-mono text-xs">{label}:</Text>
       <Text
-        className={`text-white text-xs text-right flex-1 ml-3 ${bold ? "font-bold" : ""}`}
+        className={`text-foreground text-xs text-right flex-1 ml-3 ${bold ? "font-bold" : ""}`}
       >
         {value}
       </Text>
-    </View>
+    </Box>
   );
 }
 
@@ -432,10 +436,10 @@ function RoutineTab({ member }: { member: Member }) {
   };
 
   return (
-    <View className="gap-4">
+    <Box className="gap-4">
       {/* Sub tabs + Deploy */}
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row gap-2">
+      <Box className="flex-row items-center justify-between">
+        <Box className="flex-row gap-2">
           <SubTabChip
             label="Workout Split"
             icon={
@@ -458,26 +462,26 @@ function RoutineTab({ member }: { member: Member }) {
             active={activeSubTab === "diet"}
             onPress={() => setActiveSubTab("diet")}
           />
-        </View>
-        <TouchableOpacity
+        </Box>
+        <Button
           onPress={handleDeploy}
-          activeOpacity={0.7}
-          className="bg-lime-accent px-3 py-1.5 rounded-xl flex-row items-center gap-1.5"
+
+          className="bg-primary px-3 py-1.5 rounded-xl flex-row items-center gap-1.5"
         >
-          <Save size={14} color="#000000" />
-          <Text className="font-display font-bold text-xs uppercase text-black">
+          <ButtonIcon as={Save} className="text-primary-foreground w-3.5 h-3.5" />
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
             Deploy
-          </Text>
-        </TouchableOpacity>
-      </View>
+          </ButtonText>
+        </Button>
+      </Box>
 
       {saveStatus && (
-        <View className="p-3 bg-lime-accent/15 border border-lime-accent/40 rounded-xl flex-row items-center gap-2">
+        <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
           <CheckCircle2 size={16} color="#C8F135" />
-          <Text className="text-xs font-mono text-white flex-1">
+          <Text className="text-xs font-mono text-foreground flex-1">
             {saveStatus}
           </Text>
-        </View>
+        </Box>
       )}
 
       {activeSubTab === "workout" ? (
@@ -497,7 +501,7 @@ function RoutineTab({ member }: { member: Member }) {
           onRemove={handleRemoveMeal}
         />
       )}
-    </View>
+    </Box>
   );
 }
 
@@ -513,22 +517,22 @@ function SubTabChip({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity
+    <Button
       onPress={onPress}
-      activeOpacity={0.7}
+
       className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl ${
-        active ? "bg-lime-accent" : "bg-background border border-border-subtle"
+        active ? "bg-primary" : "bg-background border border-border"
       }`}
     >
       {icon}
-      <Text
+      <ButtonText
         className={`text-[11px] font-mono font-bold uppercase ${
-          active ? "text-black" : "text-text-muted"
+          active ? "text-primary-foreground" : "text-muted-foreground"
         }`}
       >
         {label}
-      </Text>
-    </TouchableOpacity>
+      </ButtonText>
+    </Button>
   );
 }
 
@@ -546,139 +550,157 @@ function WorkoutBuilder({
   onRemove: (i: number) => void;
 }) {
   return (
-    <View className="gap-4">
+    <Box className="gap-4">
       {/* Program detail card */}
-      <View className="bg-background border border-border-subtle p-4 rounded-2xl gap-3">
-        <View className="flex-col gap-3">
-          <View className="flex-1">
+      <Box className="bg-background border border-border p-4 rounded-2xl gap-3">
+        <Box className="flex-col gap-3">
+          <Box className="flex-1">
             <InputLabel>Program Title</InputLabel>
-            <TextInput
-              value={program.programTitle}
-              onChangeText={(v) => onChangeProgram({ programTitle: v })}
-              className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-              placeholderTextColor="#555566"
-            />
-          </View>
-          <View className="flex-1">
+            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+              <InputField
+                value={program.programTitle}
+                onChangeText={(v) => onChangeProgram({ programTitle: v })}
+                placeholderTextColor="#555566"
+                className="w-full text-xs text-foreground font-mono"
+              />
+            </Input>
+          </Box>
+          <Box className="flex-1">
             <InputLabel>Active Day Focus</InputLabel>
-            <TextInput
-              value={program.currentDayTitle}
-              onChangeText={(v) => onChangeProgram({ currentDayTitle: v })}
-              className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2 text-xs text-lime-accent font-bold font-mono"
-              placeholderTextColor="#555566"
-            />
-          </View>
-          <View className="flex-1">
+            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+              <InputField
+                value={program.currentDayTitle}
+                onChangeText={(v) => onChangeProgram({ currentDayTitle: v })}
+                placeholderTextColor="#555566"
+                className="w-full text-xs text-primary font-bold font-mono"
+              />
+            </Input>
+          </Box>
+          <Box className="flex-1">
             <InputLabel>Split Schedule</InputLabel>
-            <TextInput
-              value={program.splitSchedule}
-              onChangeText={(v) => onChangeProgram({ splitSchedule: v })}
-              className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-              placeholderTextColor="#555566"
-            />
-          </View>
-        </View>
-        <View>
+            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+              <InputField
+                value={program.splitSchedule}
+                onChangeText={(v) => onChangeProgram({ splitSchedule: v })}
+                placeholderTextColor="#555566"
+                className="w-full text-xs text-foreground font-mono"
+              />
+            </Input>
+          </Box>
+        </Box>
+        <Box>
           <InputLabel>Coach Execution Notes</InputLabel>
-          <TextInput
-            value={program.notes}
-            onChangeText={(v) => onChangeProgram({ notes: v })}
-            multiline
-            numberOfLines={2}
-            className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono resize-none"
-            placeholderTextColor="#555566"
-          />
-        </View>
-      </View>
+          <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+            <InputField
+              value={program.notes}
+              onChangeText={(v) => onChangeProgram({ notes: v })}
+              multiline
+              numberOfLines={2}
+              placeholderTextColor="#555566"
+              className="w-full text-xs text-foreground font-mono"
+            />
+          </Input>
+        </Box>
+      </Box>
 
       {/* Exercise list */}
-      <View className="gap-2">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+      <Box className="gap-2">
+        <Box className="flex-row items-center justify-between">
+          <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
             Prescribed Exercises ({program.exercises.length})
           </Text>
-          <TouchableOpacity
+          <Button
             onPress={onAdd}
-            activeOpacity={0.7}
+
             className="flex-row items-center gap-1"
           >
-            <Plus size={14} color="#C8F135" />
-            <Text className="text-[11px] font-mono text-lime-accent">
+            <ButtonIcon as={Plus} className="text-primary w-3.5 h-3.5" />
+            <ButtonText className="text-[11px] font-mono text-primary">
               Add Exercise
-            </Text>
-          </TouchableOpacity>
-        </View>
+            </ButtonText>
+          </Button>
+        </Box>
 
         {program.exercises.map((ex, idx) => (
-          <View
+          <Box
             key={ex.id || idx}
-            className="bg-background border border-border-subtle p-3 rounded-xl gap-2"
+            className="bg-background border border-border p-3 rounded-xl gap-2"
           >
-            <View className="flex-row items-center gap-2">
-              <TextInput
-                value={ex.name}
-                onChangeText={(v) => onUpdate(idx, "name", v)}
-                className="flex-1 bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-white font-bold font-mono"
-                placeholderTextColor="#555566"
-              />
-              <TouchableOpacity
+            <Box className="flex-row items-center gap-2">
+              <Input className="flex-1 bg-card border-border rounded-lg px-2 py-1">
+                <InputField
+                  value={ex.name}
+                  onChangeText={(v) => onUpdate(idx, "name", v)}
+                  placeholderTextColor="#555566"
+                  className="w-full text-xs text-foreground font-bold font-mono"
+                />
+              </Input>
+              <Button
                 onPress={() => onRemove(idx)}
-                activeOpacity={0.7}
+
                 className="p-1.5"
               >
-                <Trash2 size={16} color="#FF4B1F" />
-              </TouchableOpacity>
-            </View>
+                <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
+              </Button>
+            </Box>
 
-            <View className="flex-row flex-wrap gap-2">
-              <View className="flex-1 min-w-[110px]">
+            <Box className="flex-row flex-wrap gap-2">
+              <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Muscle</MiniLabel>
-                <TextInput
-                  value={ex.targetMuscle}
-                  onChangeText={(v) => onUpdate(idx, "targetMuscle", v)}
-                  className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-white font-mono"
-                  placeholderTextColor="#555566"
-                />
-              </View>
-              <View className="flex-1 min-w-[110px]">
+                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                  <InputField
+                    value={ex.targetMuscle}
+                    onChangeText={(v) => onUpdate(idx, "targetMuscle", v)}
+                    placeholderTextColor="#555566"
+                    className="w-full text-xs text-foreground font-mono"
+                  />
+                </Input>
+              </Box>
+              <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Sets</MiniLabel>
-                <TextInput
-                  value={String(ex.sets)}
-                  onChangeText={(v) => onUpdate(idx, "sets", v)}
-                  keyboardType="numeric"
-                  className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-white font-mono"
-                  placeholderTextColor="#555566"
-                />
-              </View>
-              <View className="flex-1 min-w-[110px]">
+                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                  <InputField
+                    value={String(ex.sets)}
+                    onChangeText={(v) => onUpdate(idx, "sets", v)}
+                    keyboardType="numeric"
+                    placeholderTextColor="#555566"
+                    className="w-full text-xs text-foreground font-mono"
+                  />
+                </Input>
+              </Box>
+              <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Reps</MiniLabel>
-                <TextInput
-                  value={ex.reps}
-                  onChangeText={(v) => onUpdate(idx, "reps", v)}
-                  className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-white font-mono"
-                  placeholderTextColor="#555566"
-                />
-              </View>
-              <View className="flex-1 min-w-[110px]">
+                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                  <InputField
+                    value={ex.reps}
+                    onChangeText={(v) => onUpdate(idx, "reps", v)}
+                    placeholderTextColor="#555566"
+                    className="w-full text-xs text-foreground font-mono"
+                  />
+                </Input>
+              </Box>
+              <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Weight (kg)</MiniLabel>
-                <TextInput
-                  value={String(ex.targetWeightKg)}
-                  onChangeText={(v) => onUpdate(idx, "targetWeightKg", v)}
-                  keyboardType="numeric"
-                  className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-lime-accent font-bold font-mono"
-                  placeholderTextColor="#555566"
-                />
-              </View>
-            </View>
-          </View>
+                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                  <InputField
+                    value={String(ex.targetWeightKg)}
+                    onChangeText={(v) => onUpdate(idx, "targetWeightKg", v)}
+                    keyboardType="numeric"
+                    placeholderTextColor="#555566"
+                    className="w-full text-xs text-primary font-bold font-mono"
+                  />
+                </Input>
+              </Box>
+            </Box>
+          </Box>
         ))}
         {program.exercises.length === 0 && (
-          <Text className="text-xs font-mono text-text-muted text-center py-4">
+          <Text className="text-xs font-mono text-muted-foreground text-center py-4">
             No exercises yet. Tap &quot;Add Exercise&quot;.
           </Text>
         )}
-      </View>
-    </View>
+      </Box>
+    </Box>
   );
 }
 
@@ -695,31 +717,32 @@ function DietBuilder({
   onUpdate: (i: number, f: keyof MealItem, v: string | number) => void;
   onRemove: (i: number) => void;
 }) {
-  console.log("diet", diet);
   return (
-    <View className="gap-4">
+    <Box className="gap-4">
       {/* Diet plan + macros card */}
-      <View className="bg-background border border-border-subtle p-4 rounded-2xl gap-3">
-        <View>
+      <Box className="bg-background border border-border p-4 rounded-2xl gap-3">
+        <Box>
           <InputLabel>Diet Plan Name</InputLabel>
-          <TextInput
-            value={diet.title}
-            onChangeText={(v) => onChangeDiet({ title: v })}
-            className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-            placeholderTextColor="#555566"
-          />
-        </View>
+          <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+            <InputField
+              value={diet.title}
+              onChangeText={(v) => onChangeDiet({ title: v })}
+              placeholderTextColor="#555566"
+              className="w-full text-xs text-foreground font-mono"
+            />
+          </Input>
+        </Box>
 
-        <View className="flex-row flex-wrap gap-2">
+        <Box className="flex-row flex-wrap gap-2">
           <MacroBox
             label="Calories"
-            color="text-white"
+            color="text-foreground"
             value={String(diet.dailyCalories)}
             onChange={(v) => onChangeDiet({ dailyCalories: Number(v) || 0 })}
           />
           <MacroBox
             label="Protein (g)"
-            color="text-lime-accent"
+            color="text-primary"
             value={String(diet.targetProteinGrams)}
             onChange={(v) =>
               onChangeDiet({ targetProteinGrams: Number(v) || 0 })
@@ -733,105 +756,111 @@ function DietBuilder({
           />
           <MacroBox
             label="Fats (g)"
-            color="text-[#E5B537]"
+            color="text-warning"
             value={String(diet.targetFatsGrams)}
             onChange={(v) => onChangeDiet({ targetFatsGrams: Number(v) || 0 })}
           />
           <MacroBox
             label="Water (L)"
-            color="text-white"
+            color="text-foreground"
             value={String(diet.targetWaterLiters)}
             onChange={(v) =>
               onChangeDiet({ targetWaterLiters: Number(v) || 0 })
             }
           />
-        </View>
-      </View>
+        </Box>
+      </Box>
 
       {/* Meal schedule */}
-      <View className="gap-2">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+      <Box className="gap-2">
+        <Box className="flex-row items-center justify-between">
+          <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
             Daily Meal Schedule ({diet?.meals?.length})
           </Text>
-          <TouchableOpacity
+          <Button
             onPress={onAdd}
-            activeOpacity={0.7}
+
             className="flex-row items-center gap-1"
           >
-            <Plus size={14} color="#C8F135" />
-            <Text className="text-[11px] font-mono text-lime-accent">
+            <ButtonIcon as={Plus} className="text-primary w-3.5 h-3.5" />
+            <ButtonText className="text-[11px] font-mono text-primary">
               Add Meal
-            </Text>
-          </TouchableOpacity>
-        </View>
+            </ButtonText>
+          </Button>
+        </Box>
 
         {diet?.meals?.map((meal, idx) => (
-          <View
+          <Box
             key={meal.id || idx}
-            className="bg-background border border-border-subtle p-3 rounded-xl gap-2"
+            className="bg-background border border-border p-3 rounded-xl gap-2"
           >
-            <View className="flex-row items-center gap-2">
-              <TextInput
-                value={meal.title}
-                onChangeText={(v) => onUpdate(idx, "title", v)}
-                className="flex-1 bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-white font-bold font-mono"
-                placeholderTextColor="#555566"
-              />
-              <TextInput
-                value={meal.time}
-                onChangeText={(v) => onUpdate(idx, "time", v)}
-                className="w-20 bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs text-text-muted font-mono"
-                placeholderTextColor="#555566"
-              />
-              <TouchableOpacity
+            <Box className="flex-row items-center gap-2">
+              <Input className="flex-1 bg-card border-border rounded-lg px-2 py-1">
+                <InputField
+                  value={meal.title}
+                  onChangeText={(v) => onUpdate(idx, "title", v)}
+                  placeholderTextColor="#555566"
+                  className="w-full text-xs text-foreground font-bold font-mono"
+                />
+              </Input>
+              <Input className="w-20 bg-card border-border rounded-lg px-2 py-1">
+                <InputField
+                  value={meal.time}
+                  onChangeText={(v) => onUpdate(idx, "time", v)}
+                  placeholderTextColor="#555566"
+                  className="w-20 text-xs text-muted-foreground font-mono"
+                />
+              </Input>
+              <Button
                 onPress={() => onRemove(idx)}
-                activeOpacity={0.7}
+
                 className="p-1.5"
               >
-                <Trash2 size={16} color="#FF4B1F" />
-              </TouchableOpacity>
-            </View>
+                <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
+              </Button>
+            </Box>
 
-            <TextInput
-              value={meal.description}
-              onChangeText={(v) => onUpdate(idx, "description", v)}
-              className="w-full bg-card border border-border-subtle rounded-lg px-2.5 py-1.5 text-[11px] text-[#D0D0DC] font-mono"
-              placeholderTextColor="#555566"
-            />
+            <Input className="w-full bg-card border-border rounded-lg px-2.5 py-1.5">
+              <InputField
+                value={meal.description}
+                onChangeText={(v) => onUpdate(idx, "description", v)}
+                placeholderTextColor="#555566"
+                className="w-full text-[11px] text-foreground/80 font-mono"
+              />
+            </Input>
 
-            <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
-              <View className="flex-row items-center gap-1">
+            <Box className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
+              <Box className="flex-row items-center gap-1">
                 <Flame size={11} color="#8A8A9A" />
-                <Text className="text-[10px] font-mono text-text-muted">
+                <Text className="text-[10px] font-mono text-muted-foreground">
                   {meal.calories} kcal
                 </Text>
-              </View>
-              <Text className="text-[10px] font-mono text-lime-accent">
+              </Box>
+              <Text className="text-[10px] font-mono text-primary">
                 Protein {meal.proteinGrams}g
               </Text>
               <Text className="text-[10px] font-mono text-blue-accent">
                 Carbs {meal.carbsGrams}g
               </Text>
-              <Text className="text-[10px] font-mono text-[#E5B537]">
+              <Text className="text-[10px] font-mono text-warning">
                 Fats {meal.fatsGrams}g
               </Text>
-            </View>
-          </View>
+            </Box>
+          </Box>
         ))}
         {diet?.meals?.length === 0 && (
-          <Text className="text-xs font-mono text-text-muted text-center py-4">
+          <Text className="text-xs font-mono text-muted-foreground text-center py-4">
             No meals yet. Tap &quot;Add Meal&quot;.
           </Text>
         )}
-      </View>
-    </View>
+      </Box>
+    </Box>
   );
 }
 
 function InputLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Text className="text-text-muted font-mono text-[10px] uppercase mb-1">
+    <Text className="text-muted-foreground font-mono text-[10px] uppercase mb-1">
       {children}
     </Text>
   );
@@ -839,7 +868,7 @@ function InputLabel({ children }: { children: React.ReactNode }) {
 
 function MiniLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Text className="text-[10px] text-text-muted font-mono">{children}</Text>
+    <Text className="text-[10px] text-muted-foreground font-mono">{children}</Text>
   );
 }
 
@@ -855,16 +884,18 @@ function MacroBox({
   onChange: (v: string) => void;
 }) {
   return (
-    <View className="flex-1 min-w-[100px]">
+    <Box className="flex-1 min-w-[100px]">
       <MiniLabel>{label}</MiniLabel>
-      <TextInput
-        value={value}
-        onChangeText={onChange}
-        keyboardType="numeric"
-        className={`w-full bg-card border border-border-subtle rounded-lg px-2 py-1 text-xs font-bold font-mono ${color}`}
-        placeholderTextColor="#555566"
-      />
-    </View>
+      <Input className={`w-full bg-card border-border rounded-lg px-2 py-1 ${color}`}>
+        <InputField
+          value={value}
+          onChangeText={onChange}
+          keyboardType="numeric"
+          placeholderTextColor="#555566"
+          className={`w-full text-xs font-bold font-mono ${color}`}
+        />
+      </Input>
+    </Box>
   );
 }
 
@@ -896,34 +927,36 @@ function EditTab({ member }: { member: Member }) {
   };
 
   return (
-    <View className="gap-3">
+    <Box className="gap-3">
       {feedbackMsg && (
-        <View className="p-3 bg-lime-accent/15 border border-lime-accent/40 rounded-xl flex-row items-center gap-2">
+        <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
           <CheckCircle2 size={16} color="#C8F135" />
-          <Text className="text-xs font-mono text-white flex-1">
+          <Text className="text-xs font-mono text-foreground flex-1">
             {feedbackMsg}
           </Text>
-        </View>
+        </Box>
       )}
 
       <FieldLabel>Member Name</FieldLabel>
-      <TextInput
-        value={editName}
-        onChangeText={setEditName}
-        className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-        placeholderTextColor="#555566"
-      />
+      <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
+        <InputField
+          value={editName}
+          onChangeText={setEditName}
+          placeholderTextColor="#555566"
+          className="w-full text-xs text-foreground font-mono"
+        />
+      </Input>
 
-      <View className="flex-row gap-3 pt-1">
-        <View className="flex-1">
+      <Box className="flex-row gap-3 pt-1">
+        <Box className="flex-1">
           <FieldLabel>Tier</FieldLabel>
           <FormSelect
             value={editTier}
             options={TIER_OPTIONS}
             onChange={(v) => setEditTier(v as MembershipTier)}
           />
-        </View>
-        <View className="flex-1">
+        </Box>
+        <Box className="flex-1">
           <FieldLabel>Status</FieldLabel>
           <FormSelect
             value={editStatus}
@@ -934,101 +967,105 @@ function EditTab({ member }: { member: Member }) {
             ]}
             onChange={(v) => setEditStatus(v as MemberStatus)}
           />
-        </View>
-      </View>
+        </Box>
+      </Box>
 
-      <View className="flex-row gap-3 pt-1">
-        <View className="flex-1">
+      <Box className="flex-row gap-3 pt-1">
+        <Box className="flex-1">
           <FieldLabel>Assigned Trainer</FieldLabel>
           <FormSelect
             value={editTrainer}
             options={TRAINERS.map((t) => ({ label: t, value: t }))}
             onChange={setEditTrainer}
           />
-        </View>
-        <View className="flex-1">
+        </Box>
+        <Box className="flex-1">
           <FieldLabel>Pending Dues ($)</FieldLabel>
-          <TextInput
-            value={editDues}
-            onChangeText={setEditDues}
-            keyboardType="numeric"
-            className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-            placeholderTextColor="#555566"
-          />
-        </View>
-      </View>
+          <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
+            <InputField
+              value={editDues}
+              onChangeText={setEditDues}
+              keyboardType="numeric"
+              placeholderTextColor="#555566"
+              className="w-full text-xs text-foreground font-mono"
+            />
+          </Input>
+        </Box>
+      </Box>
 
-      <View className="pt-1">
+      <Box className="pt-1">
         <FieldLabel>Goal Description</FieldLabel>
-        <TextInput
-          value={editGoal}
-          onChangeText={setEditGoal}
-          className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2 text-xs text-white font-mono"
-          placeholderTextColor="#555566"
-        />
-      </View>
+        <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
+          <InputField
+            value={editGoal}
+            onChangeText={setEditGoal}
+            placeholderTextColor="#555566"
+            className="w-full text-xs text-foreground font-mono"
+          />
+        </Input>
+      </Box>
 
       {showDeleteConfirm && (
-        <View className="p-4 bg-[#2A1515] border border-alert-red/40 rounded-2xl gap-3">
-          <View className="flex-row items-center gap-2">
+        <Box className="p-4 bg-destructive/15 border border-destructive/40 rounded-2xl gap-3">
+          <Box className="flex-row items-center gap-2">
             <AlertTriangle size={18} color="#FF4B1F" />
-            <Text className="text-xs font-mono font-bold text-alert-red">
+            <Text className="text-xs font-mono font-bold text-destructive">
               Confirm Member Expulsion / Removal
             </Text>
-          </View>
-          <Text className="text-xs text-[#D0D0DC]">
+          </Box>
+          <Text className="text-xs text-foreground/80">
             Are you sure you want to permanently remove {editName} from the gym
             roster? This action cannot be undone.
           </Text>
-          <View className="flex-row justify-end gap-2">
-            <TouchableOpacity
+          <Box className="flex-row justify-end gap-2">
+            <Button
               onPress={() => setShowDeleteConfirm(false)}
-              activeOpacity={0.7}
-              className="px-3 py-1.5 bg-border-subtle rounded-lg"
+
+              className="px-3 py-1.5 bg-border rounded-lg"
             >
-              <Text className="text-xs font-mono text-white">Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              <ButtonText className="text-xs font-mono text-foreground">Cancel</ButtonText>
+            </Button>
+            <Button
               onPress={handleDelete}
-              activeOpacity={0.7}
-              className="px-4 py-1.5 bg-alert-red rounded-lg"
+
+              className="px-4 py-1.5 bg-destructive rounded-lg"
             >
-              <Text className="text-xs font-mono font-bold text-white">
+              <ButtonText className="text-xs font-mono font-bold text-foreground">
                 Confirm Delete
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+              </ButtonText>
+            </Button>
+          </Box>
+        </Box>
       )}
 
-      <View className="pt-3 flex-row items-center justify-between border-t border-border-subtle">
-        <TouchableOpacity
+      <Box className="pt-3 flex-row items-center justify-between border-t border-border">
+        <Button
           onPress={() => setShowDeleteConfirm(true)}
-          activeOpacity={0.7}
+
           className="px-3 py-2 rounded-xl flex-row items-center gap-1.5"
         >
-          <Trash2 size={16} color="#FF4B1F" />
-          <Text className="text-xs font-mono text-alert-red">
+          <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
+          <ButtonText className="text-xs font-mono text-destructive">
             Remove Member
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+          </ButtonText>
+        </Button>
+        <Button
           onPress={handleSave}
-          activeOpacity={0.7}
-          className="bg-lime-accent px-5 py-2.5 rounded-xl"
+
+          className="bg-primary px-5 py-2.5 rounded-xl"
         >
-          <Text className="font-display font-bold text-xs uppercase text-black">
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
             Save Changes
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          </ButtonText>
+        </Button>
+      </Box>
+    </Box>
   );
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Text className="text-text-muted font-mono text-[10px] uppercase mb-1">
+    <Text className="text-muted-foreground font-mono text-[10px] uppercase mb-1">
       {children}
     </Text>
   );
@@ -1049,14 +1086,14 @@ function FormSelect<T extends string>({
       <SelectTrigger
         variant="outline"
         size="md"
-        className="bg-background border-border-subtle rounded-xl px-3 min-h-10"
+        className="bg-background border-border rounded-xl px-3 min-h-10"
       >
-        <View className="flex-1 flex-row items-center justify-between">
-          <Text className="text-xs font-mono text-white">
+        <Box className="flex-1 flex-row items-center justify-between">
+          <Text className="text-xs font-mono text-foreground">
             {selected?.label ?? "Select"}
           </Text>
           <ChevronDown size={14} color="#8A8A9A" />
-        </View>
+        </Box>
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />

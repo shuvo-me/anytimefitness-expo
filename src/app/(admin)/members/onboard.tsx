@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, ScrollView, TouchableOpacity } from '@/tw';
+import { Box } from '@/components/ui/box';
+import { ScrollView } from '@/components/ui/scroll-view';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { InputField } from '@/components/common/InputField';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -61,24 +64,24 @@ function FormSelect<T extends string>({
       <SelectTrigger
         variant="outline"
         size="md"
-        className="bg-background border-[#252532] rounded-xl px-3.5 h-11"
+        className="bg-background border-border rounded-xl px-3.5 h-11"
       >
-        <View className="flex-1 flex-row items-center justify-between">
+        <Box className="flex-1 flex-row items-center justify-between">
           {selected ? (
-            <Text className="text-sm font-mono text-white flex-1 pr-2">
+            <Text className="text-sm font-mono text-foreground flex-1 pr-2">
               {selected.label}
             </Text>
           ) : (
-            <Text className="text-sm font-mono text-text-muted flex-1 pr-2">
+            <Text className="text-sm font-mono text-muted-foreground flex-1 pr-2">
               Select...
             </Text>
           )}
           <ChevronDown size={14} color="#8A8A9A" />
-        </View>
+        </Box>
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />
-        <SelectContent className="bg-card border-border-subtle">
+        <SelectContent className="bg-card border-border">
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
@@ -143,73 +146,72 @@ export default function MemberOnboard() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <Box className="flex-1 bg-background">
       <StatusBar style="light" />
       {createdSuccess ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <View className="w-16 h-16 rounded-full bg-lime-accent/20 items-center justify-center mb-4 border border-lime-accent">
+        <Box className="flex-1 items-center justify-center px-8">
+          <Box className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mb-4 border border-primary">
             <CheckCircle2 size={32} color="#C8F135" />
-          </View>
-          <Text className="font-display font-black text-2xl uppercase text-white text-center">
+          </Box>
+          <Text className="font-display font-black text-2xl uppercase text-foreground text-center">
             Member Enrolled Successfully!
           </Text>
-          <Text className="text-xs font-mono text-text-muted mt-3">
+          <Text className="text-xs font-mono text-muted-foreground mt-3">
             Assigned ID:{' '}
-            <Text className="text-lime-accent font-bold">{createdSuccess}</Text>
+            <Text className="text-primary font-bold">{createdSuccess}</Text>
           </Text>
-          <Text className="text-xs text-[#D0D0DC] mt-1">
+          <Text className="text-xs text-foreground/80 mt-1">
             Workout split and nutrition routine automatically initialized.
           </Text>
-        </View>
+        </Box>
       ) : (
         <>
           {/* Header */}
-          <View className="px-5 pt-5 pb-3 border-b border-border-subtle flex-row items-center justify-between">
-            <View className="flex-row items-center gap-2.5">
-              <View className="w-8 h-8 rounded-xl bg-lime-accent items-center justify-center">
+          <Box className="px-5 pt-5 pb-3 border-b border-border flex-row items-center justify-between">
+            <Box className="flex-row items-center gap-2.5">
+              <Box className="w-8 h-8 rounded-xl bg-primary items-center justify-center">
                 <UserPlus size={16} color="#000000" />
-              </View>
-              <View>
-                <Text className="font-display font-black text-lg uppercase tracking-tight text-white leading-none">
+              </Box>
+              <Box>
+                <Text className="font-display font-black text-lg uppercase tracking-tight text-foreground leading-none">
                   Member Onboarding
                 </Text>
-                <Text className="text-[10px] font-mono text-text-muted mt-0.5">
+                <Text className="text-[10px] font-mono text-muted-foreground mt-0.5">
                   ANYTIMEFITNESS ENROLLMENT
                 </Text>
-              </View>
-            </View>
-            <TouchableOpacity
+              </Box>
+            </Box>
+            <Button
               onPress={() => router.back()}
-              activeOpacity={0.7}
-              className="w-8 h-8 rounded-full bg-border-subtle items-center justify-center"
+
+              className="w-8 h-8 rounded-full bg-border items-center justify-center"
             >
-              <X size={16} color="#8A8A9A" />
-            </TouchableOpacity>
-          </View>
+              <ButtonIcon as={X} />
+            </Button>
+          </Box>
 
           <ScrollView
-            className="flex-1 px-5 py-4"
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             automaticallyAdjustKeyboardInsets={false}
-            contentContainerStyle={{ paddingBottom: 32 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 32 }}
           >
-            <View className="gap-8">
+            <Box className="gap-8">
               {error && (
-                <View className="p-3 bg-alert-red/15 border border-alert-red/40 rounded-xl">
-                  <Text className="text-xs font-mono text-alert-red">
+                <Box className="p-3 bg-destructive/15 border border-destructive/40 rounded-xl">
+                  <Text className="text-xs font-mono text-destructive">
                     {error}
                   </Text>
-                </View>
+                </Box>
               )}
 
               {/* 1. Athlete Identity */}
-              <View className="gap-4">
-                <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+              <Box className="gap-4">
+                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   1. Athlete Identity
                 </Text>
-                <View className="gap-4">
+                <Box className="gap-4">
                   <InputField
                     label="Full Name *"
                     value={name}
@@ -217,8 +219,8 @@ export default function MemberOnboard() {
                     placeholder="e.g. Marcus Vance"
                     icon={<User size={16} color="#666675" />}
                   />
-                  <View className="flex-row gap-4">
-                    <View className="flex-1">
+                  <Box className="flex-row gap-4">
+                    <Box className="flex-1">
                       <InputField
                         label="Email Address"
                         value={email}
@@ -228,10 +230,10 @@ export default function MemberOnboard() {
                         placeholder="marcus@email.com"
                         icon={<Mail size={16} color="#666675" />}
                       />
-                    </View>
-                  </View>
-                  <View className="flex-row gap-4">
-                    <View className="flex-1">
+                    </Box>
+                  </Box>
+                  <Box className="flex-row gap-4">
+                    <Box className="flex-1">
                       <InputField
                         label="Phone Number"
                         value={phone}
@@ -240,9 +242,9 @@ export default function MemberOnboard() {
                         placeholder="+1 (555) 000-0000"
                         icon={<Phone size={16} color="#666675" />}
                       />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-[11px] font-mono text-text-muted uppercase mb-1.5">
+                    </Box>
+                    <Box className="flex-1">
+                      <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
                         Gym Branch / Zone
                       </Text>
                       <FormSelect
@@ -250,71 +252,71 @@ export default function MemberOnboard() {
                         options={LOCATIONS.map((l) => ({ label: l, value: l }))}
                         onChange={setLocation}
                       />
-                    </View>
-                  </View>
-                </View>
-              </View>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
 
               {/* 2. Membership Tier & Billing */}
-              <View className="gap-4 pt-6 border-t border-border-subtle">
-                <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+              <Box className="gap-4 pt-6 border-t border-border">
+                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   2. Membership Tier & Billing
                 </Text>
-                <View className="flex-row flex-wrap gap-3">
+                <Box className="flex-row flex-wrap gap-3">
                   {TIER_OPTIONS.map((t) => {
                     const isSelected = tier === t.value;
                     return (
-                      <TouchableOpacity
+                      <Button
                         key={t.value}
                         onPress={() => setTier(t.value)}
-                        activeOpacity={0.7}
+
                         className={`flex-1 min-w-[45%] p-3 rounded-xl border ${
                           isSelected
-                            ? 'bg-lime-accent/15 border-lime-accent'
-                            : 'bg-background border-border-subtle'
+                            ? 'bg-primary/15 border-primary'
+                            : 'bg-background border-border'
                         }`}
                       >
-                        <Text
+                        <ButtonText
                           className={`text-xs font-bold ${
-                            isSelected ? 'text-lime-accent' : 'text-white'
+                            isSelected ? 'text-primary' : 'text-foreground'
                           }`}
                         >
                           {t.value}
-                        </Text>
-                        <Text className="text-[10px] font-mono mt-1 text-text-muted">
+                        </ButtonText>
+                        <Text className="text-[10px] font-mono mt-1 text-muted-foreground">
                           {getTierPrice(t.value)}
                         </Text>
-                      </TouchableOpacity>
+                      </Button>
                     );
                   })}
-                </View>
+                </Box>
 
-                <View className="flex-row items-center justify-between gap-4 p-3 rounded-xl bg-background border border-border-subtle">
-                  <View className="flex-1 mr-2">
-                    <Text className="text-xs font-bold text-white">
+                <Box className="flex-row items-center justify-between gap-4 p-3 rounded-xl bg-background border border-border">
+                  <Box className="flex-1 mr-2">
+                    <Text className="text-xs font-bold text-foreground">
                       Process Initial Payment Now
                     </Text>
-                    <Text className="text-[10px] font-mono text-text-muted mt-0.5">
+                    <Text className="text-[10px] font-mono text-muted-foreground mt-0.5">
                       Instantly marks subscription active & logs transaction
                     </Text>
-                  </View>
+                  </Box>
                   <Switch
                     value={initialPayment}
                     onValueChange={setInitialPayment}
                     trackColor={{ false: '#22222E', true: '#C8F135' }}
                     thumbColor="#FFFFFF"
                   />
-                </View>
-              </View>
+                </Box>
+              </Box>
 
               {/* 3. Trainer & Fitness Targets */}
-              <View className="gap-4 pt-6 border-t border-border-subtle">
-                <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+              <Box className="gap-4 pt-6 border-t border-border">
+                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   3. Trainer & Fitness Targets
                 </Text>
-                <View className="flex-row gap-4">
-                  <View className="flex-1">
-                    <Text className="text-[11px] font-mono text-text-muted uppercase mb-1.5">
+                <Box className="flex-row gap-4">
+                  <Box className="flex-1">
+                    <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
                       Primary Goal
                     </Text>
                     <FormSelect
@@ -322,9 +324,9 @@ export default function MemberOnboard() {
                       options={GOALS.map((g) => ({ label: g, value: g }))}
                       onChange={setGoal}
                     />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-[11px] font-mono text-text-muted uppercase mb-1.5">
+                  </Box>
+                  <Box className="flex-1">
+                    <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
                       Assigned Coach
                     </Text>
                     <FormSelect
@@ -332,51 +334,51 @@ export default function MemberOnboard() {
                       options={TRAINERS.map((t) => ({ label: t, value: t }))}
                       onChange={setTrainer}
                     />
-                  </View>
-                </View>
-                <View className="flex-row gap-4">
-                  <View className="flex-1">
+                  </Box>
+                </Box>
+                <Box className="flex-row gap-4">
+                  <Box className="flex-1">
                     <InputField
                       label="Weight (kg)"
                       value={weightKg}
                       onChangeText={setWeightKg}
                       keyboardType="numeric"
                     />
-                  </View>
-                  <View className="flex-1">
+                  </Box>
+                  <Box className="flex-1">
                     <InputField
                       label="Height (cm)"
                       value={heightCm}
                       onChangeText={setHeightCm}
                       keyboardType="numeric"
                     />
-                  </View>
-                  <View className="flex-1">
+                  </Box>
+                  <Box className="flex-1">
                     <InputField
                       label="Target Days/Mo"
                       value={attendanceGoalDays}
                       onChangeText={setAttendanceGoalDays}
                       keyboardType="numeric"
                     />
-                  </View>
-                </View>
-              </View>
+                  </Box>
+                </Box>
+              </Box>
 
               {/* 4. Emergency Contact */}
-              <View className="gap-4 pt-6 border-t border-border-subtle">
-                <Text className="text-[10px] font-mono uppercase text-text-muted tracking-wider font-bold">
+              <Box className="gap-4 pt-6 border-t border-border">
+                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   4. Emergency Contact
                 </Text>
-                <View className="flex-row gap-4">
-                  <View className="flex-1">
+                <Box className="flex-row gap-4">
+                  <Box className="flex-1">
                     <InputField
                       label="Contact Person Name"
                       value={emergencyName}
                       onChangeText={setEmergencyName}
                       placeholder="Contact Name"
                     />
-                  </View>
-                  <View className="flex-1">
+                  </Box>
+                  <Box className="flex-1">
                     <InputField
                       label="Contact Phone"
                       value={emergencyPhone}
@@ -384,36 +386,36 @@ export default function MemberOnboard() {
                       keyboardType="phone-pad"
                       placeholder="Contact Phone"
                     />
-                  </View>
-                </View>
-              </View>
-            </View>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
           </ScrollView>
 
           {/* Actions */}
-          <View className="px-5 py-4 flex-row items-center justify-end gap-3 border-t border-border-subtle">
-            <TouchableOpacity
+          <Box className="px-5 py-4 flex-row items-center justify-end gap-3 border-t border-border">
+            <Button
               onPress={() => router.back()}
-              activeOpacity={0.7}
-              className="px-4 py-2.5 rounded-xl bg-border-subtle items-center justify-center"
+
+              className="px-4 py-2.5 rounded-xl bg-border items-center justify-center"
             >
-              <Text className="text-xs font-mono font-bold text-white">
+              <ButtonText className="text-xs font-mono font-bold text-foreground">
                 Cancel
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              </ButtonText>
+            </Button>
+            <Button
               onPress={handleSubmit}
-              activeOpacity={0.7}
-              className="px-5 py-2.5 rounded-xl bg-lime-accent flex-row items-center justify-center gap-2"
+
+              className="px-5 py-2.5 rounded-xl bg-primary flex-row items-center justify-center gap-2"
             >
-              <Text className="font-display font-bold text-xs uppercase tracking-wider text-black">
+              <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                 Complete Onboarding
-              </Text>
-              <UserPlus size={16} color="#000000" />
-            </TouchableOpacity>
-          </View>
+              </ButtonText>
+              <ButtonIcon as={UserPlus} />
+            </Button>
+          </Box>
         </>
       )}
-    </View>
+    </Box>
   );
 }
