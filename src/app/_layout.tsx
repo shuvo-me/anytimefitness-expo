@@ -3,8 +3,8 @@ import { colors } from "@/components/ui/gluestack-ui-provider/config";
 import { queryClient } from "@/lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { VariableContextProvider } from "nativewind";
-import "../global.css";
+import { VariableContextProvider } from "react-native-css";
+import "../../global.css";
 
 export default function RootLayout() {
   return (

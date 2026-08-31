@@ -1,19 +1,9 @@
-import { useLogin } from "@/hooks/useAuth";
 import { Box } from "@/components/ui/box";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Text } from "@/components/ui/text";
-import {
-  Input,
-  InputField,
-  InputIcon,
-  InputSlot,
-} from "@/components/ui/input";
-import {
-  Button,
-  ButtonIcon,
-  ButtonText,
-} from "@/components/ui/button";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLogin } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
@@ -28,6 +18,7 @@ import {
   User,
 } from "lucide-react-native";
 import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type LoginMode = "admin" | "member";
 
@@ -96,7 +87,10 @@ export default function LoginScreen() {
                 size="3xl"
                 className="font-display font-extrabold italic tracking-tighter uppercase"
               >
-                ANYTIME<Text className="text-primary">FITNESS</Text>
+                ANYTIME
+                <Text className="text-primary" size="3xl">
+                  FITNESS
+                </Text>
               </Text>
               <Text className="text-xs font-mono text-muted-foreground tracking-wider uppercase leading-none">
                 Welcome back to your journey
@@ -185,7 +179,10 @@ export default function LoginScreen() {
                   </Text>
                   <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                     <InputSlot>
-                      <InputIcon as={Mail} className="text-muted-foreground w-4 h-4" />
+                      <InputIcon
+                        as={Mail}
+                        className="text-muted-foreground w-4 h-4"
+                      />
                     </InputSlot>
                     <InputField
                       value={email}
@@ -207,7 +204,10 @@ export default function LoginScreen() {
                   </Text>
                   <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                     <InputSlot>
-                      <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                      <InputIcon
+                        as={Lock}
+                        className="text-muted-foreground w-4 h-4"
+                      />
                     </InputSlot>
                     <InputField
                       value={password}
@@ -248,7 +248,10 @@ export default function LoginScreen() {
                   </Text>
                   <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                     <InputSlot>
-                      <InputIcon as={Phone} className="text-muted-foreground w-4 h-4" />
+                      <InputIcon
+                        as={Phone}
+                        className="text-muted-foreground w-4 h-4"
+                      />
                     </InputSlot>
                     <InputField
                       value={phone}
@@ -269,7 +272,10 @@ export default function LoginScreen() {
                   </Text>
                   <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                     <InputSlot>
-                      <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                      <InputIcon
+                        as={Lock}
+                        className="text-muted-foreground w-4 h-4"
+                      />
                     </InputSlot>
                     <InputField
                       value={pinCode}
@@ -304,7 +310,10 @@ export default function LoginScreen() {
                 {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </ButtonText>
               {!loginMutation.isPending && (
-                <ButtonIcon as={ArrowRight} className="text-primary-foreground w-4 h-4" />
+                <ButtonIcon
+                  as={ArrowRight}
+                  className="text-primary-foreground w-4 h-4"
+                />
               )}
             </Button>
 
@@ -312,7 +321,7 @@ export default function LoginScreen() {
             {loginMode === "admin" && (
               <Box className="flex-row items-center justify-center gap-1">
                 <Text className="text-xs font-mono text-muted-foreground">
-                  {'Don\u2019t have an account?'}
+                  {"Don\u2019t have an account?"}
                 </Text>
                 <Button
                   variant="link"

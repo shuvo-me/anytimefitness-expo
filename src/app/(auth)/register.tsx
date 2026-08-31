@@ -1,37 +1,47 @@
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { useRegister } from '@/hooks/useAuth';
-import { Box } from '@/components/ui/box';
-import { ScrollView } from '@/components/ui/scroll-view';
-import { Text } from '@/components/ui/text';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Dumbbell, User, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react-native';
+import { Box } from "@/components/ui/box";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
+import { useRegister } from "@/hooks/useAuth";
+import { useRouter } from "expo-router";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle,
+  Dumbbell,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+} from "lucide-react-native";
+import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const registerMutation = useRegister();
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handleRegister = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -57,11 +67,11 @@ export default function RegisterScreen() {
             Check Your Email
           </Text>
           <Text className="text-sm font-mono text-muted-foreground text-center mb-6 leading-relaxed">
-            We sent a verification link to{'\n'}
+            We sent a verification link to{"\n"}
             <Text className="font-bold">{email}</Text>
           </Text>
           <Button
-            onPress={() => router.replace('/(auth)/login')}
+            onPress={() => router.replace("/(auth)/login")}
             variant="default"
             size="lg"
             className="rounded-2xl"
@@ -77,10 +87,13 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Box className="absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(200, 241, 53, 0.05)' }} />
+      <Box
+        className="absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+        style={{ backgroundColor: "rgba(200, 241, 53, 0.05)" }}
+      />
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
       >
         <Box className="w-full max-w-lg mx-auto gap-3 px-6 pt-40 pb-4">
@@ -90,8 +103,14 @@ export default function RegisterScreen() {
               <Dumbbell size={28} color="#000000" strokeWidth={2.5} />
             </Box>
             <Box className="items-center">
-              <Text size="3xl" className="font-display font-extrabold italic tracking-tighter uppercase">
-                ANYTIME<Text className="text-primary">FITNESS</Text>
+              <Text
+                size="3xl"
+                className="font-display font-extrabold italic tracking-tighter uppercase"
+              >
+                ANYTIME
+                <Text className="text-primary" size="3xl">
+                  FITNESS
+                </Text>
               </Text>
               <Text className="text-xs font-mono text-muted-foreground tracking-wider uppercase leading-none">
                 Start your fitness journey today
@@ -102,7 +121,14 @@ export default function RegisterScreen() {
           {/* Auth card */}
           <Box className="bg-card border border-border rounded-3xl p-6 gap-4 mt-10">
             {error && (
-              <Box className="p-3 rounded-2xl flex-row items-center gap-2.5" style={{ backgroundColor: 'rgba(255, 75, 31, 0.15)', borderColor: 'rgba(255, 75, 31, 0.4)', borderWidth: 1 }}>
+              <Box
+                className="p-3 rounded-2xl flex-row items-center gap-2.5"
+                style={{
+                  backgroundColor: "rgba(255, 75, 31, 0.15)",
+                  borderColor: "rgba(255, 75, 31, 0.4)",
+                  borderWidth: 1,
+                }}
+              >
                 <AlertCircle size={16} color="#FF4B1F" />
                 <Text className="text-xs font-mono flex-1">{error}</Text>
               </Box>
@@ -115,7 +141,10 @@ export default function RegisterScreen() {
               </Text>
               <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                 <InputSlot>
-                  <InputIcon as={User} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={User}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
                 <InputField
                   value={fullName}
@@ -136,7 +165,10 @@ export default function RegisterScreen() {
               </Text>
               <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                 <InputSlot>
-                  <InputIcon as={Mail} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={Mail}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
                 <InputField
                   value={email}
@@ -158,7 +190,10 @@ export default function RegisterScreen() {
               </Text>
               <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                 <InputSlot>
-                  <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={Lock}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
                 <InputField
                   value={password}
@@ -169,7 +204,10 @@ export default function RegisterScreen() {
                   className="font-mono text-xs"
                 />
                 <InputSlot onPress={() => setShowPassword(!showPassword)}>
-                  <InputIcon as={showPassword ? EyeOff : Eye} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={showPassword ? EyeOff : Eye}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
               </Input>
             </Box>
@@ -181,7 +219,10 @@ export default function RegisterScreen() {
               </Text>
               <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                 <InputSlot>
-                  <InputIcon as={Lock} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={Lock}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
                 <InputField
                   value={confirmPassword}
@@ -203,10 +244,15 @@ export default function RegisterScreen() {
               className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >
               <ButtonText className="font-extrabold text-sm uppercase tracking-wider text-primary-foreground">
-                {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
+                {registerMutation.isPending
+                  ? "Creating Account..."
+                  : "Create Account"}
               </ButtonText>
               {!registerMutation.isPending && (
-                <ButtonIcon as={ArrowRight} className="text-primary-foreground w-4 h-4" />
+                <ButtonIcon
+                  as={ArrowRight}
+                  className="text-primary-foreground w-4 h-4"
+                />
               )}
             </Button>
 

@@ -1,25 +1,32 @@
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { useResetPassword } from '@/hooks/useAuth';
-import { Box } from '@/components/ui/box';
-import { ScrollView } from '@/components/ui/scroll-view';
-import { Text } from '@/components/ui/text';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Dumbbell, Mail, ArrowRight, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react-native';
+import { Box } from "@/components/ui/box";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Text } from "@/components/ui/text";
+import { useResetPassword } from "@/hooks/useAuth";
+import { useRouter } from "expo-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Dumbbell,
+  Mail,
+} from "lucide-react-native";
+import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const resetMutation = useResetPassword();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handleReset = async () => {
     if (!email.trim()) {
-      setError('Please enter your email address.');
+      setError("Please enter your email address.");
       return;
     }
 
@@ -45,14 +52,15 @@ export default function ForgotPasswordScreen() {
             Reset Link Sent
           </Text>
           <Text className="text-sm font-mono text-muted-foreground text-center mb-6 leading-relaxed">
-            Check your inbox at{'\n'}
-            <Text className="font-bold">{email}</Text>{'\n'}
+            Check your inbox at{"\n"}
+            <Text className="font-bold">{email}</Text>
+            {"\n"}
             for a password reset link.
           </Text>
           <Button
             variant="default"
             size="lg"
-            onPress={() => router.replace('/(auth)/login')}
+            onPress={() => router.replace("/(auth)/login")}
             className="rounded-2xl"
           >
             <ButtonText className="font-bold text-sm uppercase tracking-wider text-primary-foreground">
@@ -66,10 +74,13 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Box className="absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(91, 141, 239, 0.05)' }} />
+      <Box
+        className="absolute top-10 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+        style={{ backgroundColor: "rgba(91, 141, 239, 0.05)" }}
+      />
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
       >
         <Box className="w-full max-w-lg mx-auto gap-3 px-6 pt-40 pb-4">
@@ -79,11 +90,17 @@ export default function ForgotPasswordScreen() {
               <Dumbbell size={28} color="#000000" strokeWidth={2.5} />
             </Box>
             <Box className="items-center">
-              <Text size="3xl" className="font-display font-extrabold italic tracking-tighter uppercase">
-                ANYTIME<Text className="text-primary">FITNESS</Text>
+              <Text
+                size="3xl"
+                className="font-display font-extrabold italic tracking-tighter uppercase"
+              >
+                ANYTIME
+                <Text className="text-primary" size="3xl">
+                  FITNESS
+                </Text>
               </Text>
               <Text className="text-xs font-mono text-muted-foreground tracking-wider uppercase leading-none">
-                {'We\u2019ll get you back on track'}
+                {"We\u2019ll get you back on track"}
               </Text>
             </Box>
           </Box>
@@ -91,7 +108,14 @@ export default function ForgotPasswordScreen() {
           {/* Auth card */}
           <Box className="bg-card border border-border rounded-3xl p-6 gap-4 mt-10">
             {error && (
-              <Box className="p-3 rounded-2xl flex-row items-center gap-2.5" style={{ backgroundColor: 'rgba(255, 75, 31, 0.15)', borderColor: 'rgba(255, 75, 31, 0.4)', borderWidth: 1 }}>
+              <Box
+                className="p-3 rounded-2xl flex-row items-center gap-2.5"
+                style={{
+                  backgroundColor: "rgba(255, 75, 31, 0.15)",
+                  borderColor: "rgba(255, 75, 31, 0.4)",
+                  borderWidth: 1,
+                }}
+              >
                 <AlertCircle size={16} color="#FF4B1F" />
                 <Text className="text-xs font-mono flex-1">{error}</Text>
               </Box>
@@ -104,7 +128,10 @@ export default function ForgotPasswordScreen() {
               </Text>
               <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                 <InputSlot>
-                  <InputIcon as={Mail} className="text-muted-foreground w-4 h-4" />
+                  <InputIcon
+                    as={Mail}
+                    className="text-muted-foreground w-4 h-4"
+                  />
                 </InputSlot>
                 <InputField
                   value={email}
@@ -128,10 +155,13 @@ export default function ForgotPasswordScreen() {
               className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >
               <ButtonText className="font-extrabold text-sm uppercase tracking-wider text-primary-foreground">
-                {resetMutation.isPending ? 'Sending...' : 'Send Reset Link'}
+                {resetMutation.isPending ? "Sending..." : "Send Reset Link"}
               </ButtonText>
               {!resetMutation.isPending && (
-                <ButtonIcon as={ArrowRight} className="text-primary-foreground w-4 h-4" />
+                <ButtonIcon
+                  as={ArrowRight}
+                  className="text-primary-foreground w-4 h-4"
+                />
               )}
             </Button>
 
@@ -141,7 +171,10 @@ export default function ForgotPasswordScreen() {
               className="flex-row items-center justify-center gap-1.5"
               onPress={() => router.back()}
             >
-              <ButtonIcon as={ArrowLeft} className="text-muted-foreground w-3.5 h-3.5" />
+              <ButtonIcon
+                as={ArrowLeft}
+                className="text-muted-foreground w-3.5 h-3.5"
+              />
               <ButtonText className="text-xs font-mono text-muted-foreground">
                 Back to Sign In
               </ButtonText>
