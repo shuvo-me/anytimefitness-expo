@@ -6,6 +6,7 @@ export default {
   dialect: 'postgresql',
   dbCredentials: {
     url: process.env.SUPABASE_DB_URL!,
-    ssl: true,
+    ssl: 'require',
   },
+  schemaFilter: ['public'],
 } satisfies Config;

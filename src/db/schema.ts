@@ -1,16 +1,17 @@
 import {
-  pgEnum,
-  pgTable,
-  uuid,
-  text,
-  date,
-  timestamp,
-  integer,
-  numeric,
   boolean,
-  jsonb,
+  date,
   index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgSchema,
+  pgTable,
+  text,
+  timestamp,
   uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
 /* ── Enums ─────────────────────────────────────────────────────────── */
@@ -51,16 +52,21 @@ export const checkInMethod = pgEnum('check_in_method', [
   'pin',
 ]);
 
+const authSchema = pgSchema('auth');
+
 /* ── Tables ────────────────────────────────────────────────────────── */
 
-// 1. profiles — extends auth.users
-// FK to auth.users(id) is enforced via SQL migration, not Drizzle (auth.users is outside our schema).
+// 1. profiles
+
 export const profiles = pgTable('profiles', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().unique().references(() => authSchema.table('users', {
+    id: uuid('id').primaryKey(),
+  }).id, { onDelete: 'cascade' }),
   email: text('email').notNull().unique(),
   fullName: text('full_name').notNull(),
   phone: text('phone'),
-  role: userRole('role').notNull().default('member'),
+  role: userRole('role').notNull().default('admin'),
   avatarUrl: text('avatar_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

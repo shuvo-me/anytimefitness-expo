@@ -3,7 +3,9 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Text } from "@/components/ui/text";
+import { registerSchema, RegisterForm } from "@/api/register.schema";
 import { useRegister } from "@/hooks/useAuth";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
@@ -17,46 +19,43 @@ import {
   User,
 } from "lucide-react-native";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const registerMutation = useRegister();
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
-  const handleRegister = async () => {
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
+  const onSubmit = handleSubmit((values) => {
     setError(null);
-
     registerMutation.mutate(
-      { email: email.trim(), password, fullName: fullName.trim() },
+      { email: values.email, password: values.password, fullName: values.fullName },
       {
         onError: (err: Error) => setError(err.message),
-        onSuccess: () => setSuccess(true),
+        onSuccess: () => setSubmittedEmail(values.email),
       },
     );
-  };
+  });
 
-  if (success) {
+  if (submittedEmail) {
     return (
       <SafeAreaView className="flex-1 bg-background">
         <Box className="flex-1 items-center justify-center px-6">
@@ -68,7 +67,7 @@ export default function RegisterScreen() {
           </Text>
           <Text className="text-sm font-mono text-muted-foreground text-center mb-6 leading-relaxed">
             We sent a verification link to{"\n"}
-            <Text className="font-bold">{email}</Text>
+            <Text className="font-bold">{submittedEmail}</Text>
           </Text>
           <Button
             onPress={() => router.replace("/(auth)/login")}
@@ -139,23 +138,35 @@ export default function RegisterScreen() {
               <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                 Full Name
               </Text>
-              <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
-                <InputSlot>
-                  <InputIcon
-                    as={User}
-                    className="text-muted-foreground w-4 h-4"
-                  />
-                </InputSlot>
-                <InputField
-                  value={fullName}
-                  onChangeText={setFullName}
-                  autoCapitalize="words"
-                  autoComplete="name"
-                  placeholder="John Doe"
-                  placeholderTextColor="#666675"
-                  className="font-mono text-xs"
-                />
-              </Input>
+              <Controller
+                control={control}
+                name="fullName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon
+                        as={User}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                    <InputField
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      autoCapitalize="words"
+                      autoComplete="name"
+                      placeholder="John Doe"
+                      placeholderTextColor="#666675"
+                      className="font-mono text-xs"
+                    />
+                  </Input>
+                )}
+              />
+              {errors.fullName && (
+                <Text className="text-[11px] font-mono text-destructive">
+                  {errors.fullName.message}
+                </Text>
+              )}
             </Box>
 
             {/* Email */}
@@ -163,24 +174,36 @@ export default function RegisterScreen() {
               <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                 Email Address
               </Text>
-              <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
-                <InputSlot>
-                  <InputIcon
-                    as={Mail}
-                    className="text-muted-foreground w-4 h-4"
-                  />
-                </InputSlot>
-                <InputField
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  placeholderTextColor="#666675"
-                  className="font-mono text-xs"
-                />
-              </Input>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon
+                        as={Mail}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                    <InputField
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      placeholderTextColor="#666675"
+                      className="font-mono text-xs"
+                    />
+                  </Input>
+                )}
+              />
+              {errors.email && (
+                <Text className="text-[11px] font-mono text-destructive">
+                  {errors.email.message}
+                </Text>
+              )}
             </Box>
 
             {/* Password */}
@@ -188,28 +211,40 @@ export default function RegisterScreen() {
               <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                 Password
               </Text>
-              <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
-                <InputSlot>
-                  <InputIcon
-                    as={Lock}
-                    className="text-muted-foreground w-4 h-4"
-                  />
-                </InputSlot>
-                <InputField
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  placeholder="Min. 6 characters"
-                  placeholderTextColor="#666675"
-                  className="font-mono text-xs"
-                />
-                <InputSlot onPress={() => setShowPassword(!showPassword)}>
-                  <InputIcon
-                    as={showPassword ? EyeOff : Eye}
-                    className="text-muted-foreground w-4 h-4"
-                  />
-                </InputSlot>
-              </Input>
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon
+                        as={Lock}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                    <InputField
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry={!showPassword}
+                      placeholder="Min. 6 characters"
+                      placeholderTextColor="#666675"
+                      className="font-mono text-xs"
+                    />
+                    <InputSlot onPress={() => setShowPassword(!showPassword)}>
+                      <InputIcon
+                        as={showPassword ? EyeOff : Eye}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                  </Input>
+                )}
+              />
+              {errors.password && (
+                <Text className="text-[11px] font-mono text-destructive">
+                  {errors.password.message}
+                </Text>
+              )}
             </Box>
 
             {/* Confirm Password */}
@@ -217,29 +252,41 @@ export default function RegisterScreen() {
               <Text className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
                 Confirm Password
               </Text>
-              <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
-                <InputSlot>
-                  <InputIcon
-                    as={Lock}
-                    className="text-muted-foreground w-4 h-4"
-                  />
-                </InputSlot>
-                <InputField
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showPassword}
-                  placeholder="Re-enter password"
-                  placeholderTextColor="#666675"
-                  className="font-mono text-xs"
-                />
-              </Input>
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                    <InputSlot>
+                      <InputIcon
+                        as={Lock}
+                        className="text-muted-foreground w-4 h-4"
+                      />
+                    </InputSlot>
+                    <InputField
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry={!showPassword}
+                      placeholder="Re-enter password"
+                      placeholderTextColor="#666675"
+                      className="font-mono text-xs"
+                    />
+                  </Input>
+                )}
+              />
+              {errors.confirmPassword && (
+                <Text className="text-[11px] font-mono text-destructive">
+                  {errors.confirmPassword.message}
+                </Text>
+              )}
             </Box>
 
             {/* Submit */}
             <Button
               variant="default"
               size="lg"
-              onPress={handleRegister}
+              onPress={onSubmit}
               isDisabled={registerMutation.isPending}
               className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >

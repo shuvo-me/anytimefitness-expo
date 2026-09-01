@@ -14,7 +14,7 @@ export async function register(
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName, role: 'admin' } },
   });
   if (error) throw error;
 }
