@@ -60,10 +60,9 @@ const authSchema = pgSchema('auth');
 
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().unique().references(() => authSchema.table('users', {
+  userId: uuid('user_id').unique().references(() => authSchema.table('users', {
     id: uuid('id').primaryKey(),
   }).id, { onDelete: 'cascade' }),
-  email: text('email').notNull().unique(),
   fullName: text('full_name').notNull(),
   phone: text('phone'),
   role: userRole('role').notNull().default('admin'),

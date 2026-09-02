@@ -8,6 +8,20 @@
       "when": 1787676066231,
       "tag": "0000_even_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788245613675,
+      "tag": "0001_motionless_magma",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788259263613,
+      "tag": "0002_quick_mulholland_black",
+      "breakpoints": true
     }
   ]
 }

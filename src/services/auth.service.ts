@@ -28,7 +28,7 @@ export async function register(
   const { error: insertError } = await supabase
     .from('profiles' as any)
     .upsert(
-      { user_id: data.user.id, email, full_name: fullName, role: 'admin' } as any,
+      { user_id: data.user.id, full_name: fullName, role: 'admin' } as any,
       { onConflict: 'user_id', ignoreDuplicates: true },
     );
   if (insertError) throw insertError;

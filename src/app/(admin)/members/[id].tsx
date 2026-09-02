@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import type { Member, MembershipTier, MemberStatus } from "@/types/member";
-import { getMemberById, TIER_OPTIONS, TRAINERS } from "@/types/member";
+import { getMemberById, TIER_OPTIONS } from "@/types/member";
 import type {
   DietPlan,
   MealItem,
@@ -141,7 +141,7 @@ export default function MemberDetail() {
                   </Box>
                 </Box>
                 <Text className="text-xs font-mono text-muted-foreground mt-1">
-                  {member.id} • {member.tier} Plan • {member.assignedTrainer}
+                  {member.id} • {member.tier} Plan
                 </Text>
               </Box>
             </Box>
@@ -238,9 +238,7 @@ function OverviewTab({ member }: { member: Member }) {
       {/* Goal & Details */}
       <Box className="bg-background border border-border p-4 rounded-2xl gap-2">
         <DetailRow label="Primary Goal" value={member.goal} bold />
-        <DetailRow label="Email" value={member.email} />
         <DetailRow label="Phone" value={member.phone} />
-        <DetailRow label="Gym Location" value={member.location} />
         <DetailRow
           label="Weight & Height"
           value={`${member.weightKg} kg / ${member.heightCm} cm`}
@@ -906,7 +904,6 @@ function EditTab({ member }: { member: Member }) {
   const [editName, setEditName] = useState(member.name);
   const [editTier, setEditTier] = useState<MembershipTier>(member.tier);
   const [editStatus, setEditStatus] = useState<MemberStatus>(member.status);
-  const [editTrainer, setEditTrainer] = useState(member.assignedTrainer);
   const [editGoal, setEditGoal] = useState(member.goal);
   const [editDues, setEditDues] = useState(String(member.duesAmount));
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -970,27 +967,17 @@ function EditTab({ member }: { member: Member }) {
         </Box>
       </Box>
 
-      <Box className="flex-row gap-3 pt-1">
-        <Box className="flex-1">
-          <FieldLabel>Assigned Trainer</FieldLabel>
-          <FormSelect
-            value={editTrainer}
-            options={TRAINERS.map((t) => ({ label: t, value: t }))}
-            onChange={setEditTrainer}
+      <Box className="pt-1">
+        <FieldLabel>Pending Dues ($)</FieldLabel>
+        <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
+          <InputField
+            value={editDues}
+            onChangeText={setEditDues}
+            keyboardType="numeric"
+            placeholderTextColor="#555566"
+            className="w-full text-xs text-foreground font-mono"
           />
-        </Box>
-        <Box className="flex-1">
-          <FieldLabel>Pending Dues ($)</FieldLabel>
-          <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
-            <InputField
-              value={editDues}
-              onChangeText={setEditDues}
-              keyboardType="numeric"
-              placeholderTextColor="#555566"
-              className="w-full text-xs text-foreground font-mono"
-            />
-          </Input>
-        </Box>
+        </Input>
       </Box>
 
       <Box className="pt-1">

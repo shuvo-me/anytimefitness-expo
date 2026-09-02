@@ -7,10 +7,9 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name, role)
+  INSERT INTO public.profiles (id, full_name, role)
   VALUES (
     NEW.id,
-    NEW.email,
     COALESCE(NEW.raw_user_meta_data ->> 'full_name', 'Member'),
     COALESCE((NEW.raw_user_meta_data ->> 'role')::user_role, 'member')
   );

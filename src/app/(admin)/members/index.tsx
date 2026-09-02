@@ -1,4 +1,6 @@
 import { Box } from '@/components/ui/box';
+import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
 import { ScrollView } from '@/components/ui/scroll-view';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
@@ -8,8 +10,9 @@ import { useRouter } from 'expo-router';
 import { Search, UserPlus, ChevronRight } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MOCK_MEMBERS } from '@/types/member';
-import type { Member } from '@/types/member';
+import { useMembers } from '@/hooks/useMembers';
+import { Spinner } from '@/components/ui/spinner';
+import type { MemberListItem } from '@/services/members.service';
 
 const STATUS_FILTERS = ['All', 'Active', 'Expired', 'Pending'] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
@@ -19,20 +22,21 @@ export default function MembersList() {
   const inset = useSafeAreaInsets();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
+  const { data: members = [], isLoading, isError } = useMembers();
 
   const filteredMembers = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return MOCK_MEMBERS.filter((member) => {
+    return members.filter((member) => {
       const matchesSearch =
         !q ||
         member.name.toLowerCase().includes(q) ||
-        member.id.toLowerCase().includes(q) ||
+        member.displayId.toLowerCase().includes(q) ||
         member.tier.toLowerCase().includes(q);
 
       if (statusFilter === 'All') return matchesSearch;
       return matchesSearch && member.status === statusFilter.toLowerCase();
     });
-  }, [searchTerm, statusFilter]);
+  }, [members, searchTerm, statusFilter]);
 
   return (
     <>
@@ -46,9 +50,9 @@ export default function MembersList() {
           flexGrow: 1,
         }}
       >
-        <Box className="gap-5">
+        <VStack space="xl">
           {/* Header */}
-          <Box className="flex-row items-center justify-between">
+          <HStack className="items-center justify-between">
             <Box className="flex-1 pr-3">
               <Text className="font-display font-black text-3xl uppercase tracking-tight text-foreground leading-none">
                 Members
@@ -56,7 +60,7 @@ export default function MembersList() {
               <Text className="text-xs font-mono text-muted-foreground mt-1">
                 Total Enrolled:{' '}
                 <Text className="text-primary font-bold">
-                  {MOCK_MEMBERS.length} Athletes
+                  {members.length} Athletes
                 </Text>
               </Text>
             </Box>
@@ -70,7 +74,7 @@ export default function MembersList() {
                 + Add Member
               </ButtonText>
             </Button>
-          </Box>
+          </HStack>
 
           {/* Search */}
           <Input className="w-full bg-card border-border rounded-xl pr-3 py-1.5">
@@ -87,7 +91,7 @@ export default function MembersList() {
           </Input>
 
           {/* Filter Tabs */}
-          <Box className="flex-row items-center gap-2">
+          <HStack space="sm" className="items-center">
             {STATUS_FILTERS.map((filter) => {
               const isActive = statusFilter === filter;
               return (
@@ -111,11 +115,24 @@ export default function MembersList() {
                 </Button>
               );
             })}
-          </Box>
+          </HStack>
 
           {/* Members List */}
-          <Box className="gap-2.5">
-            {filteredMembers.length === 0 ? (
+          <VStack className="gap-2.5">
+            {isLoading ? (
+              <Box className="p-10 items-center bg-card border border-border-subtle rounded-2xl">
+                <Spinner color="#C8F135" />
+                <Text className="text-xs font-mono text-muted-foreground mt-3">
+                  Loading members...
+                </Text>
+              </Box>
+            ) : isError ? (
+              <Box className="p-8 items-center bg-destructive/15 border border-destructive/40 rounded-2xl">
+                <Text className="text-sm font-mono text-destructive text-center">
+                  Failed to load members.
+                </Text>
+              </Box>
+            ) : filteredMembers.length === 0 ? (
               <Box className="p-8 items-center bg-card border border-border-subtle rounded-2xl">
                 <Text className="text-sm text-muted-foreground font-mono text-center">
                   {searchTerm.trim()
@@ -138,8 +155,8 @@ export default function MembersList() {
                 );
               })
             )}
-          </Box>
-        </Box>
+          </VStack>
+        </VStack>
       </ScrollView>
       <StatusBar style="light" />
     </>
@@ -152,7 +169,7 @@ function Row({
   isPending,
   onPress,
 }: {
-  member: Member;
+  member: MemberListItem;
   isExpired: boolean;
   isPending: boolean;
   onPress: () => void;
@@ -173,18 +190,25 @@ function Row({
     ? 'text-warning'
     : 'text-primary';
 
+  const initials = member.name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? '')
+    .join('');
+
   return (
     <Button
       onPress={onPress}
 
       className="bg-card border border-border-subtle p-3.5 rounded-2xl flex-row items-center justify-between"
     >
-      <Box className="flex-row items-center gap-3.5 flex-1">
+      <HStack space="sm" className="items-center flex-1">
         <Box
           className={`w-11 h-11 rounded-full items-center justify-center border ${avatarBg}`}
         >
           <Text className={`font-display font-black text-sm tracking-tight ${avatarText}`}>
-            {member.initials}
+            {initials}
           </Text>
         </Box>
         <Box className="flex-1">
@@ -192,10 +216,10 @@ function Row({
             {member.name}
           </Text>
           <Text className="text-xs font-mono text-muted-foreground mt-0.5">
-            {member.tier} <Text className="text-muted-foreground">•</Text> {member.id}
+            {member.tier} <Text className="text-muted-foreground">•</Text> {member.displayId}
           </Text>
         </Box>
-      </Box>
+      </HStack>
 
       <Box className="items-end ml-2">
         <Text className={`text-xs font-mono font-bold capitalize ${statusText}`}>

@@ -7,6 +7,7 @@ type InputFieldProps = Pick<
   React.ComponentProps<typeof GInputField>,
   | 'value'
   | 'onChangeText'
+  | 'onBlur'
   | 'placeholder'
   | 'keyboardType'
   | 'multiline'
@@ -24,6 +25,7 @@ export function InputField({
   label,
   value,
   onChangeText,
+  onBlur,
   placeholder,
   keyboardType,
   icon,
@@ -52,6 +54,7 @@ export function InputField({
         <GInputField
           value={value}
           onChangeText={onChangeText}
+          onBlur={onBlur}
           placeholder={placeholder}
           keyboardType={keyboardType}
           multiline={multiline}
