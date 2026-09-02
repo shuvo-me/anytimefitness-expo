@@ -121,7 +121,12 @@ export default function MemberOnboard() {
 
   const onSubmit = handleSubmit((values) => {
     addMember.mutate(values, {
-      onError: () => {},
+      onError: (e) => {
+        console.error("Failed to add member:", e);
+      },
+      onSuccess: (data) => {
+        console.log("Member added successfully!", data);
+      },
     });
   });
 
