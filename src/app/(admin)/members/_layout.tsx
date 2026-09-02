@@ -1,11 +1,11 @@
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
 
 export default function MembersLayout() {
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#0C0C0F' },
+        contentStyle: { backgroundColor: "#0C0C0F" },
       }}
     >
       <Stack.Screen name="index" />
@@ -13,9 +13,10 @@ export default function MembersLayout() {
       <Stack.Screen
         name="onboard"
         options={{
-          presentation: 'formSheet',
+          presentation: "formSheet",
           sheetGrabberVisible: true,
           sheetAllowedDetents: [0.85, 1.0],
+          // gestureEnabled: false,
         }}
       />
     </Stack>

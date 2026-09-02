@@ -184,10 +184,9 @@ export default function MemberOnboard() {
           </HStack>
 
           <ScrollView
-            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            automaticallyAdjustKeyboardInsets={false}
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 20,
               paddingVertical: 16,
