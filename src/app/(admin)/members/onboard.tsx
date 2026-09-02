@@ -177,9 +177,9 @@ export default function MemberOnboard() {
             </HStack>
             <Button
               onPress={() => router.back()}
-              className="w-8 h-8 rounded-full bg-border items-center justify-center"
+              className="w-8 h-8 rounded-full bg-muted items-center justify-center"
             >
-              <ButtonIcon as={X} />
+              <ButtonIcon as={X} className="text-muted-foreground" />
             </Button>
           </HStack>
 
@@ -442,9 +442,9 @@ export default function MemberOnboard() {
                       name="emergencyName"
                       render={({ field: { onChange, onBlur, value } }) => (
                         <Box className="gap-1.5">
-<Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
-                          Contact Person Name *
-                        </Text>
+                          <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
+                            Contact Person Name *
+                          </Text>
                           <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                             <InputField
                               value={value}
@@ -466,9 +466,9 @@ export default function MemberOnboard() {
                       name="emergencyPhone"
                       render={({ field: { onChange, onBlur, value } }) => (
                         <Box className="gap-1.5">
-<Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
-                          Contact Phone *
-                        </Text>
+                          <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
+                            Contact Phone *
+                          </Text>
                           <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
                             <InputField
                               value={value}
