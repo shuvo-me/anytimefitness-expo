@@ -358,7 +358,12 @@ function OverviewTab({ member }: { member: MemberDetail }) {
           </Text>
         </Box>
         <Button
-          onPress={() => router.push("/(admin)/payments/record")}
+          onPress={() =>
+            router.push({
+              pathname: "/(admin)/payments/collect",
+              params: { memberId: member.id },
+            })
+          }
           size="sm"
           className="rounded-xl"
         >

@@ -3,7 +3,7 @@ import { Text } from '@/components/ui/text';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CreditCard, Receipt, X } from 'lucide-react-native';
+import { Receipt, Wallet, X } from 'lucide-react-native';
 import { useTransaction } from '@/hooks/usePayments';
 
 export default function InvoiceDetail() {
@@ -86,7 +86,7 @@ export default function InvoiceDetail() {
                 Method
               </Text>
               <Box className="flex-1 flex-row items-center justify-end gap-1.5 ml-4 min-w-0">
-                <CreditCard size={13} color="#8A8A9A" />
+                <Wallet size={13} color="#8A8A9A" />
                 <Text className="text-sm font-bold text-foreground">{tx.method}</Text>
               </Box>
             </Box>

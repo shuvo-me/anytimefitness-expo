@@ -10,7 +10,7 @@ export default function PaymentsLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen
-        name="record"
+        name="collect"
         options={{
           presentation: "formSheet",
           sheetGrabberVisible: true,

@@ -35,9 +35,13 @@ export function useCreateTransaction() {
 
   return useMutation({
     mutationFn: (input: CreateTransactionInput) => createTransaction(input),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.revenue });
+      queryClient.invalidateQueries({ queryKey: queryKeys.members.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.members.detail(variables.memberId),
+      });
     },
   });
 }

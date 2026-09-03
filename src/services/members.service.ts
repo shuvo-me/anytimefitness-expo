@@ -76,7 +76,7 @@ function toDbTier(tier: MembershipTier): DbTier {
   return 'basic';
 }
 
-function plannedExpiry(tier: MembershipTier, from: Date = new Date()): string {
+export function plannedExpiry(tier: MembershipTier, from: Date = new Date()): string {
   const days = tier === 'Yearly' ? 365 : 30;
   const d = new Date(from);
   d.setDate(d.getDate() + days);

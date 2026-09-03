@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { plannedExpiry } from '@/services/members.service';
 import type { MembershipTier, Tx, TxCategory, TxMethod } from '@/types/transaction';
 
 const DB_TIER_TO_UI: Record<string, MembershipTier> = {
@@ -10,18 +11,16 @@ const DB_TIER_TO_UI: Record<string, MembershipTier> = {
 export type DbPaymentMethod = 'card' | 'cash' | 'online' | 'apple_pay' | 'google_pay';
 
 const UI_METHOD_TO_DB: Record<TxMethod, DbPaymentMethod> = {
-  'Credit Card': 'card',
-  'Apple Pay': 'apple_pay',
   Cash: 'cash',
-  'Bank Transfer': 'online',
+  bKash: 'online',
 };
 
 const DB_METHOD_TO_UI: Record<string, TxMethod> = {
-  card: 'Credit Card',
-  apple_pay: 'Apple Pay',
+  card: 'Cash',
   cash: 'Cash',
-  google_pay: 'Credit Card',
-  online: 'Bank Transfer',
+  online: 'bKash',
+  apple_pay: 'bKash',
+  google_pay: 'bKash',
 };
 
 function initialsOf(name: string): string {
@@ -74,7 +73,7 @@ function mapTx(row: TransactionRow): Tx {
     tier: DB_TIER_TO_UI[row.profiles?.members?.membership_tier ?? ''] ?? 'Monthly',
     amount: Number(row.amount ?? 0),
     category,
-    method: DB_METHOD_TO_UI[row.method] ?? 'Credit Card',
+    method: DB_METHOD_TO_UI[row.method] ?? 'Cash',
     date: formatDate(row.paid_at ?? row.created_at),
   };
 }
@@ -150,5 +149,25 @@ export async function createTransaction(
     .single();
   if (error) throw error;
 
-  return (data as { id: string } | null)?.id ?? '';
+  const txId = (data as { id: string } | null)?.id ?? '';
+
+  const { data: memberRow, error: memberError } = await supabase
+    .from('members' as any)
+    .select('membership_tier')
+    .eq('id', input.memberId)
+    .single();
+  if (!memberError && memberRow) {
+    const tier =
+      (memberRow as { membership_tier: string }).membership_tier === 'premium'
+        ? 'Yearly'
+        : 'Monthly';
+    await ((supabase.from('members' as any) as any)
+      .update({
+        membership_status: 'active',
+        expiry_date: plannedExpiry(tier),
+      } as any)
+      .eq('id', input.memberId));
+  }
+
+  return txId;
 }

@@ -4,7 +4,7 @@ export type TxCategory =
   | "Registration"
   | "Locker";
 
-export type TxMethod = "Credit Card" | "Apple Pay" | "Cash" | "Bank Transfer";
+export type TxMethod = "Cash" | "bKash";
 
 export type MembershipTier = "Monthly" | "Yearly";
 
@@ -31,7 +31,7 @@ export const MOCK_TRANSACTIONS: Tx[] = [
     tier: "Yearly",
     amount: 99,
     category: "Monthly Fee",
-    method: "Credit Card",
+    method: "bKash",
     date: "Mar 14",
   },
   {
@@ -43,7 +43,7 @@ export const MOCK_TRANSACTIONS: Tx[] = [
     tier: "Monthly",
     amount: 40,
     category: "Monthly Fee",
-    method: "Apple Pay",
+    method: "bKash",
     date: "Mar 13",
   },
   {
@@ -55,7 +55,7 @@ export const MOCK_TRANSACTIONS: Tx[] = [
     tier: "Yearly",
     amount: 80,
     category: "Monthly Fee",
-    method: "Credit Card",
+    method: "Cash",
     date: "Mar 12",
   },
   {
@@ -67,7 +67,7 @@ export const MOCK_TRANSACTIONS: Tx[] = [
     tier: "Yearly",
     amount: 149,
     category: "Monthly Fee",
-    method: "Bank Transfer",
+    method: "bKash",
     date: "Mar 11",
   },
   {
@@ -91,10 +91,15 @@ export const MOCK_TRANSACTIONS: Tx[] = [
     tier: "Monthly",
     amount: 40,
     category: "Monthly Fee",
-    method: "Credit Card",
+    method: "Cash",
     date: "Mar 09",
   },
 ];
+
+export const TIER_PRICE: Record<MembershipTier, number> = {
+  Monthly: 600,
+  Yearly: 7000,
+};
 
 export const CATEGORIES: TxCategory[] = [
   "Monthly Fee",
@@ -104,10 +109,8 @@ export const CATEGORIES: TxCategory[] = [
 ];
 
 export const METHODS: TxMethod[] = [
-  "Credit Card",
-  "Apple Pay",
   "Cash",
-  "Bank Transfer",
+  "bKash",
 ];
 
 export function getTransactionById(id: string): Tx | undefined {

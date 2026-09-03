@@ -1,5 +1,5 @@
 import { Box } from "@/components/ui/box";
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Spinner } from "@/components/ui/spinner";
@@ -8,7 +8,7 @@ import { useMembers } from "@/hooks/useMembers";
 import { useMonthlyRevenue, useTransactions } from "@/hooks/usePayments";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { AlertCircle, Plus, Receipt, Search } from "lucide-react-native";
+import { AlertCircle, Receipt, Search } from "lucide-react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -67,18 +67,6 @@ export default function AdminPayments() {
                 Financial command & fee collection
               </Text>
             </Box>
-            <Button
-              onPress={() => router.push("/(admin)/payments/record")}
-              className="bg-primary px-3.5 py-2 rounded-xl flex-row items-center gap-1.5"
-            >
-              <ButtonIcon
-                as={Plus}
-                className="text-primary-foreground w-4 h-4"
-              />
-              <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
-                Record Payment
-              </ButtonText>
-            </Button>
           </Box>
 
           {/* Monthly Revenue Banner */}
@@ -143,7 +131,12 @@ export default function AdminPayments() {
                       </Box>
                     </Box>
                     <Button
-                      onPress={() => router.push("/(admin)/payments/record")}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(admin)/payments/collect",
+                          params: { memberId: m.id },
+                        })
+                      }
                       className="bg-primary px-3 py-1.5 rounded-lg"
                     >
                       <ButtonText className="font-display font-bold text-[11px] uppercase tracking-wider text-primary-foreground">
