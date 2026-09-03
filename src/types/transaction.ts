@@ -6,12 +6,15 @@ export type TxCategory =
 
 export type TxMethod = "Credit Card" | "Apple Pay" | "Cash" | "Bank Transfer";
 
+export type MembershipTier = "Monthly" | "Yearly";
+
 export interface Tx {
   id: string;
+  memberId: string;
   invoiceNumber: string;
   memberName: string;
   initials: string;
-  tier: string;
+  tier: MembershipTier;
   amount: number;
   category: TxCategory;
   method: TxMethod;
@@ -21,10 +24,11 @@ export interface Tx {
 export const MOCK_TRANSACTIONS: Tx[] = [
   {
     id: "1",
+    memberId: "",
     invoiceNumber: "INV-2041",
     memberName: "Sarah Johnson",
     initials: "SJ",
-    tier: "Premium",
+    tier: "Yearly",
     amount: 99,
     category: "Monthly Fee",
     method: "Credit Card",
@@ -32,10 +36,11 @@ export const MOCK_TRANSACTIONS: Tx[] = [
   },
   {
     id: "2",
+    memberId: "",
     invoiceNumber: "INV-2040",
     memberName: "Mike Chen",
     initials: "MC",
-    tier: "Basic",
+    tier: "Monthly",
     amount: 40,
     category: "Monthly Fee",
     method: "Apple Pay",
@@ -43,10 +48,11 @@ export const MOCK_TRANSACTIONS: Tx[] = [
   },
   {
     id: "3",
+    memberId: "",
     invoiceNumber: "INV-2039",
     memberName: "Emma Davis",
     initials: "ED",
-    tier: "Premium",
+    tier: "Yearly",
     amount: 80,
     category: "Monthly Fee",
     method: "Credit Card",
@@ -54,10 +60,11 @@ export const MOCK_TRANSACTIONS: Tx[] = [
   },
   {
     id: "4",
+    memberId: "",
     invoiceNumber: "INV-2038",
     memberName: "David Kim",
     initials: "DK",
-    tier: "VIP",
+    tier: "Yearly",
     amount: 149,
     category: "Monthly Fee",
     method: "Bank Transfer",
@@ -65,10 +72,11 @@ export const MOCK_TRANSACTIONS: Tx[] = [
   },
   {
     id: "5",
+    memberId: "",
     invoiceNumber: "INV-2037",
     memberName: "Olivia Brown",
     initials: "OB",
-    tier: "Premium",
+    tier: "Yearly",
     amount: -20,
     category: "Locker",
     method: "Cash",
@@ -76,10 +84,11 @@ export const MOCK_TRANSACTIONS: Tx[] = [
   },
   {
     id: "6",
+    memberId: "",
     invoiceNumber: "INV-2036",
     memberName: "Liam Wilson",
     initials: "LW",
-    tier: "Basic",
+    tier: "Monthly",
     amount: 40,
     category: "Monthly Fee",
     method: "Credit Card",

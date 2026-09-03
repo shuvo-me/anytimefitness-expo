@@ -1,14 +1,27 @@
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonIcon } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CreditCard, Receipt, X } from 'lucide-react-native';
-import { getTransactionById } from '@/types/transaction';
+import { useTransaction } from '@/hooks/usePayments';
 
 export default function InvoiceDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const tx = getTransactionById(id ?? '');
+  const txId = String(id ?? '');
+  const { data: tx, isLoading } = useTransaction(txId);
+
+  if (isLoading) {
+    return (
+      <Box className="flex-1 bg-card items-center justify-center">
+        <Spinner color="#C8F135" />
+        <Text className="text-xs font-mono text-muted-foreground mt-3">
+          Loading invoice...
+        </Text>
+      </Box>
+    );
+  }
 
   return (
     <Box className="flex-1 bg-card px-5 pt-4 pb-8">
@@ -92,8 +105,8 @@ export default function InvoiceDetail() {
               Total
             </Text>
             <Text className="font-display font-black text-2xl text-primary tracking-tight">
-              {tx.amount < 0 ? '-' : '+'}$
-              {Math.abs(tx.amount)}.00
+              {tx.amount < 0 ? '-' : '+'}৳
+              {Math.abs(tx.amount)}
             </Text>
           </Box>
         </Box>

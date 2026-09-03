@@ -2,16 +2,15 @@ import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useMembers } from "@/hooks/useMembers";
-import { MOCK_TRANSACTIONS } from "@/types/transaction";
+import { useMonthlyRevenue, useTransactions } from "@/hooks/usePayments";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AlertCircle, Plus, Receipt, Search } from "lucide-react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const MONTHLY_REVENUE = 284500;
 
 function initialsOf(name: string): string {
   return name
@@ -27,12 +26,14 @@ export default function AdminPayments() {
   const inset = useSafeAreaInsets();
   const [searchTerm, setSearchTerm] = useState("");
   const { data: members } = useMembers();
+  const { data: transactions, isLoading: txLoading } = useTransactions();
+  const { data: monthlyRevenue } = useMonthlyRevenue();
 
   const pendingMembers = (members ?? []).filter(
     (m) => m.status === "expired" || m.status === "pending",
   );
 
-  const filteredTransactions = MOCK_TRANSACTIONS.filter((tx) => {
+  const filteredTransactions = (transactions ?? []).filter((tx) => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -91,7 +92,7 @@ export default function AdminPayments() {
               Monthly Revenue
             </Text>
             <Text className="font-display font-black text-4xl tracking-tight text-primary-foreground mt-1 leading-none">
-              ${MONTHLY_REVENUE.toLocaleString()}.00
+              ৳{(monthlyRevenue ?? 0).toLocaleString()}
             </Text>
             <Box className="flex-row items-center justify-between mt-5 pt-3 border-t border-primary-foreground/15">
               <Box className="bg-primary-foreground/10 px-2.5 py-1 rounded-full">
@@ -179,7 +180,14 @@ export default function AdminPayments() {
             </Box>
 
             <Box className="gap-2">
-              {filteredTransactions.length === 0 ? (
+              {txLoading ? (
+                <Box className="p-8 items-center bg-card border border-border rounded-2xl">
+                  <Spinner color="#C8F135" />
+                  <Text className="text-xs font-mono text-muted-foreground mt-3">
+                    Loading transactions...
+                  </Text>
+                </Box>
+              ) : filteredTransactions.length === 0 ? (
                 <Box className="p-8 items-center bg-card border border-border rounded-2xl">
                   <Text className="text-sm text-muted-foreground font-mono text-center">
                     No transactions found
@@ -230,8 +238,8 @@ export default function AdminPayments() {
                           }`}
                         >
                           {isNegative
-                            ? `-$${Math.abs(tx.amount)}`
-                            : `+$${tx.amount}`}
+                            ? `-৳${Math.abs(tx.amount)}`
+                            : `+৳${tx.amount}`}
                         </Text>
                         <Receipt size={14} color="#555566" />
                       </Box>

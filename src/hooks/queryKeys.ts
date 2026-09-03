@@ -26,7 +26,9 @@ export const queryKeys = {
     all: (memberId: string) => ['diet', memberId] as const,
   },
   payments: {
-    all: (memberId: string) => ['payments', memberId] as const,
+    all: ['payments', 'all'] as const,
+    detail: (id: string) => ['payments', 'detail', id] as const,
+    revenue: ['payments', 'revenue'] as const,
   },
   settings: {
     adminProfile: ['settings', 'adminProfile'] as const,
