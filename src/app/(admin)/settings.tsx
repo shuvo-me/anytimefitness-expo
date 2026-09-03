@@ -332,68 +332,35 @@ function SettingsContent({
                   ))}
                 </Box>
 
-                {/* Pricing Cards per Tier */}
-                <Box className="flex-row flex-wrap gap-4">
-                  {(
-                    [
-                      {
-                        key: "basic",
-                        label: "Basic Access",
-                        color: "text-foreground",
-                      },
-                      {
-                        key: "premium",
-                        label: "Premium Tier",
-                        color: "text-primary",
-                      },
-                    ] as const
-                  ).map((tier) => (
-                    <Box
-                      key={tier.key}
-                      className="bg-background border border-border p-4 rounded-2xl flex-1 min-w-[140px]"
-                    >
-                      <Box className="flex-row items-center justify-between">
-                        <Text
-                          className={`text-[11px] font-mono uppercase tracking-wide ${tier.color}`}
-                        >
-                          {tier.label}
-                        </Text>
-                      </Box>
-                      <Box className="flex-row items-end gap-1.5 mt-3">
-                        <Text
-                          className={`text-base font-mono font-bold leading-none ${tier.color}`}
-                        >
-                          {facilityForm.currencySymbol}
-                        </Text>
-                        <Input
-                          className="flex-1 flex-row items-center bg-transparent border-0 h-9 px-0"
-                        >
-                          <GInputField
-                            value={String(
-                              facilityForm.pricing[tier.key][cadence],
-                            )}
-                            onChangeText={(v) =>
-                              setFacilityForm({
-                                ...facilityForm,
-                                pricing: {
-                                  ...facilityForm.pricing,
-                                  [tier.key]: {
-                                    ...facilityForm.pricing[tier.key],
-                                    [cadence]: Number(v) || 0,
-                                  },
-                                },
-                              })
-                            }
-                            keyboardType="numeric"
-                            className={`flex-1 text-2xl font-display font-black bg-transparent p-0 ${tier.color}`}
-                          />
-                        </Input>
-                      </Box>
-                      <Text className="text-[10px] font-mono text-muted-foreground mt-2">
-                        per athlete / {cadence}
-                      </Text>
-                    </Box>
-                  ))}
+                {/* Single Price per Cadence */}
+                <Box className="flex-1">
+                  <Text className="text-[11px] font-mono text-muted-foreground uppercase">
+                    {cadence === "monthly" ? "Monthly Price" : "Yearly Price"}
+                  </Text>
+                  <Input className="w-full bg-background border-border rounded-xl h-12 mt-1.5 px-3.5 flex-row items-center">
+                    <Text className="text-lg font-mono font-bold text-muted-foreground mr-2">
+                      {facilityForm.currencySymbol}
+                    </Text>
+                    <GInputField
+                      value={
+                        typeof facilityForm.pricing[cadence] === "number"
+                          ? String(facilityForm.pricing[cadence])
+                          : ""
+                      }
+                      onChangeText={(v) =>
+                        setFacilityForm({
+                          ...facilityForm,
+                          pricing: {
+                            ...facilityForm.pricing,
+                            [cadence]: Number(v) || 0,
+                          },
+                        })
+                      }
+                      keyboardType="numeric"
+                      className="flex-1 text-xl font-display font-black text-foreground"
+                      placeholderTextColor="#666675"
+                    />
+                  </Input>
                 </Box>
               </Box>
               <SectionSave

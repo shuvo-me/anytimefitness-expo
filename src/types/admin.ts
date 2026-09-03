@@ -37,10 +37,7 @@ export interface FacilitySettings {
   peakOccupancyAlertThreshold: number;
   currencySymbol: string;
   taxRatePercent: number;
-  pricing: {
-    basic: { monthly: number; yearly: number };
-    premium: { monthly: number; yearly: number };
-  };
+  pricing: { monthly: number; yearly: number };
   amenities: {
     lockers: boolean;
     sauna: boolean;
@@ -91,10 +88,7 @@ export const DEFAULT_FACILITY_SETTINGS: FacilitySettings = {
   peakOccupancyAlertThreshold: 85,
   currencySymbol: '৳',
   taxRatePercent: 8.25,
-  pricing: {
-    basic: { monthly: 700, yearly: 8000 },
-    premium: { monthly: 1000, yearly: 12000 },
-  },
+  pricing: { monthly: 700, yearly: 8000 },
   amenities: {
     lockers: true,
     sauna: true,
