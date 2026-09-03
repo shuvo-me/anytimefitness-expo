@@ -6,9 +6,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useMembers } from "@/hooks/useMembers";
 import { useMonthlyRevenue, useTransactions } from "@/hooks/usePayments";
+import { TIER_PRICE } from "@/types/transaction";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { AlertCircle, Receipt, Search } from "lucide-react-native";
+import { AlertCircle, Receipt, Search, Wallet } from "lucide-react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -43,6 +44,16 @@ export default function AdminPayments() {
     );
   });
 
+  const totalPaid = (transactions ?? []).reduce(
+    (sum, tx) => sum + (tx.amount > 0 ? tx.amount : 0),
+    0,
+  );
+  const paymentCount = (transactions ?? []).length;
+  const totalDue = pendingMembers.reduce(
+    (sum, m) => sum + (TIER_PRICE[m.tier] ?? 0),
+    0,
+  );
+
   return (
     <>
       <StatusBar style="light" />
@@ -69,28 +80,51 @@ export default function AdminPayments() {
             </Box>
           </Box>
 
-          {/* Monthly Revenue Banner */}
+          {/* Payment Stats Card */}
           <Box className="relative overflow-hidden bg-primary p-5 rounded-3xl">
             <Box className="absolute -right-2 -bottom-8 pointer-events-none">
               <Text className="font-display font-black text-[120px] leading-none text-primary-foreground/10">
-                $
+                ৳
               </Text>
             </Box>
-            <Text className="text-[11px] font-mono font-black uppercase tracking-widest text-primary-foreground/80">
-              Monthly Revenue
-            </Text>
+            <Box className="flex-row items-center gap-1.5">
+              <Wallet size={14} color="#000000" />
+              <Text className="text-[11px] font-mono font-black uppercase tracking-widest text-primary-foreground/80">
+                Total Paid
+              </Text>
+            </Box>
             <Text className="font-display font-black text-4xl tracking-tight text-primary-foreground mt-1 leading-none">
-              ৳{(monthlyRevenue ?? 0).toLocaleString()}
+              ৳{totalPaid.toLocaleString()}
             </Text>
-            <Box className="flex-row items-center justify-between mt-5 pt-3 border-t border-primary-foreground/15">
-              <Box className="bg-primary-foreground/10 px-2.5 py-1 rounded-full">
-                <Text className="text-xs font-mono font-bold text-primary-foreground/90">
-                  +12% vs last month
+            <Text className="text-xs font-mono text-primary-foreground/70 mt-1">
+              Lifetime collections across {paymentCount} payments
+            </Text>
+
+            <Box className="flex-row gap-3 mt-5 pt-3 border-t border-primary-foreground/15">
+              <Box className="flex-1">
+                <Text className="text-[10px] font-mono font-bold uppercase text-primary-foreground/70">
+                  Total Due
+                </Text>
+                <Text className="font-display font-black text-lg text-primary-foreground mt-0.5">
+                  ৳{totalDue.toLocaleString()}
                 </Text>
               </Box>
-              <Text className="text-[11px] font-mono font-bold uppercase text-primary-foreground/70">
-                Auto-Deposit Active
-              </Text>
+              <Box className="flex-1">
+                <Text className="text-[10px] font-mono font-bold uppercase text-primary-foreground/70">
+                  This Month
+                </Text>
+                <Text className="font-display font-black text-lg text-primary-foreground mt-0.5">
+                  ৳{(monthlyRevenue ?? 0).toLocaleString()}
+                </Text>
+              </Box>
+              <Box className="flex-1">
+                <Text className="text-[10px] font-mono font-bold uppercase text-primary-foreground/70">
+                  Payments
+                </Text>
+                <Text className="font-display font-black text-lg text-primary-foreground mt-0.5">
+                  {paymentCount}
+                </Text>
+              </Box>
             </Box>
           </Box>
 
