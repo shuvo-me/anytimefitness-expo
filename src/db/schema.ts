@@ -190,8 +190,8 @@ export const dietPlans = pgTable('diet_plans', {
   index('idx_diet_member').on(table.memberId),
 ]);
 
-// 10. app_settings
-export const appSettings = pgTable('app_settings', {
+// 10. admin_settings
+export const appSettings = pgTable('admin_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
   value: jsonb('value').$type<AppSettingsValue>().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

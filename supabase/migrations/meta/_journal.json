@@ -43,6 +43,13 @@
       "when": 1788429286681,
       "tag": "0005_icy_zeigeist",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788436905009,
+      "tag": "0006_narrow_the_executioner",
+      "breakpoints": true
     }
   ]
 }

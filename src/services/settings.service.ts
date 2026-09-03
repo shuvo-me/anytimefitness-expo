@@ -12,7 +12,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const PROFILE_KEY = 'admin_profile_settings';
 const FACILITY_KEY = 'facility_settings';
-const SETTINGS_TABLE = 'app_settings';
+const SETTINGS_TABLE = 'admin_settings';
 
 // database.types.ts is a stub (empty Tables), so the query builder resolves to
 // `never`. Cast the whole builder to `any` — same pattern used across services.

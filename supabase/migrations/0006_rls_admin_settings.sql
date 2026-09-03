@@ -1,4 +1,4 @@
--- RLS for app_settings (admin-only).
+-- RLS for admin_settings (admin-only).
 -- Hand-authored: drizzle-kit cannot express RLS policies.
 
 -- Helper: is the current user an admin? SECURITY DEFINER so it can read
@@ -16,32 +16,32 @@ AS $$
 $$;
 
 -- Security gate: only admins may read/write the global settings row.
-ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_settings ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "admin_select_settings" ON public.app_settings;
+DROP POLICY IF EXISTS "admin_select_settings" ON public.admin_settings;
 CREATE POLICY "admin_select_settings"
-  ON public.app_settings
+  ON public.admin_settings
   FOR SELECT
   TO authenticated
   USING (public.is_admin());
 
-DROP POLICY IF EXISTS "admin_insert_settings" ON public.app_settings;
+DROP POLICY IF EXISTS "admin_insert_settings" ON public.admin_settings;
 CREATE POLICY "admin_insert_settings"
-  ON public.app_settings
+  ON public.admin_settings
   FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
-DROP POLICY IF EXISTS "admin_update_settings" ON public.app_settings;
+DROP POLICY IF EXISTS "admin_update_settings" ON public.admin_settings;
 CREATE POLICY "admin_update_settings"
-  ON public.app_settings
+  ON public.admin_settings
   FOR UPDATE
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
 -- Seed the single default settings row (one global row; upsert pattern uses ON CONFLICT).
-INSERT INTO public.app_settings (value)
+INSERT INTO public.admin_settings (value)
 SELECT '{
   "admin": {
     "name": "Alex Morgan",
@@ -92,4 +92,4 @@ SELECT '{
     "stripeMode": "live"
   }
 }'::jsonb
-WHERE NOT EXISTS (SELECT 1 FROM public.app_settings);
+WHERE NOT EXISTS (SELECT 1 FROM public.admin_settings);

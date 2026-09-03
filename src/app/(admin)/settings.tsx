@@ -7,6 +7,7 @@ import {
   InputSlot,
 } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { useLogout } from "@/hooks/useAuth";
@@ -27,6 +28,7 @@ import {
 } from "@/types/admin";
 import { StatusBar } from "expo-status-bar";
 import {
+  AlertCircle,
   Bell,
   CheckCircle2,
   ChevronDown,
@@ -86,6 +88,11 @@ const NOTIFICATION_ITEMS = [
   },
 ];
 
+function humanizeError(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message;
+  return "Failed to save. Please try again.";
+}
+
 export default function AdminSettings() {
   const { data: profileData, isLoading: loadingProfile } =
     useAdminProfileSettings();
@@ -125,6 +132,8 @@ function SettingsContent({
 
   const [activeCategory, setActiveCategory] = useState<SettingCategory>("all");
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [pendingSave, setPendingSave] = useState<Record<string, boolean>>({});
+  const [saveError, setSaveError] = useState<Record<string, string | null>>({});
   const [showPin, setShowPin] = useState(false);
   const [cadence, setCadence] = useState<"monthly" | "yearly">("monthly");
 
@@ -145,20 +154,31 @@ function SettingsContent({
     }, 2000);
   };
 
-  const saveProfile = () => {
-    updateProfile.mutate(profileForm);
-    flashSaved("profile");
+  const runSave = async (key: string, saveFn: () => Promise<unknown>) => {
+    setPendingSave((prev) => ({ ...prev, [key]: true }));
+    setSaveError((prev) => ({ ...prev, [key]: null }));
+    try {
+      await saveFn();
+      flashSaved(key);
+    } catch (err) {
+      setSaveError((prev) => ({ ...prev, [key]: humanizeError(err) }));
+    } finally {
+      setPendingSave((prev) => ({ ...prev, [key]: false }));
+    }
   };
 
-  const saveBilling = () => {
-    updateFacility.mutate({ pricing: facilityForm.pricing });
-    flashSaved("billing");
-  };
+  const saveProfile = () =>
+    runSave("profile", () => updateProfile.mutateAsync(profileForm));
 
-  const saveSecurity = () => {
-    updateProfile.mutate({ securityPin: profileForm.securityPin });
-    flashSaved("security");
-  };
+  const saveBilling = () =>
+    runSave("billing", () =>
+      updateFacility.mutateAsync({ pricing: facilityForm.pricing }),
+    );
+
+  const saveSecurity = () =>
+    runSave("security", () =>
+      updateProfile.mutateAsync({ securityPin: profileForm.securityPin }),
+    );
 
   return (
     <Box className="flex-1 bg-background">
@@ -262,7 +282,12 @@ function SettingsContent({
                   />
                 </Box>
               </Box>
-              <SectionSave onSave={saveProfile} saved={!!saved.profile} />
+              <SectionSave
+                onSave={saveProfile}
+                saved={!!saved.profile}
+                loading={pendingSave.profile}
+                error={saveError.profile}
+              />
             </Section>
           )}
 
@@ -280,7 +305,7 @@ function SettingsContent({
             >
               <Box className="gap-4">
                 {/* Billing Cadence Selector */}
-                <Box className="flex-row gap-2 p-1 bg-card border border-border rounded-2xl">
+                <Box className="flex-row gap-2 p-1.5 bg-card border border-border rounded-2xl">
                   {(
                     [
                       { key: "monthly", label: "Monthly" },
@@ -290,7 +315,7 @@ function SettingsContent({
                     <Button
                       key={opt.key}
                       onPress={() => setCadence(opt.key)}
-                      className={`flex-1 py-2 rounded-xl ${
+                      className={`flex-1 py-2.5 rounded-xl ${
                         cadence === opt.key ? "bg-primary" : "bg-transparent"
                       }`}
                     >
@@ -308,7 +333,7 @@ function SettingsContent({
                 </Box>
 
                 {/* Pricing Cards per Tier */}
-                <Box className="flex-row flex-wrap gap-3">
+                <Box className="flex-row flex-wrap gap-4">
                   {(
                     [
                       {
@@ -325,18 +350,24 @@ function SettingsContent({
                   ).map((tier) => (
                     <Box
                       key={tier.key}
-                      className="bg-background border border-border p-3.5 rounded-2xl flex-1 min-w-[140px]"
+                      className="bg-background border border-border p-4 rounded-2xl flex-1 min-w-[140px]"
                     >
-                      <Text
-                        className={`text-[10px] font-mono uppercase ${tier.color}`}
-                      >
-                        {tier.label}
-                      </Text>
-                      <Box className="flex-row items-center gap-1 mt-1">
-                        <Text className={`font-mono font-bold ${tier.color}`}>
+                      <Box className="flex-row items-center justify-between">
+                        <Text
+                          className={`text-[11px] font-mono uppercase tracking-wide ${tier.color}`}
+                        >
+                          {tier.label}
+                        </Text>
+                      </Box>
+                      <Box className="flex-row items-end gap-1.5 mt-3">
+                        <Text
+                          className={`text-base font-mono font-bold leading-none ${tier.color}`}
+                        >
                           {facilityForm.currencySymbol}
                         </Text>
-                        <Input className="flex-1 flex-row items-center bg-transparent">
+                        <Input
+                          className="flex-1 flex-row items-center bg-transparent border-0 h-9 px-0"
+                        >
                           <GInputField
                             value={String(
                               facilityForm.pricing[tier.key][cadence],
@@ -354,18 +385,23 @@ function SettingsContent({
                               })
                             }
                             keyboardType="numeric"
-                            className={`flex-1 text-lg font-display font-black bg-transparent ${tier.color}`}
+                            className={`flex-1 text-2xl font-display font-black bg-transparent p-0 ${tier.color}`}
                           />
                         </Input>
                       </Box>
-                      <Text className="text-[9px] font-mono text-muted-foreground">
+                      <Text className="text-[10px] font-mono text-muted-foreground mt-2">
                         per athlete / {cadence}
                       </Text>
                     </Box>
                   ))}
                 </Box>
               </Box>
-              <SectionSave onSave={saveBilling} saved={!!saved.billing} />
+              <SectionSave
+                onSave={saveBilling}
+                saved={!!saved.billing}
+                loading={pendingSave.billing}
+                error={saveError.billing}
+              />
             </Section>
           )}
 
@@ -386,7 +422,7 @@ function SettingsContent({
                   <Text className="text-[11px] font-mono text-muted-foreground uppercase">
                     Master Terminal Security PIN
                   </Text>
-                  <Input className="flex-row items-center mt-1 bg-background border-border rounded-xl px-3.5 h-11">
+                  <Input className="flex-row items-center mt-1.5 bg-background border-border rounded-xl px-3.5 h-11">
                     <GInputField
                       value={profileForm.securityPin}
                       onChangeText={(v) =>
@@ -404,12 +440,17 @@ function SettingsContent({
                       />
                     </InputSlot>
                   </Input>
-                  <Text className="text-[10px] font-mono text-muted-foreground mt-1">
+                  <Text className="text-[11px] font-mono text-muted-foreground mt-1.5">
                     Used to unlock restricted admin actions.
                   </Text>
                 </Box>
               </Box>
-              <SectionSave onSave={saveSecurity} saved={!!saved.security} />
+              <SectionSave
+                onSave={saveSecurity}
+                saved={!!saved.security}
+                loading={pendingSave.security}
+                error={saveError.security}
+              />
             </Section>
           )}
 
@@ -556,7 +597,7 @@ function Section({
       </Button>
 
       {expanded && (
-        <Box className="px-5 pb-5 border-t border-border">{children}</Box>
+        <Box className="px-5 pt-5 pb-5 border-t border-border">{children}</Box>
       )}
     </Box>
   );
@@ -565,31 +606,53 @@ function Section({
 function SectionSave({
   onSave,
   saved,
+  loading = false,
+  error = null,
 }: {
   onSave: () => void;
   saved: boolean;
+  loading?: boolean;
+  error?: string | null;
 }) {
   return (
-    <Box className="flex-row items-center justify-between pt-4 mt-4 border-t border-border">
-      {saved ? (
-        <Box className="flex-row items-center gap-1.5">
-          <CheckCircle2 size={14} color="#C8F135" />
-          <Text className="text-xs font-mono font-bold text-primary">
-            Saved
+    <Box className="pt-4 mt-4 border-t border-border gap-3">
+      {error && (
+        <Box className="p-3 bg-destructive/15 border border-destructive/40 rounded-xl flex-row items-center gap-2">
+          <AlertCircle size={16} color="#FF4B1F" />
+          <Text className="text-xs font-mono text-foreground flex-1">
+            {error}
           </Text>
         </Box>
-      ) : (
-        <Box />
       )}
-      <Button
-        onPress={onSave}
-        className="flex-row items-center gap-1.5 bg-primary px-4 py-2 rounded-xl"
-      >
-        <ButtonIcon as={Save} className="text-primary-foreground w-3.5 h-3.5" />
-        <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-          Save
-        </ButtonText>
-      </Button>
+      <Box className="flex-row items-center justify-between">
+        {saved && !loading && !error ? (
+          <Box className="flex-row items-center gap-1.5">
+            <CheckCircle2 size={14} color="#C8F135" />
+            <Text className="text-xs font-mono font-bold text-primary">
+              Saved
+            </Text>
+          </Box>
+        ) : (
+          <Box />
+        )}
+        <Button
+          onPress={onSave}
+          isDisabled={loading}
+          className="flex-row items-center gap-1.5 bg-primary px-4 py-2 rounded-xl"
+        >
+          {loading ? (
+            <Spinner size="small" color="#101014" />
+          ) : (
+            <ButtonIcon
+              as={Save}
+              className="text-primary-foreground w-3.5 h-3.5"
+            />
+          )}
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+            {loading ? "Saving..." : "Save"}
+          </ButtonText>
+        </Button>
+      </Box>
     </Box>
   );
 }
@@ -617,7 +680,7 @@ function InputField({
         {label}
       </Text>
       <Input
-        className={`w-full bg-background border-border rounded-xl h-11 ${
+        className={`w-full bg-background border-border rounded-xl h-11 mt-1.5 ${
           icon ? "pr-3.5" : "px-3.5"
         }`}
       >
