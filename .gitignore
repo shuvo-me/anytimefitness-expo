@@ -44,3 +44,6 @@ example
 /android
 /.killo
 /.claude
+
+# Supabase CLI internal cache
+supabase/.temp/

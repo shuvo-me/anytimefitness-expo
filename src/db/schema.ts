@@ -14,6 +14,10 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import type {
+  AdminProfileSettings,
+  FacilitySettings,
+} from '@/types/admin';
 
 /* ── Enums ─────────────────────────────────────────────────────────── */
 
@@ -186,6 +190,13 @@ export const dietPlans = pgTable('diet_plans', {
   index('idx_diet_member').on(table.memberId),
 ]);
 
+// 10. app_settings
+export const appSettings = pgTable('app_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  value: jsonb('value').$type<AppSettingsValue>().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /* ── JSON payload types ─────────────────────────────────────────────── */
 
 export interface ExerciseEntry {
@@ -210,6 +221,11 @@ export interface MealEntry {
   proteinG?: number;
   carbG?: number;
   fatG?: number;
+}
+
+export interface AppSettingsValue {
+  facility: FacilitySettings;
+  admin: AdminProfileSettings;
 }
 
 /* ── Inferred types ────────────────────────────────────────────────── */
@@ -237,3 +253,6 @@ export type NewWorkoutProgram = typeof workoutPrograms.$inferInsert;
 
 export type DietPlan = typeof dietPlans.$inferSelect;
 export type NewDietPlan = typeof dietPlans.$inferInsert;
+
+export type AppSettings = typeof appSettings.$inferSelect;
+export type NewAppSettings = typeof appSettings.$inferInsert;

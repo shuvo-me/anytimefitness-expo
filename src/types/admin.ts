@@ -38,9 +38,8 @@ export interface FacilitySettings {
   currencySymbol: string;
   taxRatePercent: number;
   pricing: {
-    basic: { monthly: number; semiAnnual: number; yearly: number };
-    premium: { monthly: number; semiAnnual: number; yearly: number };
-    vip: { monthly: number; semiAnnual: number; yearly: number };
+    basic: { monthly: number; yearly: number };
+    premium: { monthly: number; yearly: number };
   };
   amenities: {
     lockers: boolean;
@@ -90,12 +89,11 @@ export const DEFAULT_FACILITY_SETTINGS: FacilitySettings = {
   operatingHours: '05:00 AM - 11:00 PM (Mon - Sun)',
   maxFloorCapacity: 50,
   peakOccupancyAlertThreshold: 85,
-  currencySymbol: '$',
+  currencySymbol: '৳',
   taxRatePercent: 8.25,
   pricing: {
-    basic: { monthly: 59, semiAnnual: 320, yearly: 590 },
-    premium: { monthly: 99, semiAnnual: 540, yearly: 990 },
-    vip: { monthly: 149, semiAnnual: 810, yearly: 1490 },
+    basic: { monthly: 700, yearly: 8000 },
+    premium: { monthly: 1000, yearly: 12000 },
   },
   amenities: {
     lockers: true,
