@@ -1,17 +1,10 @@
 import { Box } from "@/components/ui/box";
+import { HStack } from "@/components/ui/hstack";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
-import type { Member, MembershipTier, MemberStatus } from "@/types/member";
-import { getMemberById, TIER_OPTIONS } from "@/types/member";
-import type {
-  DietPlan,
-  MealItem,
-  WorkoutExercise,
-  WorkoutProgram,
-} from "@/types/routine";
-import { makeDietPlan, makeWorkoutProgram } from "@/types/routine";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectBackdrop,
@@ -23,6 +16,24 @@ import {
   SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
+import { VStack } from "@/components/ui/vstack";
+import {
+  emptyProgram,
+  type MemberDetail,
+} from "@/services/members.service";
+import {
+  useDeleteMember,
+  useMember,
+  useSaveWorkoutProgram,
+  useUpdateMember,
+  useWorkoutProgram,
+} from "@/hooks/useMembers";
+import type { MembershipTier, MemberStatus } from "@/types/member";
+import { TIER_OPTIONS } from "@/types/member";
+import type {
+  WorkoutExercise,
+  WorkoutProgram,
+} from "@/types/routine";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -31,31 +42,58 @@ import {
   CheckCircle2,
   ChevronDown,
   Dumbbell,
-  Flame,
   Plus,
+  Receipt,
   Save,
-  Sparkles,
   Trash2,
   Utensils,
 } from "lucide-react-native";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type DetailTab = "profile" | "routine" | "edit";
 
-export default function MemberDetail() {
+export default function MemberDetailScreen() {
   const router = useRouter();
   const inset = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const member = getMemberById(String(id));
+  const memberId = String(id);
+  const {
+    data: member,
+    isLoading,
+    isError,
+    refetch,
+  } = useMember(memberId);
   const [activeTab, setActiveTab] = useState<DetailTab>("profile");
 
-  if (!member) {
+  if (isLoading) {
+    return (
+      <Box className="flex-1 bg-background items-center justify-center">
+        <Spinner color="#C8F135" />
+        <Text className="text-xs font-mono text-muted-foreground mt-3">
+          Loading member...
+        </Text>
+        <StatusBar style="light" />
+      </Box>
+    );
+  }
+
+  if (isError || !member) {
     return (
       <Box className="flex-1 bg-background items-center justify-center px-6">
-        <Text className="text-sm font-mono text-muted-foreground text-center">
-          Member not found.
+        <Text className="text-sm font-mono text-destructive text-center mb-4">
+          Could not load this member.
         </Text>
+        <Button
+          onPress={() => refetch()}
+          size="sm"
+          className="rounded-xl"
+        >
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+            Retry
+          </ButtonText>
+        </Button>
         <StatusBar style="light" />
       </Box>
     );
@@ -63,21 +101,28 @@ export default function MemberDetail() {
 
   const isExpired = member.status === "expired";
   const isPending = member.status === "pending";
+  const isSuspended = member.status === "suspended";
   const statusColor = isExpired
     ? "text-destructive"
-    : isPending
+    : isSuspended
       ? "text-warning"
-      : "text-primary";
+      : isPending
+        ? "text-warning"
+        : "text-primary";
   const avatarBg = isExpired
     ? "bg-destructive/15 border-destructive/30"
-    : isPending
+    : isSuspended
       ? "bg-warning/15 border-warning/30"
-      : "bg-primary";
+      : isPending
+        ? "bg-warning/15 border-warning/30"
+        : "bg-primary/15 border-primary/30";
   const avatarText = isExpired
     ? "text-destructive"
-    : isPending
+    : isSuspended
       ? "text-warning"
-      : "text-primary-foreground";
+      : isPending
+        ? "text-warning"
+        : "text-primary";
 
   return (
     <>
@@ -91,25 +136,25 @@ export default function MemberDetail() {
           flexGrow: 1,
         }}
       >
-        <Box className="gap-5">
+        <VStack space="xl">
           {/* Header */}
-          <Box className="flex-row items-center justify-between">
+          <HStack className="items-center justify-between">
             <Button
               onPress={() => router.back()}
-
-              className="w-10 h-10 rounded-xl bg-card border border-border items-center justify-center"
+              size="icon"
+              className="w-10 h-10 rounded-xl bg-card border border-border-subtle items-center justify-center"
             >
-              <ButtonIcon as={ArrowLeft} />
+              <ButtonIcon as={ArrowLeft} className="text-foreground" />
             </Button>
             <Text className="font-display font-black text-lg uppercase tracking-tight text-foreground">
               Member Profile
             </Text>
             <Box className="w-10 h-10" />
-          </Box>
+          </HStack>
 
           {/* Title block */}
-          <Box className="bg-card border border-border p-4 rounded-2xl">
-            <Box className="flex-row items-center gap-3">
+          <Box className="bg-card border border-border-subtle p-4 rounded-2xl">
+            <HStack space="md" className="items-center">
               <Box
                 className={`w-12 h-12 rounded-full items-center justify-center border ${avatarBg}`}
               >
@@ -120,7 +165,7 @@ export default function MemberDetail() {
                 </Text>
               </Box>
               <Box className="flex-1">
-                <Box className="flex-row items-center gap-2">
+                <HStack space="sm" className="items-center">
                   <Text className="font-display font-black text-xl uppercase tracking-tight text-foreground leading-none">
                     {member.name}
                   </Text>
@@ -128,9 +173,11 @@ export default function MemberDetail() {
                     className={`px-2 py-0.5 rounded-full border ${
                       isExpired
                         ? "bg-destructive/15 border-destructive/30"
-                        : isPending
+                        : isSuspended
                           ? "bg-warning/15 border-warning/30"
-                          : "bg-primary/15 border-primary/30"
+                          : isPending
+                            ? "bg-warning/15 border-warning/30"
+                            : "bg-primary/15 border-primary/30"
                     }`}
                   >
                     <Text
@@ -139,16 +186,16 @@ export default function MemberDetail() {
                       {member.status.toUpperCase()}
                     </Text>
                   </Box>
-                </Box>
+                </HStack>
                 <Text className="text-xs font-mono text-muted-foreground mt-1">
-                  {member.id} • {member.tier} Plan
+                  {member.displayId} • {member.tier} Plan
                 </Text>
               </Box>
-            </Box>
+            </HStack>
           </Box>
 
-          {/* Tab bar */}
-          <Box className="flex-row items-center border-b border-border">
+          {/* Tab bar — pill filter style matching members list */}
+          <HStack space="sm" className="items-center">
             {(
               [
                 { key: "profile", label: "Overview" },
@@ -161,12 +208,16 @@ export default function MemberDetail() {
                 <Button
                   key={tab.key}
                   onPress={() => setActiveTab(tab.key)}
-
-                  className={`flex-1 pb-2.5 ${isActive ? "border-b-2 border-primary" : ""}`}
+                  size="sm"
+                  className={`px-4 py-1.5 rounded-full ${
+                    isActive
+                      ? "bg-primary"
+                      : "bg-card border border-border-subtle"
+                  }`}
                 >
                   <ButtonText
-                    className={`text-xs font-mono font-bold uppercase tracking-wider text-center ${
-                      isActive ? "text-primary" : "text-muted-foreground"
+                    className={`text-xs font-bold font-sans uppercase tracking-wider ${
+                      isActive ? "text-primary-foreground" : "text-muted-foreground"
                     }`}
                   >
                     {tab.label}
@@ -174,12 +225,14 @@ export default function MemberDetail() {
                 </Button>
               );
             })}
-          </Box>
+          </HStack>
 
           {activeTab === "profile" && <OverviewTab member={member} />}
-          {activeTab === "routine" && <RoutineTab member={member} />}
+          {activeTab === "routine" && (
+            <RoutineTab memberId={member.id} memberName={member.name} />
+          )}
           {activeTab === "edit" && <EditTab member={member} />}
-        </Box>
+        </VStack>
       </ScrollView>
       <StatusBar style="light" />
     </>
@@ -188,28 +241,14 @@ export default function MemberDetail() {
 
 /* ── Overview & Stats Tab ─────────────────────────────────────────── */
 
-function OverviewTab({ member }: { member: Member }) {
-  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
-
-  const flash = (msg: string) => {
-    setFeedbackMsg(msg);
-    setTimeout(() => setFeedbackMsg(null), 3000);
-  };
+function OverviewTab({ member }: { member: MemberDetail }) {
+  const router = useRouter();
 
   return (
-    <Box className="gap-4">
-      {feedbackMsg && (
-        <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
-          <CheckCircle2 size={16} color="#C8F135" />
-          <Text className="text-xs font-mono text-foreground flex-1">
-            {feedbackMsg}
-          </Text>
-        </Box>
-      )}
-
+    <VStack space="lg">
       {/* 3 Metric Cards */}
-      <Box className="flex-row gap-3">
-        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+      <HStack space="sm">
+        <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
           <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Total Sessions
           </Text>
@@ -217,7 +256,7 @@ function OverviewTab({ member }: { member: Member }) {
             {member.totalSessions}
           </Text>
         </Box>
-        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+        <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
           <Text className="text-[10px] font-mono text-muted-foreground uppercase">
             Days Left
           </Text>
@@ -225,90 +264,110 @@ function OverviewTab({ member }: { member: Member }) {
             {member.daysLeft}d
           </Text>
         </Box>
-        <Box className="flex-1 bg-background border border-border p-3.5 rounded-2xl">
+        <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
           <Text className="text-[10px] font-mono text-muted-foreground uppercase">
-            Rating
+            Total Paid
           </Text>
           <Text className="font-display font-black text-2xl text-foreground mt-1">
-            {member.rating} ★
+            ৳{member.totalPaid}
           </Text>
         </Box>
-      </Box>
+      </HStack>
 
       {/* Goal & Details */}
-      <Box className="bg-background border border-border p-4 rounded-2xl gap-2">
-        <DetailRow label="Primary Goal" value={member.goal} bold />
-        <DetailRow label="Phone" value={member.phone} />
-        <DetailRow
-          label="Weight & Height"
-          value={`${member.weightKg} kg / ${member.heightCm} cm`}
-        />
+      <Box className="bg-background border border-border-subtle p-4 rounded-2xl gap-2">
+        <DetailRow label="Primary Goal" value={member.goal?.trim() || "—"} bold last={!member.phone} />
+        {member.phone && (
+          <DetailRow label="Phone" value={member.phone} last={!member.weightKg && !member.heightCm && !member.attendanceGoalDays} />
+        )}
+        {(member.weightKg != null || member.heightCm != null) && (
+          <DetailRow
+            label="Weight & Height"
+            value={`${member.weightKg ?? "—"} kg / ${member.heightCm ?? "—"} cm`}
+            last={!member.attendanceGoalDays}
+          />
+        )}
+        {member.attendanceGoalDays != null && (
+          <DetailRow
+            label="Target Attendance"
+            value={`${member.attendanceGoalDays} days / mo`}
+            last
+          />
+        )}
         <DetailRow
           label="Emergency"
-          value={`${member.emergencyContact.name} (${member.emergencyContact.relation}) - ${member.emergencyContact.phone}`}
+          value={
+            member.emergencyContact
+              ? `${member.emergencyContact.name || "—"} (${
+                  member.emergencyContact.relation || "—"
+                }) - ${member.emergencyContact.phone || "—"}`
+              : "—"
+          }
           last
         />
       </Box>
 
-      {/* Financial & Dues */}
-      <Box className="bg-background border border-border p-4 rounded-2xl flex-row items-center justify-between">
-        <Box>
+      {/* Subscription */}
+      <Box className="bg-background border border-border-subtle p-4 rounded-2xl gap-2">
+        <HStack className="items-center justify-between mb-1">
           <Text className="text-[10px] font-mono text-muted-foreground uppercase">
-            Outstanding Balance
+            Subscription
           </Text>
-          <Text
-            className={`font-display font-black text-2xl mt-0.5 ${
-              member.duesAmount > 0 ? "text-destructive" : "text-primary"
+          <Box
+            className={`px-2 py-0.5 rounded-full ${
+              member.status === "active"
+                ? "bg-primary/15"
+                : member.status === "expired"
+                  ? "bg-destructive/15"
+                  : "bg-warning/15"
             }`}
           >
-            ${member.duesAmount}.00
-          </Text>
-        </Box>
-        {member.duesAmount > 0 ? (
-          <Button
-            onPress={() =>
-              flash(`Collected $${member.duesAmount} fee successfully!`)
-            }
-
-            className="bg-primary px-4 py-2 rounded-xl"
-          >
-            <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-              Collect Payment (${member.duesAmount})
-            </ButtonText>
-          </Button>
-        ) : (
-          <Box className="bg-primary/15 px-3 py-1 rounded-lg border border-primary/30">
-            <Text className="text-xs font-mono text-primary">
-              All Fees Settled
+            <Text
+              className={`text-[10px] font-mono font-bold uppercase ${
+                member.status === "active"
+                  ? "text-primary"
+                  : member.status === "expired"
+                    ? "text-destructive"
+                    : "text-warning"
+              }`}
+            >
+              {member.status}
             </Text>
           </Box>
-        )}
+        </HStack>
+        <DetailRow label="Plan" value={member.tier} bold />
+        <DetailRow
+          label="Start Date"
+          value={member.startDate ? formatDate(member.startDate) : "—"}
+        />
+        <DetailRow
+          label="End Date"
+          value={member.expiryDate ? formatDate(member.expiryDate) : "—"}
+          last
+        />
       </Box>
 
-      {/* Quick Actions */}
-      <Box className="flex-row gap-3 pt-1">
+      {/* Financial */}
+      <Box className="bg-background border border-border-subtle p-4 rounded-2xl flex-row items-center justify-between">
+        <Box>
+          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+            Lifetime Collections
+          </Text>
+          <Text className="font-display font-black text-2xl mt-0.5 text-foreground">
+            ৳{member.totalPaid}
+          </Text>
+        </Box>
         <Button
-          onPress={() => flash(`${member.name} checked in to gym`)}
-
-          className="flex-1 bg-border py-2.5 rounded-xl flex-row items-center justify-center gap-2"
+          onPress={() => router.push("/(admin)/payments/record")}
+          size="sm"
+          className="rounded-xl"
         >
-          <ButtonIcon as={CheckCircle2} className="text-primary w-4 h-4" />
-          <ButtonText className="text-xs font-mono font-bold text-foreground">
-            Check In to Gym
-          </ButtonText>
-        </Button>
-        <Button
-          onPress={() => flash("Member deck view (coming soon)")}
-
-          className="flex-1 bg-border py-2.5 rounded-xl flex-row items-center justify-center gap-2"
-        >
-          <ButtonIcon as={Sparkles} className="text-primary w-4 h-4" />
-          <ButtonText className="text-xs font-mono font-bold text-primary">
-            View Deck
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+            Collect Payment
           </ButtonText>
         </Button>
       </Box>
-    </Box>
+    </VStack>
   );
 }
 
@@ -325,7 +384,7 @@ function DetailRow({
 }) {
   return (
     <Box
-      className={`flex-row justify-between py-1 ${last ? "" : "border-b border-border"}`}
+      className={`flex-row justify-between py-1.5 ${last ? "" : "border-b border-border-subtle"}`}
     >
       <Text className="text-muted-foreground font-mono text-xs">{label}:</Text>
       <Text
@@ -337,33 +396,50 @@ function DetailRow({
   );
 }
 
+function formatDate(dateString: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(dateString));
+}
+
 /* ── Assigned Routine & Diet Tab ──────────────────────────────────── */
 
 type RoutineSubTab = "workout" | "diet";
 
-function RoutineTab({ member }: { member: Member }) {
+function RoutineTab({
+  memberId,
+  memberName,
+}: {
+  memberId: string;
+  memberName: string;
+}) {
   const [activeSubTab, setActiveSubTab] = useState<RoutineSubTab>("workout");
-  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
-  const [program, setProgram] = useState<WorkoutProgram>(() =>
-    makeWorkoutProgram(member.id),
-  );
-  const [diet, setDiet] = useState<DietPlan>(() => makeDietPlan(member.id));
+  const { data: fetched, isLoading } = useWorkoutProgram(memberId);
+  const [draft, setDraft] = useState<WorkoutProgram | null>(null);
+  const saveMutation = useSaveWorkoutProgram(memberId);
 
-  const flash = (msg: string) => {
-    setSaveStatus(msg);
-    setTimeout(() => setSaveStatus(null), 3000);
-  };
+  const program = draft ?? fetched ?? emptyProgram(memberId);
+
+  if (isLoading) {
+    return (
+      <Box className="p-10 items-center bg-card border border-border-subtle rounded-2xl">
+        <Spinner color="#C8F135" />
+        <Text className="text-xs font-mono text-muted-foreground mt-3">
+          Loading routine...
+        </Text>
+      </Box>
+    );
+  }
 
   const handleDeploy = () => {
-    flash(`Saved routine & nutrition plan for ${member.name}!`);
+    saveMutation.mutate(program);
   };
 
   const updateProgram = (patch: Partial<WorkoutProgram>) =>
-    setProgram((p) => ({ ...p, ...patch }));
-
-  const updateDiet = (patch: Partial<DietPlan>) =>
-    setDiet((d) => ({ ...d, ...patch }));
+    setDraft((prev) => ({ ...(prev ?? program), ...patch }));
 
   const handleAddExercise = () => {
     const newEx: WorkoutExercise = {
@@ -376,7 +452,10 @@ function RoutineTab({ member }: { member: Member }) {
       completedSets: [false, false, false, false],
       instructions: "Retract scapula, lower bar to sternum with control.",
     };
-    updateProgram({ exercises: [...program.exercises, newEx] });
+    setDraft((prev) => {
+      const base = prev ?? program;
+      return { ...base, exercises: [...base.exercises, newEx] };
+    });
   };
 
   const handleUpdateExercise = (
@@ -384,60 +463,35 @@ function RoutineTab({ member }: { member: Member }) {
     field: keyof WorkoutExercise,
     value: string | number,
   ) => {
-    const updated = [...program.exercises];
-    if (field === "sets") {
-      const numSets = Number(value) || 3;
-      updated[index] = {
-        ...updated[index],
-        sets: numSets,
-        completedSets: Array(numSets).fill(false),
-      };
-    } else {
-      updated[index] = { ...updated[index], [field]: value };
-    }
-    updateProgram({ exercises: updated });
-  };
-
-  const handleRemoveExercise = (index: number) => {
-    updateProgram({
-      exercises: program.exercises.filter((_, i) => i !== index),
+    setDraft((prev) => {
+      const base = prev ?? program;
+      const updated = [...base.exercises];
+      if (field === "sets") {
+        const numSets = Number(value) || 3;
+        updated[index] = {
+          ...updated[index],
+          sets: numSets,
+          completedSets: Array(numSets).fill(false),
+        };
+      } else {
+        updated[index] = { ...updated[index], [field]: value };
+      }
+      return { ...base, exercises: updated };
     });
   };
 
-  const handleAddMeal = () => {
-    const newMeal: MealItem = {
-      id: `meal-${Date.now()}`,
-      time: "02:00 PM",
-      title: `Meal 0${diet.meals.length + 1}: Protein Snack`,
-      description: "Rice cakes with peanut butter and whey isolate.",
-      calories: 350,
-      proteinGrams: 30,
-      carbsGrams: 40,
-      fatsGrams: 8,
-      completed: false,
-    };
-    updateDiet({ meals: [...diet.meals, newMeal] });
-  };
-
-  const handleUpdateMeal = (
-    index: number,
-    field: keyof MealItem,
-    value: string | number,
-  ) => {
-    const updated = [...diet.meals];
-    updated[index] = { ...updated[index], [field]: value };
-    updateDiet({ meals: updated });
-  };
-
-  const handleRemoveMeal = (index: number) => {
-    updateDiet({ meals: diet.meals.filter((_, i) => i !== index) });
+  const handleRemoveExercise = (index: number) => {
+    setDraft((prev) => {
+      const base = prev ?? program;
+      return { ...base, exercises: base.exercises.filter((_, i) => i !== index) };
+    });
   };
 
   return (
-    <Box className="gap-4">
+    <VStack space="md">
       {/* Sub tabs + Deploy */}
-      <Box className="flex-row items-center justify-between">
-        <Box className="flex-row gap-2">
+      <HStack className="items-center justify-between">
+        <HStack space="sm" className="items-center">
           <SubTabChip
             label="Workout Split"
             icon={
@@ -460,24 +514,33 @@ function RoutineTab({ member }: { member: Member }) {
             active={activeSubTab === "diet"}
             onPress={() => setActiveSubTab("diet")}
           />
-        </Box>
+        </HStack>
         <Button
           onPress={handleDeploy}
-
-          className="bg-primary px-3 py-1.5 rounded-xl flex-row items-center gap-1.5"
+          isDisabled={saveMutation.isPending}
+          size="sm"
+          className="rounded-xl"
         >
           <ButtonIcon as={Save} className="text-primary-foreground w-3.5 h-3.5" />
           <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-            Deploy
+            {saveMutation.isPending ? "Saving..." : "Deploy"}
           </ButtonText>
         </Button>
-      </Box>
+      </HStack>
 
-      {saveStatus && (
+      {saveMutation.isSuccess && (
         <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
           <CheckCircle2 size={16} color="#C8F135" />
           <Text className="text-xs font-mono text-foreground flex-1">
-            {saveStatus}
+            Saved routine for {memberName}!
+          </Text>
+        </Box>
+      )}
+      {saveMutation.isError && (
+        <Box className="p-3 bg-destructive/15 border border-destructive/40 rounded-xl flex-row items-center gap-2">
+          <AlertTriangle size={16} color="#FF4B1F" />
+          <Text className="text-xs font-mono text-foreground flex-1">
+            Failed to save routine. Please try again.
           </Text>
         </Box>
       )}
@@ -491,15 +554,14 @@ function RoutineTab({ member }: { member: Member }) {
           onRemove={handleRemoveExercise}
         />
       ) : (
-        <DietBuilder
-          diet={diet}
-          onChangeDiet={updateDiet}
-          onAdd={handleAddMeal}
-          onUpdate={handleUpdateMeal}
-          onRemove={handleRemoveMeal}
-        />
+        <Box className="p-10 items-center bg-background border border-border-subtle rounded-2xl gap-2">
+          <Utensils size={22} color="#8A8A9A" />
+          <Text className="text-sm font-mono text-muted-foreground text-center">
+            Diet & nutrition plans —{'\n'}coming in a future update.
+          </Text>
+        </Box>
       )}
-    </Box>
+    </VStack>
   );
 }
 
@@ -510,16 +572,16 @@ function SubTabChip({
   onPress,
 }: {
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   active: boolean;
   onPress: () => void;
 }) {
   return (
     <Button
       onPress={onPress}
-
-      className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl ${
-        active ? "bg-primary" : "bg-background border border-border"
+      size="sm"
+      className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full ${
+        active ? "bg-primary" : "bg-card border border-border-subtle"
       }`}
     >
       {icon}
@@ -548,16 +610,17 @@ function WorkoutBuilder({
   onRemove: (i: number) => void;
 }) {
   return (
-    <Box className="gap-4">
+    <VStack space="lg">
       {/* Program detail card */}
-      <Box className="bg-background border border-border p-4 rounded-2xl gap-3">
-        <Box className="flex-col gap-3">
+      <Box className="bg-background border border-border-subtle p-4 rounded-2xl gap-3">
+        <VStack space="md">
           <Box className="flex-1">
             <InputLabel>Program Title</InputLabel>
-            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+            <Input className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2">
               <InputField
                 value={program.programTitle}
                 onChangeText={(v) => onChangeProgram({ programTitle: v })}
+                placeholder="e.g. 4-Day Upper/Lower Hypertrophy"
                 placeholderTextColor="#555566"
                 className="w-full text-xs text-foreground font-mono"
               />
@@ -565,10 +628,11 @@ function WorkoutBuilder({
           </Box>
           <Box className="flex-1">
             <InputLabel>Active Day Focus</InputLabel>
-            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+            <Input className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2">
               <InputField
                 value={program.currentDayTitle}
                 onChangeText={(v) => onChangeProgram({ currentDayTitle: v })}
+                placeholder="e.g. Day 1: Push (Chest / Shoulders / Triceps)"
                 placeholderTextColor="#555566"
                 className="w-full text-xs text-primary font-bold font-mono"
               />
@@ -576,24 +640,26 @@ function WorkoutBuilder({
           </Box>
           <Box className="flex-1">
             <InputLabel>Split Schedule</InputLabel>
-            <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+            <Input className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2">
               <InputField
                 value={program.splitSchedule}
                 onChangeText={(v) => onChangeProgram({ splitSchedule: v })}
+                placeholder="e.g. Mon / Tue / Thu / Fri"
                 placeholderTextColor="#555566"
                 className="w-full text-xs text-foreground font-mono"
               />
             </Input>
           </Box>
-        </Box>
+        </VStack>
         <Box>
           <InputLabel>Coach Execution Notes</InputLabel>
-          <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
+          <Input className="w-full bg-card border border-border-subtle rounded-xl px-3 py-2">
             <InputField
               value={program.notes}
               onChangeText={(v) => onChangeProgram({ notes: v })}
               multiline
               numberOfLines={2}
+              placeholder="Focus notes for the assigned program"
               placeholderTextColor="#555566"
               className="w-full text-xs text-foreground font-mono"
             />
@@ -602,30 +668,30 @@ function WorkoutBuilder({
       </Box>
 
       {/* Exercise list */}
-      <Box className="gap-2">
-        <Box className="flex-row items-center justify-between">
+      <VStack space="sm">
+        <HStack className="items-center justify-between">
           <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
             Prescribed Exercises ({program.exercises.length})
           </Text>
           <Button
             onPress={onAdd}
-
-            className="flex-row items-center gap-1"
+            size="sm"
+            className="bg-primary rounded-full px-3 py-1.5"
           >
-            <ButtonIcon as={Plus} className="text-primary w-3.5 h-3.5" />
-            <ButtonText className="text-[11px] font-mono text-primary">
+            <ButtonIcon as={Plus} className="text-primary-foreground w-3.5 h-3.5" />
+            <ButtonText className="font-display font-bold text-[11px] uppercase tracking-wider text-primary-foreground">
               Add Exercise
             </ButtonText>
           </Button>
-        </Box>
+        </HStack>
 
         {program.exercises.map((ex, idx) => (
           <Box
             key={ex.id || idx}
-            className="bg-background border border-border p-3 rounded-xl gap-2"
+            className="bg-background border border-border-subtle p-3 rounded-xl gap-2"
           >
-            <Box className="flex-row items-center gap-2">
-              <Input className="flex-1 bg-card border-border rounded-lg px-2 py-1">
+            <HStack space="sm" className="items-center">
+              <Input className="flex-1 bg-card border border-border-subtle rounded-lg px-2 py-1">
                 <InputField
                   value={ex.name}
                   onChangeText={(v) => onUpdate(idx, "name", v)}
@@ -635,17 +701,21 @@ function WorkoutBuilder({
               </Input>
               <Button
                 onPress={() => onRemove(idx)}
-
-                className="p-1.5"
+                size="sm"
+                variant="outline"
+                className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1"
               >
-                <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
+                <ButtonIcon as={Trash2} className="text-destructive w-3.5 h-3.5" />
+                <ButtonText className="text-[10px] font-mono font-bold uppercase text-destructive">
+                  Remove
+                </ButtonText>
               </Button>
-            </Box>
+            </HStack>
 
-            <Box className="flex-row flex-wrap gap-2">
+            <HStack space="sm" className="flex-wrap">
               <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Muscle</MiniLabel>
-                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                <Input className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1">
                   <InputField
                     value={ex.targetMuscle}
                     onChangeText={(v) => onUpdate(idx, "targetMuscle", v)}
@@ -656,7 +726,7 @@ function WorkoutBuilder({
               </Box>
               <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Sets</MiniLabel>
-                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                <Input className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1">
                   <InputField
                     value={String(ex.sets)}
                     onChangeText={(v) => onUpdate(idx, "sets", v)}
@@ -668,7 +738,7 @@ function WorkoutBuilder({
               </Box>
               <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Reps</MiniLabel>
-                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                <Input className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1">
                   <InputField
                     value={ex.reps}
                     onChangeText={(v) => onUpdate(idx, "reps", v)}
@@ -679,7 +749,7 @@ function WorkoutBuilder({
               </Box>
               <Box className="flex-1 min-w-[110px]">
                 <MiniLabel>Weight (kg)</MiniLabel>
-                <Input className="w-full bg-card border-border rounded-lg px-2 py-1">
+                <Input className="w-full bg-card border border-border-subtle rounded-lg px-2 py-1">
                   <InputField
                     value={String(ex.targetWeightKg)}
                     onChangeText={(v) => onUpdate(idx, "targetWeightKg", v)}
@@ -689,174 +759,23 @@ function WorkoutBuilder({
                   />
                 </Input>
               </Box>
-            </Box>
+            </HStack>
           </Box>
         ))}
         {program.exercises.length === 0 && (
-          <Text className="text-xs font-mono text-muted-foreground text-center py-4">
-            No exercises yet. Tap &quot;Add Exercise&quot;.
-          </Text>
-        )}
-      </Box>
-    </Box>
-  );
-}
-
-function DietBuilder({
-  diet,
-  onChangeDiet,
-  onAdd,
-  onUpdate,
-  onRemove,
-}: {
-  diet: DietPlan;
-  onChangeDiet: (patch: Partial<DietPlan>) => void;
-  onAdd: () => void;
-  onUpdate: (i: number, f: keyof MealItem, v: string | number) => void;
-  onRemove: (i: number) => void;
-}) {
-  return (
-    <Box className="gap-4">
-      {/* Diet plan + macros card */}
-      <Box className="bg-background border border-border p-4 rounded-2xl gap-3">
-        <Box>
-          <InputLabel>Diet Plan Name</InputLabel>
-          <Input className="w-full bg-card border-border rounded-xl px-3 py-2">
-            <InputField
-              value={diet.title}
-              onChangeText={(v) => onChangeDiet({ title: v })}
-              placeholderTextColor="#555566"
-              className="w-full text-xs text-foreground font-mono"
-            />
-          </Input>
-        </Box>
-
-        <Box className="flex-row flex-wrap gap-2">
-          <MacroBox
-            label="Calories"
-            color="text-foreground"
-            value={String(diet.dailyCalories)}
-            onChange={(v) => onChangeDiet({ dailyCalories: Number(v) || 0 })}
-          />
-          <MacroBox
-            label="Protein (g)"
-            color="text-primary"
-            value={String(diet.targetProteinGrams)}
-            onChange={(v) =>
-              onChangeDiet({ targetProteinGrams: Number(v) || 0 })
-            }
-          />
-          <MacroBox
-            label="Carbs (g)"
-            color="text-blue-accent"
-            value={String(diet.targetCarbsGrams)}
-            onChange={(v) => onChangeDiet({ targetCarbsGrams: Number(v) || 0 })}
-          />
-          <MacroBox
-            label="Fats (g)"
-            color="text-warning"
-            value={String(diet.targetFatsGrams)}
-            onChange={(v) => onChangeDiet({ targetFatsGrams: Number(v) || 0 })}
-          />
-          <MacroBox
-            label="Water (L)"
-            color="text-foreground"
-            value={String(diet.targetWaterLiters)}
-            onChange={(v) =>
-              onChangeDiet({ targetWaterLiters: Number(v) || 0 })
-            }
-          />
-        </Box>
-      </Box>
-
-      {/* Meal schedule */}
-      <Box className="gap-2">
-        <Box className="flex-row items-center justify-between">
-          <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
-            Daily Meal Schedule ({diet?.meals?.length})
-          </Text>
-          <Button
-            onPress={onAdd}
-
-            className="flex-row items-center gap-1"
-          >
-            <ButtonIcon as={Plus} className="text-primary w-3.5 h-3.5" />
-            <ButtonText className="text-[11px] font-mono text-primary">
-              Add Meal
-            </ButtonText>
-          </Button>
-        </Box>
-
-        {diet?.meals?.map((meal, idx) => (
-          <Box
-            key={meal.id || idx}
-            className="bg-background border border-border p-3 rounded-xl gap-2"
-          >
-            <Box className="flex-row items-center gap-2">
-              <Input className="flex-1 bg-card border-border rounded-lg px-2 py-1">
-                <InputField
-                  value={meal.title}
-                  onChangeText={(v) => onUpdate(idx, "title", v)}
-                  placeholderTextColor="#555566"
-                  className="w-full text-xs text-foreground font-bold font-mono"
-                />
-              </Input>
-              <Input className="w-20 bg-card border-border rounded-lg px-2 py-1">
-                <InputField
-                  value={meal.time}
-                  onChangeText={(v) => onUpdate(idx, "time", v)}
-                  placeholderTextColor="#555566"
-                  className="w-20 text-xs text-muted-foreground font-mono"
-                />
-              </Input>
-              <Button
-                onPress={() => onRemove(idx)}
-
-                className="p-1.5"
-              >
-                <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
-              </Button>
-            </Box>
-
-            <Input className="w-full bg-card border-border rounded-lg px-2.5 py-1.5">
-              <InputField
-                value={meal.description}
-                onChangeText={(v) => onUpdate(idx, "description", v)}
-                placeholderTextColor="#555566"
-                className="w-full text-[11px] text-foreground/80 font-mono"
-              />
-            </Input>
-
-            <Box className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
-              <Box className="flex-row items-center gap-1">
-                <Flame size={11} color="#8A8A9A" />
-                <Text className="text-[10px] font-mono text-muted-foreground">
-                  {meal.calories} kcal
-                </Text>
-              </Box>
-              <Text className="text-[10px] font-mono text-primary">
-                Protein {meal.proteinGrams}g
-              </Text>
-              <Text className="text-[10px] font-mono text-blue-accent">
-                Carbs {meal.carbsGrams}g
-              </Text>
-              <Text className="text-[10px] font-mono text-warning">
-                Fats {meal.fatsGrams}g
-              </Text>
-            </Box>
+          <Box className="p-6 items-center bg-background border border-border-subtle rounded-xl">
+            <Text className="text-xs font-mono text-muted-foreground text-center">
+              No exercises yet.{" "}
+              <Text className="text-primary">{'Tap "+" Add Exercise.'}</Text>
+            </Text>
           </Box>
-        ))}
-        {diet?.meals?.length === 0 && (
-          <Text className="text-xs font-mono text-muted-foreground text-center py-4">
-            No meals yet. Tap &quot;Add Meal&quot;.
-          </Text>
         )}
-      </Box>
-    </Box>
+      </VStack>
+    </VStack>
   );
 }
 
-function InputLabel({ children }: { children: React.ReactNode }) {
+function InputLabel({ children }: { children: ReactNode }) {
   return (
     <Text className="text-muted-foreground font-mono text-[10px] uppercase mb-1">
       {children}
@@ -864,87 +783,113 @@ function InputLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function MiniLabel({ children }: { children: React.ReactNode }) {
+function MiniLabel({ children }: { children: ReactNode }) {
   return (
     <Text className="text-[10px] text-muted-foreground font-mono">{children}</Text>
   );
 }
 
-function MacroBox({
-  label,
-  color,
-  value,
-  onChange,
-}: {
-  label: string;
-  color: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <Box className="flex-1 min-w-[100px]">
-      <MiniLabel>{label}</MiniLabel>
-      <Input className={`w-full bg-card border-border rounded-lg px-2 py-1 ${color}`}>
-        <InputField
-          value={value}
-          onChangeText={onChange}
-          keyboardType="numeric"
-          placeholderTextColor="#555566"
-          className={`w-full text-xs font-bold font-mono ${color}`}
-        />
-      </Input>
-    </Box>
-  );
-}
-
 /* ── Edit Membership Tab ──────────────────────────────────────────── */
 
-function EditTab({ member }: { member: Member }) {
+const STATUS_OPTIONS: { label: string; value: MemberStatus }[] = [
+  { label: "Active", value: "active" },
+  { label: "Expired", value: "expired" },
+  { label: "Suspended", value: "suspended" },
+  { label: "Pending", value: "pending" },
+];
+
+function EditTab({ member }: { member: MemberDetail }) {
   const router = useRouter();
+  const updateMutation = useUpdateMember();
+  const deleteMutation = useDeleteMember();
+
   const [editName, setEditName] = useState(member.name);
   const [editTier, setEditTier] = useState<MembershipTier>(member.tier);
   const [editStatus, setEditStatus] = useState<MemberStatus>(member.status);
-  const [editGoal, setEditGoal] = useState(member.goal);
-  const [editDues, setEditDues] = useState(String(member.duesAmount));
+  const [editGoal, setEditGoal] = useState(member.goal ?? "");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
-
-  const flash = (msg: string) => {
-    setFeedbackMsg(msg);
-    setTimeout(() => setFeedbackMsg(null), 2000);
-  };
+  const [feedbackMsg, setFeedbackMsg] = useState<{
+    kind: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const handleSave = () => {
-    flash("Member updated successfully!");
+    if (updateMutation.isPending) return;
+    updateMutation.mutate(
+      {
+        id: member.id,
+        patch: {
+          fullName: editName.trim() || member.name,
+          tier: editTier,
+          status: editStatus,
+          goal: editGoal.trim() || null,
+        },
+      },
+      {
+        onSuccess: () => {
+          setFeedbackMsg({
+            kind: "success",
+            text: "Member updated successfully!",
+          });
+          setTimeout(() => setFeedbackMsg(null), 3000);
+        },
+        onError: () => {
+          setFeedbackMsg({ kind: "error", text: "Failed to update member." });
+          setTimeout(() => setFeedbackMsg(null), 3000);
+        },
+      },
+    );
   };
 
   const handleDelete = () => {
-    flash(`${member.name} removed`);
-    setTimeout(() => router.back(), 1200);
+    deleteMutation.mutate(member.id, {
+      onSuccess: () => {
+        setFeedbackMsg({ kind: "success", text: `${member.name} removed` });
+        setTimeout(() => {
+          setFeedbackMsg(null);
+          router.back();
+        }, 1200);
+      },
+      onError: () => {
+        setFeedbackMsg({ kind: "error", text: "Failed to remove member." });
+        setTimeout(() => setFeedbackMsg(null), 3000);
+      },
+    });
   };
 
   return (
-    <Box className="gap-3">
+    <VStack space="md">
       {feedbackMsg && (
-        <Box className="p-3 bg-primary/15 border border-primary/40 rounded-xl flex-row items-center gap-2">
-          <CheckCircle2 size={16} color="#C8F135" />
+        <Box
+          className={`p-3 rounded-xl flex-row items-center gap-2 ${
+            feedbackMsg.kind === "success"
+              ? "bg-primary/15 border border-primary/40"
+              : "bg-destructive/15 border border-destructive/40"
+          }`}
+        >
+          <CheckCircle2
+            size={16}
+            color={feedbackMsg.kind === "success" ? "#C8F135" : "#FF4B1F"}
+          />
           <Text className="text-xs font-mono text-foreground flex-1">
-            {feedbackMsg}
+            {feedbackMsg.text}
           </Text>
         </Box>
       )}
 
-      <FieldLabel>Member Name</FieldLabel>
-      <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
-        <InputField
-          value={editName}
-          onChangeText={setEditName}
-          placeholderTextColor="#555566"
-          className="w-full text-xs text-foreground font-mono"
-        />
-      </Input>
+      <Box>
+        <FieldLabel>Member Name</FieldLabel>
+        <Input className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2">
+          <InputField
+            value={editName}
+            onChangeText={setEditName}
+            placeholderTextColor="#555566"
+            className="w-full text-xs text-foreground font-mono"
+          />
+        </Input>
+      </Box>
 
-      <Box className="flex-row gap-3 pt-1">
+      <HStack space="md" className="pt-1">
         <Box className="flex-1">
           <FieldLabel>Tier</FieldLabel>
           <FormSelect
@@ -957,32 +902,15 @@ function EditTab({ member }: { member: Member }) {
           <FieldLabel>Status</FieldLabel>
           <FormSelect
             value={editStatus}
-            options={[
-              { label: "Active", value: "active" },
-              { label: "Expired", value: "expired" },
-              { label: "Pending", value: "pending" },
-            ]}
+            options={STATUS_OPTIONS}
             onChange={(v) => setEditStatus(v as MemberStatus)}
           />
         </Box>
-      </Box>
-
-      <Box className="pt-1">
-        <FieldLabel>Pending Dues ($)</FieldLabel>
-        <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
-          <InputField
-            value={editDues}
-            onChangeText={setEditDues}
-            keyboardType="numeric"
-            placeholderTextColor="#555566"
-            className="w-full text-xs text-foreground font-mono"
-          />
-        </Input>
-      </Box>
+      </HStack>
 
       <Box className="pt-1">
         <FieldLabel>Goal Description</FieldLabel>
-        <Input className="w-full bg-background border-border rounded-xl px-3 py-2">
+        <Input className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2">
           <InputField
             value={editGoal}
             onChangeText={setEditGoal}
@@ -994,63 +922,75 @@ function EditTab({ member }: { member: Member }) {
 
       {showDeleteConfirm && (
         <Box className="p-4 bg-destructive/15 border border-destructive/40 rounded-2xl gap-3">
-          <Box className="flex-row items-center gap-2">
+          <HStack space="sm" className="items-center">
             <AlertTriangle size={18} color="#FF4B1F" />
             <Text className="text-xs font-mono font-bold text-destructive">
-              Confirm Member Expulsion / Removal
+              Confirm Member Removal
             </Text>
-          </Box>
+          </HStack>
           <Text className="text-xs text-foreground/80">
             Are you sure you want to permanently remove {editName} from the gym
             roster? This action cannot be undone.
           </Text>
-          <Box className="flex-row justify-end gap-2">
+          <HStack space="sm" className="justify-end">
             <Button
               onPress={() => setShowDeleteConfirm(false)}
-
-              className="px-3 py-1.5 bg-border rounded-lg"
+              size="sm"
+              variant="outline"
+              className="rounded-lg"
             >
               <ButtonText className="text-xs font-mono text-foreground">Cancel</ButtonText>
             </Button>
             <Button
               onPress={handleDelete}
-
-              className="px-4 py-1.5 bg-destructive rounded-lg"
+              isDisabled={deleteMutation.isPending}
+              size="sm"
+              variant="destructive"
+              className="rounded-lg"
             >
               <ButtonText className="text-xs font-mono font-bold text-foreground">
-                Confirm Delete
+                {deleteMutation.isPending ? "Removing..." : "Confirm Delete"}
               </ButtonText>
             </Button>
-          </Box>
+          </HStack>
         </Box>
       )}
 
-      <Box className="pt-3 flex-row items-center justify-between border-t border-border">
-        <Button
-          onPress={() => setShowDeleteConfirm(true)}
-
-          className="px-3 py-2 rounded-xl flex-row items-center gap-1.5"
-        >
-          <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
-          <ButtonText className="text-xs font-mono text-destructive">
-            Remove Member
-          </ButtonText>
-        </Button>
+      <Box className="pt-3 flex-row items-center justify-between border-t border-border-subtle">
+        <HStack space="xs" className="items-center">
+          <Receipt size={14} color="#8A8A9A" />
+          <Text className="text-[10px] font-mono text-muted-foreground">
+            ৳{member.totalPaid} collected lifetime
+          </Text>
+        </HStack>
         <Button
           onPress={handleSave}
-
-          className="bg-primary px-5 py-2.5 rounded-xl"
+          isDisabled={updateMutation.isPending}
+          size="sm"
+          className="rounded-xl"
         >
           <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-            Save Changes
+            {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </ButtonText>
         </Button>
       </Box>
-    </Box>
+
+      <Button
+        onPress={() => setShowDeleteConfirm(true)}
+        size="sm"
+        variant="outline"
+        className="rounded-xl flex-row items-center gap-1.5 self-start"
+      >
+        <ButtonIcon as={Trash2} className="text-destructive w-4 h-4" />
+        <ButtonText className="text-xs font-mono text-destructive">
+          Remove Member
+        </ButtonText>
+      </Button>
+    </VStack>
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+function FieldLabel({ children }: { children: ReactNode }) {
   return (
     <Text className="text-muted-foreground font-mono text-[10px] uppercase mb-1">
       {children}
@@ -1073,7 +1013,7 @@ function FormSelect<T extends string>({
       <SelectTrigger
         variant="outline"
         size="md"
-        className="bg-background border-border rounded-xl px-3 min-h-10"
+        className="bg-background border-border-subtle rounded-xl px-3 min-h-10"
       >
         <Box className="flex-1 flex-row items-center justify-between">
           <Text className="text-xs font-mono text-foreground">
@@ -1084,7 +1024,7 @@ function FormSelect<T extends string>({
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />
-        <SelectContent className="bg-card">
+        <SelectContent className="bg-card border-border-subtle">
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>

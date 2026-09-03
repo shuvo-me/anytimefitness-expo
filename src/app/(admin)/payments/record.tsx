@@ -13,7 +13,7 @@ import {
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
-import { MOCK_MEMBERS } from "@/types/member";
+import { useMembers } from "@/hooks/useMembers";
 import { CATEGORIES, METHODS, TxCategory, TxMethod } from "@/types/transaction";
 import { useRouter } from "expo-router";
 import { CheckCircle2, ChevronDown } from "lucide-react-native";
@@ -68,11 +68,15 @@ function FormSelect<T extends string>({
 
 export default function RecordPayment() {
   const router = useRouter();
+  const { data: members } = useMembers();
+  const memberList = members ?? [];
 
-  const [memberId, setMemberId] = useState(MOCK_MEMBERS[0]?.id ?? "");
+  const [memberId, setMemberId] = useState("");
   const [amount, setAmount] = useState("80");
   const [category, setCategory] = useState<TxCategory>("Monthly Fee");
   const [method, setMethod] = useState<TxMethod>("Credit Card");
+
+  const selectedMemberId = memberId || memberList[0]?.id || "";
 
   return (
     <Box className="flex-1 bg-card px-5 pt-6 pb-8">
@@ -87,9 +91,9 @@ export default function RecordPayment() {
               Select Member
             </Text>
             <FormSelect
-              value={memberId}
-              options={MOCK_MEMBERS.map((m) => ({
-                label: `${m.name} (${m.tier} - ${m.id})`,
+              value={selectedMemberId}
+              options={memberList.map((m) => ({
+                label: `${m.name} (${m.tier} - ${m.displayId})`,
                 value: m.id,
               }))}
               onChange={setMemberId}

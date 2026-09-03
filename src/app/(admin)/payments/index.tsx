@@ -3,7 +3,7 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Text } from "@/components/ui/text";
-import { MOCK_MEMBERS } from "@/types/member";
+import { useMembers } from "@/hooks/useMembers";
 import { MOCK_TRANSACTIONS } from "@/types/transaction";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -13,13 +13,24 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MONTHLY_REVENUE = 284500;
 
+function initialsOf(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export default function AdminPayments() {
   const router = useRouter();
   const inset = useSafeAreaInsets();
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: members } = useMembers();
 
-  const pendingMembers = MOCK_MEMBERS.filter((m) => m.duesAmount > 0);
-  const totalDue = pendingMembers.reduce((sum, m) => sum + m.duesAmount, 0);
+  const pendingMembers = (members ?? []).filter(
+    (m) => m.status === "expired" || m.status === "pending",
+  );
 
   const filteredTransactions = MOCK_TRANSACTIONS.filter((tx) => {
     const q = searchTerm.trim().toLowerCase();
@@ -103,7 +114,7 @@ export default function AdminPayments() {
                   {pendingMembers.length})
                 </Text>
                 <Text className="text-xs font-mono text-muted-foreground">
-                  Total Due: ${totalDue}
+                  {pendingMembers.length} uncollected
                 </Text>
               </Box>
               <Box className="gap-2">
@@ -115,7 +126,7 @@ export default function AdminPayments() {
                     <Box className="flex-row items-center gap-2.5 flex-1">
                       <Box className="w-8 h-8 rounded-lg bg-destructive/15 border border-destructive/30 items-center justify-center">
                         <Text className="font-mono font-bold text-xs text-destructive">
-                          {m.initials}
+                          {initialsOf(m.name)}
                         </Text>
                       </Box>
                       <Box className="flex-1">
@@ -123,9 +134,9 @@ export default function AdminPayments() {
                           {m.name}
                         </Text>
                         <Text className="text-[10px] font-mono text-muted-foreground mt-0.5">
-                          {m.tier} • Due:{" "}
-                          <Text className="text-destructive font-bold">
-                            ${m.duesAmount}
+                          {m.tier} •{" "}
+                          <Text className="text-destructive font-bold uppercase">
+                            {m.status}
                           </Text>
                         </Text>
                       </Box>

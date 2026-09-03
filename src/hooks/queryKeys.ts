@@ -19,6 +19,9 @@ export const queryKeys = {
   workouts: {
     all: (memberId: string) => ['workouts', memberId] as const,
   },
+  workoutPrograms: {
+    byMember: (memberId: string) => ['workout-programs', memberId] as const,
+  },
   diet: {
     all: (memberId: string) => ['diet', memberId] as const,
   },

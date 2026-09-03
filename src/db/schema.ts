@@ -1,6 +1,7 @@
 import {
   boolean,
   date,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -91,6 +92,10 @@ export const members = pgTable('members', {
     phone: string;
     relation: string;
   }>(),
+  goal: text('goal'),
+  weightKg: doublePrecision('weight_kg'),
+  heightCm: doublePrecision('height_cm'),
+  attendanceGoalDays: integer('attendance_goal_days'),
   notes: text('notes'),
 }, (table) => [
   index('idx_members_status').on(table.membershipStatus),
@@ -156,6 +161,9 @@ export const workoutPrograms = pgTable('workout_programs', {
   memberId: uuid('member_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   splitDay: text('split_day').notNull(),
+  splitSchedule: text('split_schedule'),
+  notes: text('notes'),
+  assignedBy: text('assigned_by'),
   assignedDate: date('assigned_date').notNull().defaultNow(),
   exercises: jsonb('exercises').$type<ExerciseEntry[]>().notNull().default([]),
   completed: boolean('completed').notNull().default(false),
@@ -181,9 +189,14 @@ export const dietPlans = pgTable('diet_plans', {
 /* ── JSON payload types ─────────────────────────────────────────────── */
 
 export interface ExerciseEntry {
+  id?: string;
   name: string;
+  targetMuscle?: string;
   sets: number;
   reps: string;
+  targetWeightKg?: number;
+  completedSets?: boolean[];
+  instructions?: string;
   weight?: string;
   restSec?: number;
   completed?: boolean;

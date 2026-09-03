@@ -22,6 +22,20 @@
       "when": 1788259263613,
       "tag": "0002_quick_mulholland_black",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788331923923,
+      "tag": "0003_member_profile_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788332083009,
+      "tag": "0004_workout_program_routine_fields",
+      "breakpoints": true
     }
   ]
 }
