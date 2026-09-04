@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAddMember } from "@/hooks/useMembers";
+import { useFacilitySettings } from "@/hooks/useSettings";
 import { MembershipTier, TIER_OPTIONS } from "@/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -132,13 +133,15 @@ export default function MemberOnboard() {
 
   const created = addMember.isSuccess;
 
+  const { data: facilitySettings } = useFacilitySettings();
+
   const getTierPrice = (t: MembershipTier) => {
-    switch (t) {
-      case "Monthly":
-        return "৳600 / mo";
-      case "Yearly":
-        return "৳7000 / yr";
-    }
+    const symbol = facilitySettings?.currencySymbol ?? "৳";
+    const amount =
+      t === "Monthly"
+        ? facilitySettings?.pricing.monthly
+        : facilitySettings?.pricing.yearly;
+    return `${symbol}${amount ?? 0} / ${t === "Monthly" ? "mo" : "yr"}`;
   };
 
   return (

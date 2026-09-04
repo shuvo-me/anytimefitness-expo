@@ -1,5 +1,6 @@
 import type { MemberForm } from '@/api/member.schema';
 import { supabase } from '@/lib/supabase';
+import { getFacilitySettings } from '@/services/settings.service';
 import type { MembershipTier, MemberStatus } from '@/types/member';
 import type {
   WorkoutExercise,
@@ -17,11 +18,6 @@ const DB_STATUS_TO_UI: Record<string, MemberStatus> = {
   expired: 'expired',
   suspended: 'suspended',
   pending: 'pending',
-};
-
-const TIER_PRICE: Record<MembershipTier, number> = {
-  Monthly: 600,
-  Yearly: 7000,
 };
 
 interface MemberProfileRow {
@@ -127,11 +123,14 @@ export async function addMember(form: MemberForm): Promise<string> {
   if (memberError) throw memberError;
 
   if (form.initialPayment) {
+    const { pricing } = await getFacilitySettings();
+    const amount =
+      pricing[form.tier === 'Monthly' ? 'monthly' : 'yearly'];
     const { error: txError } = await supabase
       .from('transactions' as any)
       .insert({
         member_id: profile.id,
-        amount: TIER_PRICE[form.tier],
+        amount,
         status: 'completed',
         method: 'card',
         description: `Initial ${form.tier} membership payment`,

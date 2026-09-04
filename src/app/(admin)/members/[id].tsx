@@ -30,6 +30,7 @@ import {
 } from "@/hooks/useMembers";
 import type { MembershipTier, MemberStatus } from "@/types/member";
 import { TIER_OPTIONS } from "@/types/member";
+import { useFacilitySettings } from "@/hooks/useSettings";
 import type {
   WorkoutExercise,
   WorkoutProgram,
@@ -807,6 +808,7 @@ function EditTab({ member }: { member: MemberDetail }) {
   const router = useRouter();
   const updateMutation = useUpdateMember();
   const deleteMutation = useDeleteMember();
+  const { data: facilitySettings } = useFacilitySettings();
 
   const [editName, setEditName] = useState(member.name);
   const [editTier, setEditTier] = useState<MembershipTier>(member.tier);
@@ -817,6 +819,16 @@ function EditTab({ member }: { member: MemberDetail }) {
     kind: "success" | "error";
     text: string;
   } | null>(null);
+
+  const symbol = facilitySettings?.currencySymbol ?? "৳";
+  const tierOptions = TIER_OPTIONS.map((t) => ({
+    value: t.value,
+    label: `${t.value} (${
+      t.value === "Monthly"
+        ? facilitySettings?.pricing.monthly ?? 0
+        : facilitySettings?.pricing.yearly ?? 0
+    }${symbol}/${t.value === "Monthly" ? "mo" : "yr"})`,
+  }));
 
   const handleSave = () => {
     if (updateMutation.isPending) return;
@@ -899,7 +911,7 @@ function EditTab({ member }: { member: MemberDetail }) {
           <FieldLabel>Tier</FieldLabel>
           <FormSelect
             value={editTier}
-            options={TIER_OPTIONS}
+            options={tierOptions}
             onChange={(v) => setEditTier(v as MembershipTier)}
           />
         </Box>
