@@ -90,6 +90,25 @@ export function useResetPassword() {
   });
 }
 
+export function useChangePassword() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      email,
+      currentPassword,
+      newPassword,
+    }: {
+      email: string;
+      currentPassword: string;
+      newPassword: string;
+    }) => authService.changePassword(email, currentPassword, newPassword),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
+    },
+  });
+}
+
 export function useLogout() {
   const queryClient = useQueryClient();
 

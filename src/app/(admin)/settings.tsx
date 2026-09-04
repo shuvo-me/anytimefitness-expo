@@ -22,7 +22,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { useLogout } from "@/hooks/useAuth";
+import {
+  changePasswordSchema,
+  type ChangePasswordForm,
+} from "@/api/change-password.schema";
+import { useLogout, useAuth, useChangePassword } from "@/hooks/useAuth";
 import {
   useAdminProfileSettings,
   useFacilitySettings,
@@ -57,6 +61,8 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Controller, useForm, type Control } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const ALL_SECTION_KEYS = [
   "profile",
@@ -144,7 +150,6 @@ function SettingsContent({
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [pendingSave, setPendingSave] = useState<Record<string, boolean>>({});
   const [saveError, setSaveError] = useState<Record<string, string | null>>({});
-  const [showPin, setShowPin] = useState(false);
   const [cadence, setCadence] = useState<"monthly" | "yearly">("monthly");
 
   const [openSections, setOpenSections] =
@@ -179,11 +184,6 @@ function SettingsContent({
   const saveBilling = () =>
     runSave("billing", () =>
       updateFacility.mutateAsync({ pricing: facilityForm.pricing }),
-    );
-
-  const saveSecurity = () =>
-    runSave("security", () =>
-      updateProfile.mutateAsync({ securityPin: profileForm.securityPin }),
     );
 
   return (
@@ -393,47 +393,11 @@ function SettingsContent({
               <Section
                 value="security"
                 title="Security"
-                subtitle="Terminal access PIN"
+                subtitle="Account password"
                 icon={<KeyRound size={16} color="#C8F135" />}
                 iconBg="bg-primary/15 border-primary/30"
               >
-                <VStack space="lg">
-                  <Box className="flex-1">
-                    <Text
-                      size="xs"
-                      className="font-mono text-muted-foreground uppercase"
-                    >
-                      Master Terminal Security PIN
-                    </Text>
-                    <Input className="flex-row items-center mt-1.5 bg-background border-border rounded-xl px-3.5 h-11">
-                      <GInputField
-                        value={profileForm.securityPin}
-                        onChangeText={(v) =>
-                          setProfileForm({ ...profileForm, securityPin: v })
-                        }
-                        secureTextEntry={!showPin}
-                        maxLength={6}
-                        className="flex-1 text-base text-foreground font-mono tracking-widest"
-                        placeholderTextColor="#666675"
-                      />
-                      <InputSlot onPress={() => setShowPin(!showPin)}>
-                        <InputIcon
-                          as={showPin ? EyeOff : Eye}
-                          className="text-muted-foreground w-4 h-4"
-                        />
-                      </InputSlot>
-                    </Input>
-                    <Text size="xs" className="font-mono text-muted-foreground mt-1.5">
-                      Used to unlock restricted admin actions.
-                    </Text>
-                  </Box>
-                </VStack>
-                <SectionSave
-                  onSave={saveSecurity}
-                  saved={!!saved.security}
-                  loading={pendingSave.security}
-                  error={saveError.security}
-                />
+                <ChangePasswordBlock />
               </Section>
             )}
 
@@ -640,6 +604,169 @@ function SectionSave({
           </Button>
         </Box>
       </VStack>
+    </Box>
+  );
+}
+
+function ChangePasswordBlock() {
+  const { user } = useAuth();
+  const changePassword = useChangePassword();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const success = changePassword.isSuccess;
+
+  const onSubmit = handleSubmit(async (values) => {
+    if (!user?.email) return;
+    await changePassword.mutateAsync({
+      email: user.email,
+      currentPassword: values.currentPassword,
+      newPassword: values.newPassword,
+    });
+    reset();
+  });
+
+  return (
+    <VStack space="lg">
+      <Box className="pt-5 mt-1 border-t border-border">
+        <Text size="sm" bold className="font-mono text-foreground">
+          Change Password
+        </Text>
+        <Text size="2xs" className="font-mono text-muted-foreground mt-1">
+          {user?.email
+            ? `Account: ${user.email}`
+            : "Sign in is required to change your password."}
+        </Text>
+      </Box>
+
+      <VStack space="lg">
+        <PasswordField
+          control={control}
+          name="currentPassword"
+          label="Current Password"
+          error={errors.currentPassword?.message}
+        />
+        <PasswordField
+          control={control}
+          name="newPassword"
+          label="New Password"
+          error={errors.newPassword?.message}
+        />
+        <PasswordField
+          control={control}
+          name="confirmPassword"
+          label="Confirm New Password"
+          error={errors.confirmPassword?.message}
+        />
+      </VStack>
+
+      {changePassword.isError && (
+        <Box className="p-3 bg-destructive/15 border border-destructive/40 rounded-xl flex-row items-center gap-2">
+          <AlertCircle size={16} color="#FF4B1F" />
+          <Text size="xs" className="font-mono text-foreground flex-1">
+            {changePassword.error instanceof Error
+              ? changePassword.error.message
+              : "Failed to change password. Please try again."}
+          </Text>
+        </Box>
+      )}
+
+      <Box className="flex-row items-center justify-between">
+        {success ? (
+          <Box className="flex-row items-center gap-1.5">
+            <CheckCircle2 size={14} color="#C8F135" />
+            <Text size="xs" bold className="font-mono text-primary">
+              Password updated
+            </Text>
+          </Box>
+        ) : (
+          <Box />
+        )}
+        <Button
+          onPress={onSubmit}
+          isDisabled={changePassword.isPending}
+          className="flex-row items-center gap-1.5 bg-primary px-4 py-2 rounded-xl"
+        >
+          {changePassword.isPending ? (
+            <Spinner size="small" color="#101014" />
+          ) : (
+            <ButtonIcon
+              as={Save}
+              className="text-primary-foreground w-3.5 h-3.5"
+            />
+          )}
+          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+            {changePassword.isPending ? "Updating..." : "Update Password"}
+          </ButtonText>
+        </Button>
+      </Box>
+    </VStack>
+  );
+}
+
+function PasswordField({
+  control,
+  name,
+  label,
+  error,
+}: {
+  control: Control<ChangePasswordForm>;
+  name: "currentPassword" | "newPassword" | "confirmPassword";
+  label: string;
+  error?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <Box>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <Box>
+            <Text
+              size="xs"
+              className="font-mono text-muted-foreground uppercase mb-1.5"
+            >
+              {label}
+            </Text>
+            <Input className="flex-row items-center bg-background border-border rounded-xl px-3.5 h-11">
+              <GInputField
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry={!visible}
+                autoCapitalize="none"
+                className="flex-1 text-sm text-foreground font-mono"
+                placeholderTextColor="#666675"
+              />
+              <InputSlot onPress={() => setVisible(!visible)}>
+                <InputIcon
+                  as={visible ? EyeOff : Eye}
+                  className="text-muted-foreground w-4 h-4"
+                />
+              </InputSlot>
+            </Input>
+          </Box>
+        )}
+      />
+      {error && (
+        <Text className="text-[11px] font-mono text-destructive mt-1">
+          {error}
+        </Text>
+      )}
     </Box>
   );
 }
