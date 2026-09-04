@@ -10,6 +10,8 @@ export const queryKeys = {
   },
   attendance: {
     occupancy: ['attendance', 'occupancy'] as const,
+    today: ['attendance', 'today'] as const,
+    trend: ['attendance', 'trend'] as const,
     recent: ['attendance', 'recent'] as const,
   },
   classes: {
