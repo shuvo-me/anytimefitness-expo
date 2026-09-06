@@ -1,7 +1,7 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
 import { Spinner } from "@/components/ui/spinner";
+import { Text } from "@/components/ui/text";
+import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Dumbbell } from "lucide-react-native";
@@ -19,7 +19,7 @@ export default function Index() {
           className="font-display text-2xl font-extrabold italic tracking-tighter uppercase"
           size="2xl"
         >
-          ANYTIME<Text className="text-primary">FITNESS</Text>
+          ANYTIME<Text className="text-primary text-2xl">FITNESS</Text>
         </Text>
         <Spinner size="small" color="#C8F135" className="mt-4" />
         <StatusBar style="light" />

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AnytimeFitenss",
-    "slug": "AnytimeFitenss",
+    "slug": "anytimefitness",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -29,9 +29,16 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#0C0C0F",
+          "image": "./assets/images/logo-glow.png",
+          "resizeMode": "contain",
+          "imageWidth": 180
+        }
+      ],
+      [
+        "expo-system-ui",
+        {
+          "backgroundColor": "#0C0C0F"
         }
       ],
       "expo-secure-store",
@@ -40,6 +47,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d3aaf583-142b-4d3b-8cc6-afde6a13f551"
+      }
+    },
+    "owner": "shuvojsdev"
   }
 }

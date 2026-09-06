@@ -6,13 +6,9 @@ import 'react-native-url-polyfill/auto';
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY ?? '';
 
-const isValidUrl = url.startsWith('http://') || url.startsWith('https://');
-
 function getStorage(): SupportedStorage | undefined {
   if (Platform.OS === 'web') return undefined;
 
-  // Lazy import to avoid SSR crashes
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const SecureStore = require('expo-secure-store');
   return {
     getItem: (key: string) => SecureStore.getItemAsync(key),
@@ -22,8 +18,8 @@ function getStorage(): SupportedStorage | undefined {
 }
 
 export const supabase = createClient<Database>(
-  isValidUrl ? url : 'http://localhost:54321',
-  isValidUrl ? supabaseKey : 'placeholder-key',
+  url,
+  supabaseKey,
   {
     auth: {
       storage: getStorage(),
