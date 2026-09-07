@@ -1,9 +1,10 @@
+import { RegisterForm, registerSchema } from "@/api/register.schema";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
-import { registerSchema, RegisterForm } from "@/api/register.schema";
 import { useRegister } from "@/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -47,7 +48,11 @@ export default function RegisterScreen() {
   const onSubmit = handleSubmit((values) => {
     setError(null);
     registerMutation.mutate(
-      { email: values.email, password: values.password, fullName: values.fullName },
+      {
+        email: values.email,
+        password: values.password,
+        fullName: values.fullName,
+      },
       {
         onError: (err: Error) => setError(err.message),
         onSuccess: () => setSubmittedEmail(values.email),
@@ -57,30 +62,28 @@ export default function RegisterScreen() {
 
   if (submittedEmail) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <Box className="flex-1 items-center justify-center px-6">
-          <Box className="w-16 h-16 rounded-full bg-primary items-center justify-center mb-4">
-            <CheckCircle size={32} color="#000000" />
-          </Box>
-          <Text size="xl" className="font-display font-bold text-center mb-2">
-            Check Your Email
-          </Text>
-          <Text className="text-sm font-mono text-muted-foreground text-center mb-6 leading-relaxed">
-            We sent a verification link to{"\n"}
-            <Text className="font-bold">{submittedEmail}</Text>
-          </Text>
-          <Button
-            onPress={() => router.replace("/(auth)/login")}
-            variant="default"
-            size="lg"
-            className="rounded-2xl"
-          >
-            <ButtonText className="font-bold text-sm uppercase tracking-wider text-primary-foreground">
-              Back to Sign In
-            </ButtonText>
-          </Button>
+      <Box className="flex-1 bg-background items-center justify-center px-6">
+        <Box className="w-16 h-16 rounded-full bg-primary items-center justify-center mb-4">
+          <CheckCircle size={32} color="#000000" />
         </Box>
-      </SafeAreaView>
+        <Text size="xl" className="font-display font-bold text-center mb-2">
+          Registration Successful!
+        </Text>
+        <Text className="text-sm font-mono text-muted-foreground text-center mb-6 leading-relaxed">
+          Login with your email to access your account!
+          <Text className="font-bold">{submittedEmail}</Text>
+        </Text>
+        <Button
+          onPress={() => router.replace("/(auth)/login")}
+          variant="default"
+          size="lg"
+          className="rounded-2xl"
+        >
+          <ButtonText className="font-bold text-sm uppercase tracking-wider text-primary-foreground">
+            Back to Login
+          </ButtonText>
+        </Button>
+      </Box>
     );
   }
 
@@ -291,9 +294,11 @@ export default function RegisterScreen() {
               className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >
               <ButtonText className="font-extrabold text-sm uppercase tracking-wider text-primary-foreground">
-                {registerMutation.isPending
-                  ? "Creating Account..."
-                  : "Create Account"}
+                {registerMutation.isPending ? (
+                  <Spinner color="#0C0C0F" />
+                ) : (
+                  "Create Account"
+                )}
               </ButtonText>
               {!registerMutation.isPending && (
                 <ButtonIcon

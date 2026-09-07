@@ -2,6 +2,7 @@ import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useLogin } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
@@ -307,7 +308,11 @@ export default function LoginScreen() {
               className="w-full h-11 rounded-2xl flex-row items-center justify-center gap-2"
             >
               <ButtonText className="font-extrabold text-sm uppercase tracking-wider text-primary-foreground">
-                {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                {loginMutation.isPending ? (
+                  <Spinner color="#0C0C0F" />
+                ) : (
+                  "Sign In"
+                )}
               </ButtonText>
               {!loginMutation.isPending && (
                 <ButtonIcon
