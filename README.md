@@ -1,56 +1,119 @@
-# Welcome to your Expo app 👋
+# AnytimeFitenss
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A dual-persona gym management platform built with Expo — an **admin/staff console** for running the facility and a **member app** for members. Both personas share one codebase powered by Supabase (Postgres, Auth, Realtime, Storage).
 
-## Get started
+> Package/repo name: `anytimefitenss` · Product brand: **AnytimeFitenss**
 
-1. Install dependencies
+---
+
+## Screenshots
+
+| | | |
+|---|---|---|
+| ![Screenshot 1](./assets/screenshots/Screenshot_1.png) | ![Screenshot 2](./assets/screenshots/Screenshot_2.png) | ![Screenshot 3](./assets/screenshots/Screenshot_3.png) |
+| ![Screenshot 4](./assets/screenshots/Screenshot_4.png) | ![Screenshot 5](./assets/screenshots/Screenshot_5.png) | |
+
+---
+
+## Features
+
+### Admin console
+- **Live dashboard** — real-time gym occupancy vs. capacity, today's check-ins, monthly check-in trend chart, monthly revenue, recent members & transactions.
+- **Members management** — member list with search and status filters, member detail with plan assignment, and a full onboarding form (formSheet).
+- **Payments** — collect dues, generate invoices, view revenue trends and transaction history.
+- **Settings** — profile, facility, billing/currency, security (PIN, 2FA), notifications, and maintenance, backed by `react-hook-form` + `zod` validation.
+
+### Member app
+- **Login** for members (email/password or phone + PIN) and staff are segmented on the auth screen.
+- **Registration** with role-based routing, and **forgot password** flow (magic link).
+- Member dashboard currently stubbed ("Coming soon") — the member workout/diet/payments stack is on the roadmap.
+
+### Security & architecture
+- Session persistence via `expo-secure-store`, role-based route guards in Expo Router, and **Postgres Row-Level Security** as the real enforcement boundary.
+- TanStack Query v5 for all server + client state, with live attendance via Supabase Realtime.
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Runtime | Expo SDK 57 · React Native 0.86 · React 19.2 · TypeScript (strict) |
+| Navigation | Expo Router (file-based, `src/app/`) |
+| Backend | Supabase — Postgres, Auth (JWT), Realtime (WSS), Storage, Edge Functions |
+| Schema | Drizzle ORM (`src/db/schema.ts`) → SQL migrations |
+| State / data | TanStack React Query v5 |
+| Styling | NativeWind v5 + Tailwind CSS v4 + gluestack-ui v5 |
+| Forms | react-hook-form + zod |
+| Icons | lucide-react-native |
+| Charts | Victory Native / react-native-svg |
+
+---
+
+## Getting started
+
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Add your Supabase credentials to a local `.env` (never commit `.env*` files):
+
+   ```
+   EXPO_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+   SUPABASE_DB_URL=postgresql://...   # CLI-only, never prefixed EXPO_PUBLIC_
+   ```
+
+3. Start the app:
 
    ```bash
    npx expo start
+   # or
+   npm run ios       # iOS simulator
+   npm run android   # Android emulator
+   npm run web       # Web
    ```
 
-In the output, you'll find options to open the app in a
+Only variables prefixed `EXPO_PUBLIC_` reach client code. `SUPABASE_DB_URL` is server/CLI-only — never ship it in the app bundle.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Database workflow
 
 ```bash
-npm run reset-project
+npx drizzle-kit generate                                                # schema.ts → SQL in supabase/migrations/
+npx supabase db reset                                                   # recreate local DB from migrations
+npx supabase db push                                                    # apply migrations to linked project
+npx supabase gen types typescript --local > src/types/database.types.ts # regenerate types
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Verification
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx tsc --noEmit   # typecheck (strict) — must pass
+npm run lint       # ESLint
+```
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+├── app/                       # Expo Router routes
+│   ├── (auth)/                # login, register, forgot-password
+│   ├── (admin)/               # home, members/, payments/, settings
+│   └── (member)/              # dashboard
+├── services/                  # plain async functions calling Supabase (no React)
+├── hooks/                     # React Query hooks wrapping src/services
+├── components/
+│   ├── ui/                    # gluestack-ui v5 components (copy-in, never hand-edit)
+│   ├── common/                # app-specific shared components
+│   └── charts/                # Victory Native / SVG charts
+├── api/                       # zod validation schemas per form
+├── db/                        # Drizzle ORM schema (source of truth)
+├── lib/                       # supabase client, query client, utils
+└── types/                     # generated database.types.ts, admin settings types
+```
