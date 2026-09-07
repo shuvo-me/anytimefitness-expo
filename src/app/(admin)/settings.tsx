@@ -1,4 +1,9 @@
 import {
+  changePasswordSchema,
+  type ChangePasswordForm,
+} from "@/api/change-password.schema";
+import { InputField } from "@/components/common/InputField";
+import {
   Accordion,
   AccordionContent,
   AccordionHeader,
@@ -10,7 +15,6 @@ import {
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
-import { InputField } from "@/components/common/InputField";
 import {
   InputField as GInputField,
   Input,
@@ -22,11 +26,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import {
-  changePasswordSchema,
-  type ChangePasswordForm,
-} from "@/api/change-password.schema";
-import { useLogout, useAuth, useChangePassword } from "@/hooks/useAuth";
+import { useAuth, useChangePassword, useLogout } from "@/hooks/useAuth";
 import {
   useAdminProfileSettings,
   useFacilitySettings,
@@ -42,6 +42,7 @@ import {
   DEFAULT_ADMIN_PROFILE,
   DEFAULT_FACILITY_SETTINGS,
 } from "@/types/admin";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { StatusBar } from "expo-status-bar";
 import {
   AlertCircle,
@@ -60,9 +61,8 @@ import {
   User,
 } from "lucide-react-native";
 import { useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Controller, useForm, type Control } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ALL_SECTION_KEYS = [
   "profile",
@@ -110,10 +110,11 @@ function humanizeError(err: unknown): string {
 }
 
 export default function AdminSettings() {
-  const { data: profileData, isLoading: loadingProfile } =
+  const { data: adminProfile, isLoading: loadingProfile } =
     useAdminProfileSettings();
   const { data: facilityData, isLoading: loadingFacility } =
     useFacilitySettings();
+  const { profile } = useAuth();
 
   if (loadingProfile || loadingFacility) {
     return (
@@ -125,6 +126,12 @@ export default function AdminSettings() {
       </Box>
     );
   }
+
+  const profileData = {
+    ...adminProfile,
+    name: (profile as any)?.full_name ?? adminProfile?.name,
+    email: (profile as any)?.email ?? adminProfile?.email,
+  };
 
   return (
     <SettingsContent
@@ -152,8 +159,7 @@ function SettingsContent({
   const [saveError, setSaveError] = useState<Record<string, string | null>>({});
   const [cadence, setCadence] = useState<"monthly" | "yearly">("monthly");
 
-  const [openSections, setOpenSections] =
-    useState<string[]>(ALL_SECTION_KEYS);
+  const [openSections, setOpenSections] = useState<string[]>(ALL_SECTION_KEYS);
 
   const [profileForm, setProfileForm] = useState(initialProfile);
   const [facilityForm, setFacilityForm] = useState(initialFacility);
@@ -245,11 +251,13 @@ function SettingsContent({
           paddingBottom: inset.bottom + 24,
         }}
       >
-        <Accordion type="multiple" value={openSections} onValueChange={setOpenSections}>
+        <Accordion
+          type="multiple"
+          value={openSections}
+          onValueChange={setOpenSections}
+        >
           <VStack space="2xl">
-            {/* ================================================================= */}
-            {/* SECTION 1: PROFILE */}
-            {/* ================================================================= */}
+            {/* PROFILE */}
             {(activeCategory === "all" || activeCategory === "profile") && (
               <Section
                 value="profile"
@@ -458,8 +466,7 @@ function SettingsContent({
             {/* ================================================================= */}
             {/* SECTION 5: MAINTENANCE */}
             {/* ================================================================= */}
-            {(activeCategory === "all" ||
-              activeCategory === "maintenance") && (
+            {(activeCategory === "all" || activeCategory === "maintenance") && (
               <Section
                 value="maintenance"
                 title="Maintenance"
@@ -474,12 +481,18 @@ function SettingsContent({
                   variant="ghost"
                   className="p-4 bg-background border border-border rounded-2xl flex-row items-start gap-3 w-full"
                 >
-                  <ButtonIcon as={LogOut} className="text-destructive w-5 h-5" />
+                  <ButtonIcon
+                    as={LogOut}
+                    className="text-destructive w-5 h-5"
+                  />
                   <Box className="flex-1">
                     <Text size="xs" bold>
                       Lock & Log Out Admin Session
                     </Text>
-                    <Text size="2xs" className="font-mono text-muted-foreground">
+                    <Text
+                      size="2xs"
+                      className="font-mono text-muted-foreground"
+                    >
                       {logoutMutation.isPending
                         ? "Signing out..."
                         : "Terminates session and returns to login."}
@@ -534,7 +547,10 @@ function Section({
               <AccordionTitleText className="font-display text-base font-bold text-left">
                 {title}
               </AccordionTitleText>
-              <Text size="xs" className="font-mono text-muted-foreground mt-0.5">
+              <Text
+                size="xs"
+                className="font-mono text-muted-foreground mt-0.5"
+              >
                 {subtitle}
               </Text>
             </Box>

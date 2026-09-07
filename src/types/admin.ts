@@ -12,15 +12,15 @@ export type SettingCategory =
 export interface AdminProfileSettings {
   name: string;
   email: string;
-  phone: string;
-  title: string;
-  gymBranch: string;
-  bio: string;
-  certifications: string[];
-  shiftHours: string;
-  securityPin: string;
-  twoFactorEnabled: boolean;
-  emergencyContact: {
+  phone?: string;
+  title?: string;
+  gymBranch?: string;
+  bio?: string;
+  certifications?: string[];
+  shiftHours?: string;
+  securityPin?: string;
+  twoFactorEnabled?: boolean;
+  emergencyContact?: {
     name: string;
     phone: string;
     relation: string;

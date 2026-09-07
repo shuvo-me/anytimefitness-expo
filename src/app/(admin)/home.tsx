@@ -1,28 +1,29 @@
-import { Box } from '@/components/ui/box';
-import { ScrollView } from '@/components/ui/scroll-view';
-import { Text } from '@/components/ui/text';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { useRouter } from 'expo-router';
-import {
-  CheckCircle2,
-  DollarSign,
-  TrendingUp,
-  ChevronRight,
-} from 'lucide-react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAdminProfileSettings, useFacilitySettings } from '@/hooks/useSettings';
-import { useMembers } from '@/hooks/useMembers';
-import { useTransactions, useMonthlyRevenue } from '@/hooks/usePayments';
+import { Box } from "@/components/ui/box";
+import { Button, ButtonText } from "@/components/ui/button";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
+import { Text } from "@/components/ui/text";
 import {
   useCurrentOccupancy,
-  useTodayCheckIns,
   useMonthlyCheckInTrend,
-} from '@/hooks/useAttendance';
+  useTodayCheckIns,
+} from "@/hooks/useAttendance";
+import { useAuth } from "@/hooks/useAuth";
+import { useMembers } from "@/hooks/useMembers";
+import { useMonthlyRevenue, useTransactions } from "@/hooks/usePayments";
+import { useFacilitySettings } from "@/hooks/useSettings";
+import { useRouter } from "expo-router";
+import {
+  CheckCircle2,
+  ChevronRight,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AdminHome() {
   const router = useRouter();
-  const { data: profileData } = useAdminProfileSettings();
+  const { profile } = useAuth();
   const { data: facilityData } = useFacilitySettings();
   const { data: members = [] } = useMembers();
   const { data: transactions = [] } = useTransactions();
@@ -32,49 +33,51 @@ export default function AdminHome() {
   const { data: trend = [] } = useMonthlyCheckInTrend();
   const inset = useSafeAreaInsets();
 
-  const adminName = profileData?.name ?? 'Alex Morgan';
+  const adminName = (profile as any)?.full_name ?? "Alex Morgan";
   const maxCapacity = facilityData?.maxFloorCapacity ?? 120;
-  const symbol = facilityData?.currencySymbol ?? '৳';
+  const symbol = facilityData?.currencySymbol ?? "৳";
 
   const adminInitials =
     adminName
-      .split(' ')
-      .map((n) => n[0])
+      .split(" ")
+      .map((n: any) => n[0])
       .slice(0, 2)
-      .join('')
-      .toUpperCase() || 'AM';
+      .join("")
+      .toUpperCase() || "AM";
 
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   const totalSubs = members.length;
-  const activeSubs = members.filter((m) => m.status === 'active').length;
-  const occupancyPercent = maxCapacity > 0 ? Math.round((occupancy / maxCapacity) * 100) : 0;
+  const activeSubs = members.filter((m) => m.status === "active").length;
+  const occupancyPercent =
+    maxCapacity > 0 ? Math.round((occupancy / maxCapacity) * 100) : 0;
 
   const recentTransactions = transactions.slice(0, 4);
   const recentMembers = members.slice(0, 4);
 
   const initialsOf = (name: string) =>
     name
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
       .slice(0, 2)
-      .map((n) => n[0]?.toUpperCase() ?? '')
-      .join('');
+      .map((n) => n[0]?.toUpperCase() ?? "")
+      .join("");
 
   const avgPerMonth =
     trend.length > 0
       ? Math.round(trend.reduce((sum, p) => sum + p.count, 0) / trend.length)
       : 0;
-  const maxTrendCount = trend.reduce((max, p) => Math.max(max, p.count), 0) || 1;
+  const maxTrendCount =
+    trend.reduce((max, p) => Math.max(max, p.count), 0) || 1;
 
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         paddingHorizontal: 16,
-        backgroundColor: '#0C0C0F',
+        backgroundColor: "#0C0C0F",
         paddingTop: inset.top + 16,
         paddingBottom: inset.bottom + 24,
         flexGrow: 1,
@@ -88,12 +91,15 @@ export default function AdminHome() {
               <Text className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">
                 {greeting}
               </Text>
-              <Text size="2xl" className="font-display font-black uppercase tracking-tight mt-0.5 leading-none">
+              <Text
+                size="2xl"
+                className="font-display font-black uppercase tracking-tight mt-0.5 leading-none"
+              >
                 {adminName}
               </Text>
             </Box>
             <Button
-              onPress={() => router.push('/(admin)/settings')}
+              onPress={() => router.push("/(admin)/settings")}
               className="w-10 h-10 rounded-2xl bg-primary items-center justify-center"
             >
               <Text className="font-display font-extrabold text-sm text-primary-foreground">
@@ -109,7 +115,10 @@ export default function AdminHome() {
           <Box className="flex-1 bg-card border border-border p-4 rounded-3xl">
             <Box className="flex-row items-center justify-between">
               <Box className="flex-1 pr-2">
-                <Text size="xs" className="font-mono uppercase tracking-wider font-semibold text-muted-foreground">
+                <Text
+                  size="xs"
+                  className="font-mono uppercase tracking-wider font-semibold text-muted-foreground"
+                >
                   Today Attendance
                 </Text>
               </Box>
@@ -118,7 +127,10 @@ export default function AdminHome() {
               </Box>
             </Box>
             <Box className="flex-row items-baseline gap-2 mt-2">
-              <Text size="3xl" className="font-display font-black tracking-tight leading-none">
+              <Text
+                size="3xl"
+                className="font-display font-black tracking-tight leading-none"
+              >
                 {todayCheckIns}
               </Text>
               <Text size="xs" className="font-mono text-muted-foreground">
@@ -139,7 +151,10 @@ export default function AdminHome() {
           <Box className="flex-1 bg-card border border-border p-4 rounded-3xl">
             <Box className="flex-row items-center justify-between">
               <Box className="flex-1 pr-2">
-                <Text size="xs" className="font-mono uppercase tracking-wider font-semibold text-muted-foreground">
+                <Text
+                  size="xs"
+                  className="font-mono uppercase tracking-wider font-semibold text-muted-foreground"
+                >
                   Monthly Revenue
                 </Text>
               </Box>
@@ -148,10 +163,16 @@ export default function AdminHome() {
               </Box>
             </Box>
             <Box className="flex-row items-baseline gap-1 mt-2">
-              <Text size="3xl" className="font-display font-black text-primary tracking-tight leading-none">
-                {symbol}{monthlyRevenue.toLocaleString()}
+              <Text
+                size="3xl"
+                className="font-display font-black text-primary tracking-tight leading-none"
+              >
+                {symbol}
+                {monthlyRevenue.toLocaleString()}
               </Text>
-              <Text size="xs" className="font-mono text-muted-foreground">/ mo</Text>
+              <Text size="xs" className="font-mono text-muted-foreground">
+                / mo
+              </Text>
             </Box>
             <Box className="mt-3 pt-3 border-t border-border flex-row items-center justify-between">
               <Text size="xs" className="font-mono font-bold text-primary">
@@ -171,7 +192,10 @@ export default function AdminHome() {
               <Box className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 items-center justify-center">
                 <TrendingUp size={16} color="#C8F135" />
               </Box>
-              <Text size="lg" className="font-display font-black uppercase tracking-tight">
+              <Text
+                size="lg"
+                className="font-display font-black uppercase tracking-tight"
+              >
                 Attendance Trend
               </Text>
             </Box>
@@ -203,14 +227,16 @@ export default function AdminHome() {
                     </Text>
                     <Box
                       className={`w-full max-w-[48px] rounded-t-lg ${
-                        item.isCurrent ? 'bg-primary' : 'bg-border'
+                        item.isCurrent ? "bg-primary" : "bg-border"
                       }`}
                       style={{ height: `${heightPercent}%` }}
                     />
                     <Text
                       size="xs"
                       className={`font-mono ${
-                        item.isCurrent ? 'text-primary font-bold' : 'text-muted-foreground'
+                        item.isCurrent
+                          ? "text-primary font-bold"
+                          : "text-muted-foreground"
                       }`}
                     >
                       {item.month}
@@ -237,7 +263,7 @@ export default function AdminHome() {
               <Button
                 variant="link"
                 size="sm"
-                onPress={() => router.push('/(admin)/payments')}
+                onPress={() => router.push("/(admin)/payments")}
               >
                 <ButtonText className="text-[10px] font-mono text-primary">
                   View All ({transactions.length})
@@ -261,22 +287,32 @@ export default function AdminHome() {
                           {t.memberName}
                         </Text>
                       </Box>
-                      <Text size="xs" className="text-muted-foreground font-mono">
+                      <Text
+                        size="xs"
+                        className="text-muted-foreground font-mono"
+                      >
                         {t.tier} • {t.category}
                       </Text>
                     </Box>
                     <Box className="items-end">
                       <Text className="font-bold text-xs">
-                        {symbol}{t.amount.toLocaleString()}
+                        {symbol}
+                        {t.amount.toLocaleString()}
                       </Text>
-                      <Text size="xs" className="text-muted-foreground font-mono">
+                      <Text
+                        size="xs"
+                        className="text-muted-foreground font-mono"
+                      >
                         {t.date}
                       </Text>
                     </Box>
                   </Box>
                 ))
               ) : (
-                <Text size="xs" className="font-mono text-muted-foreground py-3">
+                <Text
+                  size="xs"
+                  className="font-mono text-muted-foreground py-3"
+                >
                   No transactions yet.
                 </Text>
               )}
@@ -292,7 +328,7 @@ export default function AdminHome() {
               <Button
                 variant="link"
                 size="sm"
-                onPress={() => router.push('/(admin)/members')}
+                onPress={() => router.push("/(admin)/members")}
               >
                 <ButtonText className="text-[10px] font-mono text-primary">
                   Directory ({members.length})
@@ -303,12 +339,12 @@ export default function AdminHome() {
             <Box className="gap-2">
               {recentMembers.length > 0 ? (
                 recentMembers.map((member) => {
-                  const isActive = member.status === 'active';
+                  const isActive = member.status === "active";
                   return (
                     <Button
                       key={member.id}
                       variant="outline"
-                      onPress={() => router.push('/(admin)/members')}
+                      onPress={() => router.push("/(admin)/members")}
                       className="bg-background border-border p-2.5 rounded-xl flex-row items-center justify-between"
                     >
                       <Box className="flex-row items-center gap-2.5">
@@ -321,7 +357,10 @@ export default function AdminHome() {
                           <Text className="text-xs font-bold leading-tight">
                             {member.name}
                           </Text>
-                          <Text size="xs" className="text-muted-foreground font-mono">
+                          <Text
+                            size="xs"
+                            className="text-muted-foreground font-mono"
+                          >
                             {member.tier} • {member.displayId}
                           </Text>
                         </Box>
@@ -331,17 +370,17 @@ export default function AdminHome() {
                         <Box
                           className={`px-2 py-0.5 rounded ${
                             isActive
-                              ? 'bg-primary/15 border border-primary/30'
-                              : 'bg-destructive/15 border border-destructive/30'
+                              ? "bg-primary/15 border border-primary/30"
+                              : "bg-destructive/15 border border-destructive/30"
                           }`}
                         >
                           <Text
                             size="xs"
                             className={`font-mono ${
-                              isActive ? 'text-primary' : 'text-destructive'
+                              isActive ? "text-primary" : "text-destructive"
                             }`}
                           >
-                            {isActive ? 'Active' : member.status}
+                            {isActive ? "Active" : member.status}
                           </Text>
                         </Box>
                         <ChevronRight size={14} color="#666675" />
@@ -350,7 +389,10 @@ export default function AdminHome() {
                   );
                 })
               ) : (
-                <Text size="xs" className="font-mono text-muted-foreground py-3">
+                <Text
+                  size="xs"
+                  className="font-mono text-muted-foreground py-3"
+                >
                   No members onboarded yet.
                 </Text>
               )}

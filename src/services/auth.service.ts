@@ -72,5 +72,6 @@ export async function getProfile(userId: string): Promise<Profile | null> {
     .eq('user_id', userId)
     .single();
   if (error) throw error;
-  return data as Profile;
+  const profile = { ...data as object, email: (await supabase.auth.getUser()).data.user?.email ?? '' } as Profile & { email: string };
+  return profile;
 }
