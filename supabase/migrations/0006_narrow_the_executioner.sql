@@ -1,1 +1,0 @@
-ALTER TABLE "app_settings" RENAME TO "admin_settings";
