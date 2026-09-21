@@ -112,7 +112,7 @@ export async function addMember(form: MemberForm): Promise<string> {
     .insert({
       id: profile.id,
       start_date: form.startDate,
-      admissionFee: form.admissionFee,
+      admission_fee: form.admissionFee,
       membership_tier: toDbTier(form.tier),
       membership_status: form.initialPayment ? 'active' : 'pending',
       expiry_date: plannedExpiry(form.tier),
