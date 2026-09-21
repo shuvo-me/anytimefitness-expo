@@ -115,7 +115,7 @@ export async function addMember(form: MemberForm): Promise<string> {
       admission_fee: form.admissionFee,
       membership_tier: toDbTier(form.tier),
       membership_status: form.initialPayment ? 'active' : 'pending',
-      expiry_date: plannedExpiry(form.tier),
+      expiry_date: plannedExpiry(form.tier, form.startDate),
       emergency_contact: emergencyContact,
       goal: form.goal?.trim() || null,
       weight_kg: weightKg,
@@ -164,6 +164,7 @@ interface MemberDetailRow {
   members: {
     membership_tier: string;
     membership_status: string;
+    admission_fee: number;
     start_date: string | null;
     expiry_date: string | null;
     goal: string | null;
@@ -196,6 +197,7 @@ export interface MemberDetail {
   emergencyContact: { name: string; phone: string; relation: string } | null;
   totalSessions: number;
   totalPaid: number;
+  admissionFee: number;
 }
 
 function initialsOf(name: string): string {
@@ -211,7 +213,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
   const { data, error } = await supabase
     .from('profiles' as any)
     .select(
-      'id, full_name, phone, members(id, membership_tier, membership_status, start_date, expiry_date, goal, weight_kg, height_cm, attendance_goal_days, emergency_contact)',
+      'id, full_name, phone, members(id, membership_tier, membership_status, start_date, expiry_date, goal, weight_kg, height_cm, attendance_goal_days, emergency_contact, admission_fee)',
     )
     .eq('id', id)
     .single();
@@ -239,7 +241,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
   const totalPaid = (txRows ?? []).reduce(
     (sum, tx: { amount: number | string }) => sum + Number(tx.amount ?? 0),
     0,
-  );
+  ) + row.members?.admission_fee! as number;
 
   const mem = row.members;
   return {
@@ -266,6 +268,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
       : null,
     totalSessions,
     totalPaid,
+    admissionFee: mem?.admission_fee ?? 0,
   };
 }
 

@@ -1,10 +1,8 @@
 import { Box } from "@/components/ui/box";
-import { HStack } from "@/components/ui/hstack";
-import { ScrollView } from "@/components/ui/scroll-view";
-import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
+import { ScrollView } from "@/components/ui/scroll-view";
 import {
   Select,
   SelectBackdrop,
@@ -16,11 +14,9 @@ import {
   SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import {
-  emptyProgram,
-  type MemberDetail,
-} from "@/services/members.service";
 import {
   useDeleteMember,
   useMember,
@@ -28,13 +24,11 @@ import {
   useUpdateMember,
   useWorkoutProgram,
 } from "@/hooks/useMembers";
+import { useFacilitySettings } from "@/hooks/useSettings";
+import { emptyProgram, type MemberDetail } from "@/services/members.service";
 import type { MembershipTier, MemberStatus } from "@/types/member";
 import { TIER_OPTIONS } from "@/types/member";
-import { useFacilitySettings } from "@/hooks/useSettings";
-import type {
-  WorkoutExercise,
-  WorkoutProgram,
-} from "@/types/routine";
+import type { WorkoutExercise, WorkoutProgram } from "@/types/routine";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -49,8 +43,8 @@ import {
   Trash2,
   Utensils,
 } from "lucide-react-native";
-import { useState } from "react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type DetailTab = "profile" | "routine" | "edit";
@@ -60,12 +54,7 @@ export default function MemberDetailScreen() {
   const inset = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const memberId = String(id);
-  const {
-    data: member,
-    isLoading,
-    isError,
-    refetch,
-  } = useMember(memberId);
+  const { data: member, isLoading, isError, refetch } = useMember(memberId);
   const [activeTab, setActiveTab] = useState<DetailTab>("profile");
 
   if (isLoading) {
@@ -86,11 +75,7 @@ export default function MemberDetailScreen() {
         <Text className="text-sm font-mono text-destructive text-center mb-4">
           Could not load this member.
         </Text>
-        <Button
-          onPress={() => refetch()}
-          size="sm"
-          className="rounded-xl"
-        >
+        <Button onPress={() => refetch()} size="sm" className="rounded-xl">
           <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
             Retry
           </ButtonText>
@@ -218,7 +203,9 @@ export default function MemberDetailScreen() {
                 >
                   <ButtonText
                     className={`text-xs font-bold font-sans uppercase tracking-wider ${
-                      isActive ? "text-primary-foreground" : "text-muted-foreground"
+                      isActive
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {tab.label}
@@ -250,7 +237,7 @@ function OverviewTab({ member }: { member: MemberDetail }) {
       {/* 3 Metric Cards */}
       <HStack space="sm">
         <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+          <Text className="text-2xs font-mono text-muted-foreground uppercase">
             Total Sessions
           </Text>
           <Text className="font-display font-black text-2xl text-foreground mt-1">
@@ -258,7 +245,7 @@ function OverviewTab({ member }: { member: MemberDetail }) {
           </Text>
         </Box>
         <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+          <Text className="text-2xs font-mono text-muted-foreground uppercase">
             Days Left
           </Text>
           <Text className="font-display font-black text-2xl text-primary mt-1">
@@ -266,20 +253,31 @@ function OverviewTab({ member }: { member: MemberDetail }) {
           </Text>
         </Box>
         <Box className="flex-1 bg-background border border-border-subtle p-3.5 rounded-2xl">
-          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
-            Total Paid
+          <Text className="text-2xs font-mono text-muted-foreground uppercase">
+            Admission Fee
           </Text>
           <Text className="font-display font-black text-2xl text-foreground mt-1">
-            ৳{member.totalPaid}
+            ৳{member.admissionFee}
           </Text>
         </Box>
       </HStack>
 
       {/* Goal & Details */}
       <Box className="bg-background border border-border-subtle p-4 rounded-2xl gap-2">
-        <DetailRow label="Primary Goal" value={member.goal?.trim() || "—"} bold last={!member.phone} />
+        <DetailRow
+          label="Primary Goal"
+          value={member.goal?.trim() || "—"}
+          bold
+          last={!member.phone}
+        />
         {member.phone && (
-          <DetailRow label="Phone" value={member.phone} last={!member.weightKg && !member.heightCm && !member.attendanceGoalDays} />
+          <DetailRow
+            label="Phone"
+            value={member.phone}
+            last={
+              !member.weightKg && !member.heightCm && !member.attendanceGoalDays
+            }
+          />
         )}
         {(member.weightKg != null || member.heightCm != null) && (
           <DetailRow
@@ -311,7 +309,7 @@ function OverviewTab({ member }: { member: MemberDetail }) {
       {/* Subscription */}
       <Box className="bg-background border border-border-subtle p-4 rounded-2xl gap-2">
         <HStack className="items-center justify-between mb-1">
-          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+          <Text className="text-2xs font-mono text-muted-foreground uppercase">
             Subscription
           </Text>
           <Box
@@ -349,29 +347,37 @@ function OverviewTab({ member }: { member: MemberDetail }) {
       </Box>
 
       {/* Financial */}
-      <Box className="bg-background border border-border-subtle p-4 rounded-2xl flex-row items-center justify-between">
-        <Box>
-          <Text className="text-[10px] font-mono text-muted-foreground uppercase">
-            Lifetime Collections
-          </Text>
-          <Text className="font-display font-black text-2xl mt-0.5 text-foreground">
+      <Box className="bg-background border border-border-subtle rounded-2xl p-4">
+        {/* Header */}
+        <Box className="flex-row items-center justify-between mb-4">
+          <Box>
+            <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+              Total Lifetime Payment Summary
+            </Text>
+          </Box>
+
+          <Button
+            onPress={() =>
+              router.push({
+                pathname: "/(admin)/payments/collect",
+                params: { memberId: member.id },
+              })
+            }
+            size="sm"
+            className="rounded-xl"
+          >
+            <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+              Collect
+            </ButtonText>
+          </Button>
+        </Box>
+
+        {/* Lifetime total */}
+        <Box className="bg-muted/30 rounded-xl p-3.5 mb-3">
+          <Text className="font-display font-black text-2xl text-foreground mt-1">
             ৳{member.totalPaid}
           </Text>
         </Box>
-        <Button
-          onPress={() =>
-            router.push({
-              pathname: "/(admin)/payments/collect",
-              params: { memberId: member.id },
-            })
-          }
-          size="sm"
-          className="rounded-xl"
-        >
-          <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-            Collect Payment
-          </ButtonText>
-        </Button>
       </Box>
     </VStack>
   );
@@ -489,7 +495,10 @@ function RoutineTab({
   const handleRemoveExercise = (index: number) => {
     setDraft((prev) => {
       const base = prev ?? program;
-      return { ...base, exercises: base.exercises.filter((_, i) => i !== index) };
+      return {
+        ...base,
+        exercises: base.exercises.filter((_, i) => i !== index),
+      };
     });
   };
 
@@ -527,7 +536,10 @@ function RoutineTab({
           size="sm"
           className="rounded-xl"
         >
-          <ButtonIcon as={Save} className="text-primary-foreground w-3.5 h-3.5" />
+          <ButtonIcon
+            as={Save}
+            className="text-primary-foreground w-3.5 h-3.5"
+          />
           <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
             {saveMutation.isPending ? "Saving..." : "Deploy"}
           </ButtonText>
@@ -563,7 +575,7 @@ function RoutineTab({
         <Box className="p-10 items-center bg-background border border-border-subtle rounded-2xl gap-2">
           <Utensils size={22} color="#8A8A9A" />
           <Text className="text-sm font-mono text-muted-foreground text-center">
-            Diet & nutrition plans —{'\n'}coming in a future update.
+            Diet & nutrition plans —{"\n"}coming in a future update.
           </Text>
         </Box>
       )}
@@ -684,7 +696,10 @@ function WorkoutBuilder({
             size="sm"
             className="bg-primary rounded-full px-3 py-1.5"
           >
-            <ButtonIcon as={Plus} className="text-primary-foreground w-3.5 h-3.5" />
+            <ButtonIcon
+              as={Plus}
+              className="text-primary-foreground w-3.5 h-3.5"
+            />
             <ButtonText className="font-display font-bold text-[11px] uppercase tracking-wider text-primary-foreground">
               Add Exercise
             </ButtonText>
@@ -711,7 +726,10 @@ function WorkoutBuilder({
                 variant="outline"
                 className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1"
               >
-                <ButtonIcon as={Trash2} className="text-destructive w-3.5 h-3.5" />
+                <ButtonIcon
+                  as={Trash2}
+                  className="text-destructive w-3.5 h-3.5"
+                />
                 <ButtonText className="text-[10px] font-mono font-bold uppercase text-destructive">
                   Remove
                 </ButtonText>
@@ -791,7 +809,9 @@ function InputLabel({ children }: { children: ReactNode }) {
 
 function MiniLabel({ children }: { children: ReactNode }) {
   return (
-    <Text className="text-[10px] text-muted-foreground font-mono">{children}</Text>
+    <Text className="text-[10px] text-muted-foreground font-mono">
+      {children}
+    </Text>
   );
 }
 
@@ -825,8 +845,8 @@ function EditTab({ member }: { member: MemberDetail }) {
     value: t.value,
     label: `${t.value} (${
       t.value === "Monthly"
-        ? facilitySettings?.pricing.monthly ?? 0
-        : facilitySettings?.pricing.yearly ?? 0
+        ? (facilitySettings?.pricing.monthly ?? 0)
+        : (facilitySettings?.pricing.yearly ?? 0)
     }${symbol}/${t.value === "Monthly" ? "mo" : "yr"})`,
   }));
 
@@ -956,7 +976,9 @@ function EditTab({ member }: { member: MemberDetail }) {
               variant="outline"
               className="rounded-lg"
             >
-              <ButtonText className="text-xs font-mono text-foreground">Cancel</ButtonText>
+              <ButtonText className="text-xs font-mono text-foreground">
+                Cancel
+              </ButtonText>
             </Button>
             <Button
               onPress={handleDelete}
