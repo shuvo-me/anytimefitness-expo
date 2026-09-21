@@ -46,7 +46,7 @@ example
 /.claude
 
 # migrations
-migrations
+drizzle/migrations/schema.ts
 
 
 # Supabase CLI internal cache

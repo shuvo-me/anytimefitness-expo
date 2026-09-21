@@ -1,0 +1,1 @@
+ALTER TABLE "members" ADD COLUMN "admission_fee" numeric(10,2) DEFAULT '0.00' NOT NULL;
