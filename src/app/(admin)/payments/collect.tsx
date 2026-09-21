@@ -1,5 +1,4 @@
 import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import {
@@ -13,6 +12,7 @@ import {
   SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Text } from "@/components/ui/text";
 import { useMembers } from "@/hooks/useMembers";
 import { useCreateTransaction } from "@/hooks/usePayments";
 import {
@@ -23,8 +23,14 @@ import {
   TxMethod,
 } from "@/types/transaction";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { AlertCircle, CheckCircle2, ChevronDown, Receipt } from "lucide-react-native";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  Receipt,
+} from "lucide-react-native";
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function FormSelect<T extends string>({
   value,
@@ -83,6 +89,7 @@ export default function CollectFee() {
   const { memberId } = useLocalSearchParams<{ memberId: string }>();
   const createTx = useCreateTransaction();
   const { data: members } = useMembers();
+  const inset = useSafeAreaInsets();
 
   const member = (members ?? []).find((m) => m.id === memberId);
 
@@ -108,7 +115,10 @@ export default function CollectFee() {
   };
 
   return (
-    <Box className="flex-1 bg-card px-5 pt-6 pb-8">
+    <Box
+      className="flex-1 bg-card px-5 "
+      style={{ paddingTop: inset.top + 20, paddingBottom: inset.bottom + 20 }}
+    >
       <Box className="gap-4">
         <Box className="flex-row items-center gap-3">
           <Box className="w-10 h-10 rounded-2xl bg-primary items-center justify-center">
@@ -142,14 +152,6 @@ export default function CollectFee() {
         ) : (
           <Box className="gap-5">
             <Box className="bg-background border border-border rounded-2xl p-4 gap-3">
-              <Box className="flex-row items-center justify-between">
-                <Text className="text-xs font-mono text-muted-foreground uppercase">
-                  Member
-                </Text>
-                <Text className="text-sm font-bold text-foreground flex-1 text-right ml-4">
-                  {member.name}
-                </Text>
-              </Box>
               <Box className="flex-row items-center justify-between">
                 <Text className="text-xs font-mono text-muted-foreground uppercase">
                   Plan
@@ -223,7 +225,10 @@ export default function CollectFee() {
                 isDisabled={createTx.isPending}
                 className="px-5 py-2.5 rounded-xl bg-primary flex-row items-center justify-center gap-2"
               >
-                <ButtonIcon as={CheckCircle2} className="text-primary-foreground w-4 h-4" />
+                <ButtonIcon
+                  as={CheckCircle2}
+                  className="text-primary-foreground w-4 h-4"
+                />
                 <ButtonText className="font-display font-bold text-xs uppercase tracking-wider text-primary-foreground">
                   {createTx.isPending ? "Processing..." : "Confirm Payment"}
                 </ButtonText>
