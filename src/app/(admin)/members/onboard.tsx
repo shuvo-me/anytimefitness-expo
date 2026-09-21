@@ -1,6 +1,12 @@
 import { MemberForm, memberSchema } from "@/api/member.schema";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import {
+  DateTimePicker,
+  DateTimePickerIcon,
+  DateTimePickerInput,
+  DateTimePickerTrigger,
+} from "@/components/ui/date-time-picker";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
@@ -24,6 +30,7 @@ import { MembershipTier, TIER_OPTIONS } from "@/types/member";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import {
+  Calendar,
   CheckCircle2,
   ChevronDown,
   Phone,
@@ -108,6 +115,8 @@ export default function MemberOnboard() {
     defaultValues: {
       fullName: "",
       phone: "",
+      startDate: new Date(),
+      admissionFee: 0,
       tier: "Monthly",
       initialPayment: true,
       goal: GOALS[0],
@@ -125,6 +134,7 @@ export default function MemberOnboard() {
       onError: (e) => {
         console.error("Failed to add member:", e);
       },
+
       onSuccess: (data) => {
         console.log("Member added successfully!", data);
       },
@@ -213,7 +223,7 @@ export default function MemberOnboard() {
 
               {/* 1. Athlete Identity */}
               <VStack space="lg">
-                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
+                <Text className="text-2xs font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   1. Athlete Identity
                 </Text>
                 <VStack space="lg">
@@ -274,12 +284,82 @@ export default function MemberOnboard() {
                     )}
                   />
                   <FieldError message={errors.phone?.message} />
+
+                  <Controller
+                    control={control}
+                    name="startDate"
+                    render={({ field: { onChange, value } }) => (
+                      <Box className="gap-1.5">
+                        <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
+                          Date *
+                        </Text>
+
+                        <DateTimePicker
+                          value={value}
+                          onChange={onChange}
+                          mode="date"
+                          maximumDate={new Date()}
+                          placeholder="Select onboarding date"
+                          format="YYYY-MM-DD"
+                        >
+                          <DateTimePickerTrigger
+                            variant="outline"
+                            size="md"
+                            className="bg-background border-border rounded-xl h-11 px-3.5"
+                          >
+                            <DateTimePickerInput className="font-mono text-sm flex-1" />
+                            <DateTimePickerIcon
+                              as={Calendar}
+                              className="text-muted-foreground"
+                            />
+                          </DateTimePickerTrigger>
+                        </DateTimePicker>
+
+                        <FieldError message={errors.startDate?.message} />
+                      </Box>
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="admissionFee"
+                    render={({
+                      field: { onChange, value, onBlur },
+                      fieldState: { error },
+                    }) => (
+                      <Box className="gap-1.5">
+                        <Text className="text-[11px] font-mono text-muted-foreground uppercase mb-1.5">
+                          Admission Fee *
+                        </Text>
+
+                        <Input className="bg-background border-border rounded-xl h-11 px-3.5 gap-2.5">
+                          <InputField
+                            onBlur={onBlur}
+                            placeholderTextColor="#666675"
+                            className="font-mono text-sm"
+                            value={value !== undefined ? String(value) : ""}
+                            onChangeText={(text) => {
+                              onChange(text === "" ? undefined : Number(text));
+                            }}
+                            placeholder="Enter admission fee"
+                            keyboardType="numeric"
+                          />
+                        </Input>
+
+                        {error?.message && (
+                          <Text className="text-[11px] font-mono text-destructive">
+                            {error.message}
+                          </Text>
+                        )}
+                      </Box>
+                    )}
+                  />
                 </VStack>
               </VStack>
 
               {/* 2. Membership Tier & Billing */}
               <VStack space="lg" className="pt-6 border-t border-border">
-                <Text className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider font-bold">
+                <Text className="text-2xs font-mono uppercase text-muted-foreground tracking-wider font-bold">
                   2. Membership Tier & Billing
                 </Text>
                 <Controller

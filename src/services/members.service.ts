@@ -97,10 +97,10 @@ export async function addMember(form: MemberForm): Promise<string> {
   const hasEmergency = Boolean(form.emergencyName || form.emergencyPhone);
   const emergencyContact = hasEmergency
     ? {
-        name: form.emergencyName ?? '',
-        phone: form.emergencyPhone ?? '',
-        relation: form.emergencyRelation ?? '',
-      }
+      name: form.emergencyName ?? '',
+      phone: form.emergencyPhone ?? '',
+      relation: form.emergencyRelation ?? '',
+    }
     : null;
 
   const weightKg = parseOptionalNumber(form.weightKg);
@@ -111,6 +111,8 @@ export async function addMember(form: MemberForm): Promise<string> {
     .from('members' as any)
     .insert({
       id: profile.id,
+      start_date: form.startDate,
+      admissionFee: form.admissionFee,
       membership_tier: toDbTier(form.tier),
       membership_status: form.initialPayment ? 'active' : 'pending',
       expiry_date: plannedExpiry(form.tier),
@@ -257,10 +259,10 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
     attendanceGoalDays: mem?.attendance_goal_days ?? null,
     emergencyContact: mem?.emergency_contact
       ? {
-          name: mem.emergency_contact.name ?? '',
-          phone: mem.emergency_contact.phone ?? '',
-          relation: mem.emergency_contact.relation ?? '',
-        }
+        name: mem.emergency_contact.name ?? '',
+        phone: mem.emergency_contact.phone ?? '',
+        relation: mem.emergency_contact.relation ?? '',
+      }
       : null,
     totalSessions,
     totalPaid,
