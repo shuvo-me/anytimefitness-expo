@@ -76,7 +76,12 @@ export function plannedExpiry(tier: MembershipTier, from: Date = new Date()): st
   const days = tier === 'Yearly' ? 365 : 30;
   const d = new Date(from);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+
+  //YYYY-MM-DD string from local date components 
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export async function addMember(form: MemberForm): Promise<string> {
@@ -279,6 +284,7 @@ export interface UpdateMemberInput {
   status?: MemberStatus;
   goal?: string | null;
   admissionFee?: number;
+  startDate?: string;
 }
 
 export async function updateMember(
@@ -298,6 +304,15 @@ export async function updateMember(
   if (patch.status !== undefined) membersPatch.membership_status = patch.status;
   if (patch.goal !== undefined) membersPatch.goal = patch.goal?.trim() || null;
   if (patch.admissionFee !== undefined) membersPatch.admission_fee = patch.admissionFee;
+  if (patch.startDate !== undefined) {
+    membersPatch.start_date = patch.startDate;
+    if (patch.tier !== undefined) {
+      membersPatch.expiry_date = plannedExpiry(
+        patch.tier,
+        new Date(`${patch.startDate}T00:00:00`),
+      );
+    }
+  }
 
   const memberPromise =
     Object.keys(membersPatch).length > 0

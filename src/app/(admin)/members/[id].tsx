@@ -1,5 +1,11 @@
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import {
+  DateTimePicker,
+  DateTimePickerIcon,
+  DateTimePickerInput,
+  DateTimePickerTrigger,
+} from "@/components/ui/date-time-picker";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
@@ -34,6 +40,7 @@ import { StatusBar } from "expo-status-bar";
 import {
   AlertTriangle,
   ArrowLeft,
+  Calendar,
   CheckCircle2,
   ChevronDown,
   Dumbbell,
@@ -837,6 +844,9 @@ function EditTab({ member }: { member: MemberDetail }) {
   const [editTier, setEditTier] = useState<MembershipTier>(member.tier);
   const [editStatus, setEditStatus] = useState<MemberStatus>(member.status);
   const [editGoal, setEditGoal] = useState(member.goal ?? "");
+  const [editStartDate, setEditStartDate] = useState<Date | undefined>(
+    member.startDate ? new Date(`${member.startDate}T00:00:00`) : undefined,
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{
     kind: "success" | "error";
@@ -855,6 +865,12 @@ function EditTab({ member }: { member: MemberDetail }) {
 
   const handleSave = () => {
     if (updateMutation.isPending) return;
+    const toDateInputValue = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
     updateMutation.mutate(
       {
         id: member.id,
@@ -864,6 +880,9 @@ function EditTab({ member }: { member: MemberDetail }) {
           status: editStatus,
           goal: editGoal.trim() || null,
           admissionFee: editAdmissionFee,
+          ...(editStartDate
+            ? { startDate: toDateInputValue(editStartDate) }
+            : {}),
         },
       },
       {
@@ -946,6 +965,32 @@ function EditTab({ member }: { member: MemberDetail }) {
               className="w-full text-xs text-foreground font-mono"
             />
           </Input>
+        </Box>
+      </HStack>
+
+      <HStack space="md" className="pt-1">
+        <Box className="flex-1">
+          <FieldLabel>Onboarding Date</FieldLabel>
+          <DateTimePicker
+            value={editStartDate}
+            onChange={(date) => setEditStartDate(date)}
+            mode="date"
+            maximumDate={new Date()}
+            placeholder="Select onboarding date"
+            format="YYYY-MM-DD"
+          >
+            <DateTimePickerTrigger
+              variant="outline"
+              size="md"
+              className="bg-background border-border-subtle rounded-xl h-11 px-3.5"
+            >
+              <DateTimePickerInput className="font-mono text-sm flex-1" />
+              <DateTimePickerIcon
+                as={Calendar}
+                className="text-muted-foreground"
+              />
+            </DateTimePickerTrigger>
+          </DateTimePicker>
         </Box>
       </HStack>
 
