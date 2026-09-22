@@ -831,6 +831,9 @@ function EditTab({ member }: { member: MemberDetail }) {
   const { data: facilitySettings } = useFacilitySettings();
 
   const [editName, setEditName] = useState(member.name);
+  const [editAdmissionFee, setEditAdmissionFee] = useState<number | undefined>(
+    member.admissionFee,
+  );
   const [editTier, setEditTier] = useState<MembershipTier>(member.tier);
   const [editStatus, setEditStatus] = useState<MemberStatus>(member.status);
   const [editGoal, setEditGoal] = useState(member.goal ?? "");
@@ -860,6 +863,7 @@ function EditTab({ member }: { member: MemberDetail }) {
           tier: editTier,
           status: editStatus,
           goal: editGoal.trim() || null,
+          admissionFee: editAdmissionFee,
         },
       },
       {
@@ -914,17 +918,36 @@ function EditTab({ member }: { member: MemberDetail }) {
         </Box>
       )}
 
-      <Box>
-        <FieldLabel>Member Name</FieldLabel>
-        <Input className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2">
-          <InputField
-            value={editName}
-            onChangeText={setEditName}
-            placeholderTextColor="#555566"
-            className="w-full text-xs text-foreground font-mono"
-          />
-        </Input>
-      </Box>
+      <HStack space="md">
+        <Box className="flex-1">
+          <FieldLabel>Member Name</FieldLabel>
+          <Input className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2">
+            <InputField
+              value={editName}
+              onChangeText={setEditName}
+              placeholderTextColor="#555566"
+              className="w-full text-xs text-foreground font-mono"
+            />
+          </Input>
+        </Box>
+
+        <Box className="flex-1">
+          <FieldLabel>Admission Fee</FieldLabel>
+          <Input className="w-full bg-background border border-border-subtle rounded-xl px-3 py-2">
+            <InputField
+              keyboardType="numeric"
+              value={
+                editAdmissionFee !== undefined ? String(editAdmissionFee) : ""
+              }
+              onChangeText={(text) => {
+                setEditAdmissionFee(text === "" ? undefined : Number(text));
+              }}
+              placeholderTextColor="#555566"
+              className="w-full text-xs text-foreground font-mono"
+            />
+          </Input>
+        </Box>
+      </HStack>
 
       <HStack space="md" className="pt-1">
         <Box className="flex-1">

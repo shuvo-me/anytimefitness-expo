@@ -278,6 +278,7 @@ export interface UpdateMemberInput {
   tier?: MembershipTier;
   status?: MemberStatus;
   goal?: string | null;
+  admissionFee?: number;
 }
 
 export async function updateMember(
@@ -296,6 +297,7 @@ export async function updateMember(
   }
   if (patch.status !== undefined) membersPatch.membership_status = patch.status;
   if (patch.goal !== undefined) membersPatch.goal = patch.goal?.trim() || null;
+  if (patch.admissionFee !== undefined) membersPatch.admission_fee = patch.admissionFee;
 
   const memberPromise =
     Object.keys(membersPatch).length > 0
