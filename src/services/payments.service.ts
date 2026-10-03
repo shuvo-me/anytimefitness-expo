@@ -189,8 +189,10 @@ export async function createTransaction(
 
   const txId = (data as { id: string } | null)?.id ?? '';
 
+  const membership_tier = input.category === "Monthly Fee" ? "basic" : input.category === "Yearly Fee" ? "standard" : null;
+
   const membershipPatch = isPending
-    ? { membership_status: 'active' }
+    ? { membership_status: 'active', ...(membership_tier ? { membership_tier } : {}) }
     : isExpired
       ? (() => {
         const today = new Date();
@@ -198,9 +200,10 @@ export async function createTransaction(
           membership_status: 'active',
           start_date: toDateOnlyString(today),
           expiry_date: plannedExpiry(tier as MembershipTier, today),
+          ...(membership_tier ? { membership_tier } : {})
         };
       })()
-      : { membership_status: 'active' };
+      : { membership_status: 'active', ...(membership_tier ? { membership_tier } : {}) };
 
   const { error: updateError } = await ((supabase.from('members' as any) as any)
     .update(membershipPatch as any)

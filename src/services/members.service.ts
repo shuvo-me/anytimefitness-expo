@@ -9,8 +9,7 @@ import type {
 
 const DB_TIER_TO_UI: Record<string, MembershipTier> = {
   basic: 'Monthly',
-  standard: 'Monthly',
-  premium: 'Yearly',
+  standard: 'Yearly',
 };
 
 const DB_STATUS_TO_UI: Record<string, MemberStatus> = {
@@ -278,6 +277,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
 
   const mem = row.members;
   const status = getMembershipStatus(mem?.membership_status as MembershipStatus, mem?.expiry_date ?? null);
+  console.log('check', DB_TIER_TO_UI[mem?.membership_tier ?? ''] ?? 'Monthly', mem?.membership_tier)
   return {
     id: row.id,
     displayId: shortId(row.id),

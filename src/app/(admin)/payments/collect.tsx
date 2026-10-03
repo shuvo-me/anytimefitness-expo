@@ -17,9 +17,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useMember } from "@/hooks/useMembers";
 import { useCreateTransaction } from "@/hooks/usePayments";
-import { plannedExpiry } from "@/services/members.service";
+import { useFacilitySettings } from "@/hooks/useSettings";
 import { CATEGORIES, METHODS, TxCategory, TxMethod } from "@/types/transaction";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addMonths, addYears, format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertCircle,
@@ -106,10 +107,13 @@ export default function CollectFee() {
   const createTx = useCreateTransaction();
   const { data: member, isLoading, isError } = useMember(id);
   const inset = useSafeAreaInsets();
+  const { data: facilitySettings } = useFacilitySettings();
 
   const {
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
@@ -117,12 +121,11 @@ export default function CollectFee() {
   });
 
   const amountValue = useWatch({ control, name: "amount" });
+  const categoryValue = useWatch({ control, name: "category" });
 
   const isPending = member?.status === "pending";
   const isExpired = member?.status === "expired";
   const canCollect = isPending || isExpired;
-  const renewalExpiry =
-    member && isExpired ? plannedExpiry(member.tier, new Date()) : null;
 
   const onSubmit = handleSubmit((values) => {
     if (!id || createTx.isPending || !canCollect) return;
@@ -203,24 +206,55 @@ export default function CollectFee() {
                   {member.status}
                 </Text>
               </Box>
-              {isPending && member.expiryDate && (
-                <Box className="flex-row items-center justify-between">
-                  <Text className="text-xs font-mono text-muted-foreground uppercase">
-                    Activates
-                  </Text>
-                  <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
-                    {member.startDate ? formatDate(member.startDate) : "—"} →{" "}
-                    {formatDate(member.expiryDate)} (dates unchanged)
-                  </Text>
-                </Box>
-              )}
-              {isExpired && renewalExpiry && (
+              {isPending &&
+                member.expiryDate &&
+                categoryValue !== "Admission Fee" && (
+                  <Box className="flex-row items-center justify-between">
+                    <Text className="text-xs font-mono text-muted-foreground uppercase">
+                      Activates
+                    </Text>
+                    <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                      {format(
+                        new Date(member.startDate as string),
+                        "MMM dd, yyyy",
+                      )}{" "}
+                      {""}
+                      {categoryValue === "Monthly Fee" ? (
+                        <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                          →
+                          {format(
+                            addMonths(new Date(member.startDate as string), 1),
+                            "MMM dd, yyyy",
+                          )}
+                        </Text>
+                      ) : (
+                        <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                          →
+                          {format(
+                            addYears(new Date(member.startDate as string), 1),
+                            "MMM dd, yyyy",
+                          )}
+                        </Text>
+                      )}{" "}
+                    </Text>
+                  </Box>
+                )}
+              {isExpired && categoryValue !== "Admission Fee" && (
                 <Box className="flex-row items-center justify-between">
                   <Text className="text-xs font-mono text-muted-foreground uppercase">
                     Renews to
                   </Text>
                   <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
-                    Today → {formatDate(renewalExpiry)}
+                    Today →{" "}
+                    {categoryValue === "Monthly Fee" ? (
+                      <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                        {format(addMonths(new Date(), 1), "MMM dd, yyyy")}
+                      </Text>
+                    ) : (
+                      <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                        {format(addYears(new Date(), 1), "MMM dd, yyyy")}
+                      </Text>
+                    )}
                   </Text>
                 </Box>
               )}
@@ -242,7 +276,15 @@ export default function CollectFee() {
                     <FormSelect
                       value={value}
                       options={CATEGORIES.map((c) => ({ label: c, value: c }))}
-                      onChange={(v) => onChange(v as TxCategory)}
+                      onChange={(v) => {
+                        onChange(v as TxCategory);
+                        setValue(
+                          "amount",
+                          v === "Monthly Fee"
+                            ? String(facilitySettings?.pricing.monthly ?? 0)
+                            : String(facilitySettings?.pricing.yearly ?? 0),
+                        );
+                      }}
                     />
                   )}
                 />
