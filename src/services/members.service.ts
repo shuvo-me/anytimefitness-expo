@@ -277,7 +277,6 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
 
   const mem = row.members;
   const status = getMembershipStatus(mem?.membership_status as MembershipStatus, mem?.expiry_date ?? null);
-  console.log('check', DB_TIER_TO_UI[mem?.membership_tier ?? ''] ?? 'Monthly', mem?.membership_tier)
   return {
     id: row.id,
     displayId: shortId(row.id),

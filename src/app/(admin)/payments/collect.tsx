@@ -18,7 +18,13 @@ import { Text } from "@/components/ui/text";
 import { useMember } from "@/hooks/useMembers";
 import { useCreateTransaction } from "@/hooks/usePayments";
 import { useFacilitySettings } from "@/hooks/useSettings";
-import { CATEGORIES, METHODS, TxCategory, TxMethod } from "@/types/transaction";
+import {
+  CATEGORIES,
+  MembershipTier,
+  METHODS,
+  TxCategory,
+  TxMethod,
+} from "@/types/transaction";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths, addYears, format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -117,7 +123,17 @@ export default function CollectFee() {
     formState: { errors },
   } = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
-    defaultValues: { amount: "0", category: "Monthly Fee", method: "Cash" },
+    defaultValues: {
+      amount:
+        member?.tier === "Monthly"
+          ? JSON.stringify(facilitySettings?.pricing.monthly ?? 0)
+          : JSON.stringify(facilitySettings?.pricing.yearly ?? 0),
+      category:
+        (member?.tier as MembershipTier) === "Monthly"
+          ? "Monthly Fee"
+          : "Yearly Fee",
+      method: "Cash",
+    },
   });
 
   const amountValue = useWatch({ control, name: "amount" });
@@ -282,7 +298,11 @@ export default function CollectFee() {
                           "amount",
                           v === "Monthly Fee"
                             ? String(facilitySettings?.pricing.monthly ?? 0)
-                            : String(facilitySettings?.pricing.yearly ?? 0),
+                            : v === "Yearly Fee"
+                              ? String(facilitySettings?.pricing.yearly ?? 0)
+                              : v === "Admission Fee"
+                                ? "0"
+                                : "0",
                         );
                       }}
                     />
