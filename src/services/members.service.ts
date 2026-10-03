@@ -41,6 +41,27 @@ function daysUntil(dateString: string | null): number {
   const diffMs = new Date(dateString).getTime() - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
+type MembershipStatus = 'pending' | 'active' | 'expired';
+
+function getMembershipStatus(
+  status: MembershipStatus | null | undefined,
+  expiryDate: string | null
+): MembershipStatus {
+  if (status !== 'active' || !expiryDate) {
+    return status ?? 'pending';
+  }
+
+  const today = new Date();
+  const expiry = new Date(`${expiryDate}T00:00:00`);
+
+  today.setHours(0, 0, 0, 0);
+
+  if (today > expiry) {
+    return 'expired';
+  }
+
+  return 'active';
+}
 
 export async function listMembers() {
   const { data, error } = await supabase
@@ -52,15 +73,22 @@ export async function listMembers() {
 
   const rows = (data ?? []) as MemberProfileRow[];
 
-  return rows.map((row) => ({
-    id: row.id,
-    displayId: shortId(row.id),
-    name: row.full_name ?? 'Unnamed Member',
-    phone: row.phone ?? '',
-    tier: DB_TIER_TO_UI[row.members?.membership_tier ?? ''] ?? 'Monthly',
-    status: DB_STATUS_TO_UI[row.members?.membership_status ?? ''] ?? 'pending',
-    daysLeft: daysUntil(row.members?.expiry_date ?? null),
-  }));
+  return rows.map((row) => {
+    const dbStatus = row.members?.membership_status ?? 'pending';
+    const expiryDate = row.members?.expiry_date ?? null;
+
+    const status = getMembershipStatus(dbStatus as MembershipStatus, expiryDate);
+
+    return {
+      id: row.id,
+      displayId: shortId(row.id),
+      name: row.full_name ?? 'Unnamed Member',
+      phone: row.phone ?? '',
+      tier: DB_TIER_TO_UI[row.members?.membership_tier ?? ''] ?? 'Monthly',
+      status: DB_STATUS_TO_UI[status] ?? 'pending',
+      daysLeft: daysUntil(row.members?.expiry_date ?? null),
+    }
+  });
 }
 
 export type MemberListItem = Awaited<ReturnType<typeof listMembers>>[number];
@@ -249,6 +277,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
   ) + row.members?.admission_fee! as number;
 
   const mem = row.members;
+  const status = getMembershipStatus(mem?.membership_status as MembershipStatus, mem?.expiry_date ?? null);
   return {
     id: row.id,
     displayId: shortId(row.id),
@@ -256,7 +285,7 @@ export async function getMemberById(id: string): Promise<MemberDetail | null> {
     initials: initialsOf(name),
     phone: row.phone ?? '',
     tier: DB_TIER_TO_UI[mem?.membership_tier ?? ''] ?? 'Monthly',
-    status: DB_STATUS_TO_UI[mem?.membership_status ?? ''] ?? 'pending',
+    status: DB_STATUS_TO_UI[status] ?? 'pending',
     daysLeft: daysUntil(mem?.expiry_date ?? null),
     startDate: mem?.start_date ?? null,
     expiryDate: mem?.expiry_date ?? null,
