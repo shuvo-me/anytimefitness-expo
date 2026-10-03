@@ -1,16 +1,18 @@
-import { Box } from '@/components/ui/box';
-import { Text } from '@/components/ui/text';
-import { Button, ButtonIcon } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Receipt, Wallet, X } from 'lucide-react-native';
-import { useTransaction } from '@/hooks/usePayments';
+import { Box } from "@/components/ui/box";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Text } from "@/components/ui/text";
+import { useTransaction } from "@/hooks/usePayments";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Receipt, Wallet, X } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function InvoiceDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const txId = String(id ?? '');
+  const txId = String(id ?? "");
   const { data: tx, isLoading } = useTransaction(txId);
+  const insets = useSafeAreaInsets();
 
   if (isLoading) {
     return (
@@ -24,7 +26,10 @@ export default function InvoiceDetail() {
   }
 
   return (
-    <Box className="flex-1 bg-card px-5 pt-4 pb-8">
+    <Box
+      className="flex-1 bg-card px-5"
+      style={{ paddingBottom: insets.bottom, paddingTop: insets.top + 20 }}
+    >
       {tx ? (
         <Box className="gap-5">
           <Box className="flex-row items-center justify-between">
@@ -87,7 +92,9 @@ export default function InvoiceDetail() {
               </Text>
               <Box className="flex-1 flex-row items-center justify-end gap-1.5 ml-4 min-w-0">
                 <Wallet size={13} color="#8A8A9A" />
-                <Text className="text-sm font-bold text-foreground">{tx.method}</Text>
+                <Text className="text-sm font-bold text-foreground">
+                  {tx.method}
+                </Text>
               </Box>
             </Box>
             <Box className="flex-row items-center justify-between">
@@ -105,8 +112,7 @@ export default function InvoiceDetail() {
               Total
             </Text>
             <Text className="font-display font-black text-2xl text-primary tracking-tight">
-              {tx.amount < 0 ? '-' : '+'}৳
-              {Math.abs(tx.amount)}
+              {tx.amount < 0 ? "-" : "+"}৳{Math.abs(tx.amount)}
             </Text>
           </Box>
         </Box>

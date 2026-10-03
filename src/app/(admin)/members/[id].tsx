@@ -238,6 +238,7 @@ export default function MemberDetailScreen() {
 
 function OverviewTab({ member }: { member: MemberDetail }) {
   const router = useRouter();
+  const canCollect = member.status === "pending" || member.status === "expired";
 
   return (
     <VStack space="lg">
@@ -363,20 +364,27 @@ function OverviewTab({ member }: { member: MemberDetail }) {
             </Text>
           </Box>
 
-          <Button
-            onPress={() =>
-              router.push({
-                pathname: "/(admin)/payments/collect",
-                params: { memberId: member.id },
-              })
-            }
-            size="sm"
-            className="rounded-xl"
-          >
-            <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
-              Collect
-            </ButtonText>
-          </Button>
+          {canCollect ? (
+            <Button
+              onPress={() =>
+                router.push({
+                  pathname: "/(admin)/payments/collect",
+                  params: { memberId: member.id },
+                })
+              }
+              size="sm"
+              className="rounded-xl"
+            >
+              <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+                Collect
+              </ButtonText>
+            </Button>
+          ) : (
+            <Text className="text-[10px] font-mono text-muted-foreground uppercase">
+              Active until{" "}
+              {member.expiryDate ? formatDate(member.expiryDate) : "—"}
+            </Text>
+          )}
         </Box>
 
         {/* Lifetime total */}

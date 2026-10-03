@@ -40,6 +40,20 @@ function formatDate(value: string | null | undefined): string {
   }).format(new Date(value));
 }
 
+function toDateOnlyString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isPastExpiry(expiryDate: string | null): boolean {
+  if (!expiryDate) return true;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today > new Date(`${expiryDate}T00:00:00`);
+}
+
 interface TransactionRow {
   id: string;
   amount: number | string;
@@ -134,11 +148,35 @@ export interface CreateTransactionInput {
 export async function createTransaction(
   input: CreateTransactionInput,
 ): Promise<string> {
+  const { data: memberRow, error: memberError } = await supabase
+    .from('members' as any)
+    .select('membership_tier, membership_status, start_date, expiry_date')
+    .eq('id', input.memberId)
+    .single();
+  console.log('memberRow:', memberRow, 'memberError:', memberError);
+  if (memberError) throw memberError;
+
+  const row = memberRow as {
+    membership_tier: string;
+    membership_status: string;
+    start_date: string | null;
+    expiry_date: string | null;
+  } | null;
+  if (!row) throw new Error('Member not found.');
+
+  const tier: MembershipTier | '' = input.category === "Monthly Fee" ? "Monthly" : input.category === "Yearly Fee" ? "Yearly" : '';
+
+  const isPending = row.membership_status === 'pending';
+  const isExpired = (tier === 'Yearly' || tier === 'Monthly') &&
+    row.membership_status === 'expired' ||
+    (row.membership_status === 'active' && isPastExpiry(row.expiry_date));
+
   const { data, error } = await supabase
     .from('transactions' as any)
     .insert({
       member_id: input.memberId,
       amount: input.amount,
+      category: input.category,
       currency: 'BDT',
       status: 'completed',
       method: UI_METHOD_TO_DB[input.method],
@@ -151,23 +189,23 @@ export async function createTransaction(
 
   const txId = (data as { id: string } | null)?.id ?? '';
 
-  const { data: memberRow, error: memberError } = await supabase
-    .from('members' as any)
-    .select('membership_tier')
-    .eq('id', input.memberId)
-    .single();
-  if (!memberError && memberRow) {
-    const tier =
-      (memberRow as { membership_tier: string }).membership_tier === 'premium'
-        ? 'Yearly'
-        : 'Monthly';
-    await ((supabase.from('members' as any) as any)
-      .update({
-        membership_status: 'active',
-        expiry_date: plannedExpiry(tier),
-      } as any)
-      .eq('id', input.memberId));
-  }
+  const membershipPatch = isPending
+    ? { membership_status: 'active' }
+    : isExpired
+      ? (() => {
+        const today = new Date();
+        return {
+          membership_status: 'active',
+          start_date: toDateOnlyString(today),
+          expiry_date: plannedExpiry(tier as MembershipTier, today),
+        };
+      })()
+      : { membership_status: 'active' };
+
+  const { error: updateError } = await ((supabase.from('members' as any) as any)
+    .update(membershipPatch as any)
+    .eq('id', input.memberId));
+  if (updateError) throw updateError;
 
   return txId;
 }

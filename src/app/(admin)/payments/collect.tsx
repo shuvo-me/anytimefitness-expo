@@ -1,3 +1,4 @@
+import { PaymentForm, paymentSchema } from "@/api/payment.schema";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
@@ -12,16 +13,13 @@ import {
   SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
-import { useMembers } from "@/hooks/useMembers";
+import { useMember } from "@/hooks/useMembers";
 import { useCreateTransaction } from "@/hooks/usePayments";
-import {
-  CATEGORIES,
-  METHODS,
-  TIER_PRICE,
-  TxCategory,
-  TxMethod,
-} from "@/types/transaction";
+import { plannedExpiry } from "@/services/members.service";
+import { CATEGORIES, METHODS, TxCategory, TxMethod } from "@/types/transaction";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertCircle,
@@ -29,7 +27,7 @@ import {
   ChevronDown,
   Receipt,
 } from "lucide-react-native";
-import { useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function FormSelect<T extends string>({
@@ -84,35 +82,64 @@ function Label({ children }: { children: string }) {
   );
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <Text className="text-[11px] font-mono text-destructive mt-1">
+      {message}
+    </Text>
+  );
+}
+
+function formatDate(dateString: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${dateString}T00:00:00`));
+}
+
 export default function CollectFee() {
   const router = useRouter();
   const { memberId } = useLocalSearchParams<{ memberId: string }>();
+  const id = String(memberId ?? "");
   const createTx = useCreateTransaction();
-  const { data: members } = useMembers();
+  const { data: member, isLoading, isError } = useMember(id);
   const inset = useSafeAreaInsets();
 
-  const member = (members ?? []).find((m) => m.id === memberId);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PaymentForm>({
+    resolver: zodResolver(paymentSchema),
+    defaultValues: { amount: "0", category: "Monthly Fee", method: "Cash" },
+  });
 
-  const [amount, setAmount] = useState(
-    member ? String(TIER_PRICE[member.tier]) : "600",
-  );
-  const [category, setCategory] = useState<TxCategory>("Monthly Fee");
-  const [method, setMethod] = useState<TxMethod>("Cash");
+  const amountValue = useWatch({ control, name: "amount" });
 
-  const handleSubmit = () => {
-    if (!memberId || createTx.isPending) return;
-    const numericAmount = Number(amount);
-    if (Number.isNaN(numericAmount) || numericAmount <= 0) return;
+  const isPending = member?.status === "pending";
+  const isExpired = member?.status === "expired";
+  const canCollect = isPending || isExpired;
+  const renewalExpiry =
+    member && isExpired ? plannedExpiry(member.tier, new Date()) : null;
 
+  const onSubmit = handleSubmit((values) => {
+    if (!id || createTx.isPending || !canCollect) return;
     createTx.mutate(
-      { memberId, amount: numericAmount, method, category },
+      {
+        memberId: id,
+        amount: Number(values.amount),
+        method: values.method as TxMethod,
+        category: values.category as TxCategory,
+      },
       {
         onSuccess: (txId) => {
           router.replace(`/(admin)/payments/invoice/${txId}`);
         },
       },
     );
-  };
+  });
 
   return (
     <Box
@@ -138,12 +165,20 @@ export default function CollectFee() {
           <Box className="p-3 bg-destructive/15 border border-destructive/40 rounded-xl flex-row items-center gap-2">
             <AlertCircle size={16} color="#FF4B1F" />
             <Text className="text-xs font-mono text-foreground flex-1">
-              Failed to record payment. Please try again.
+              {createTx.error?.message ??
+                "Failed to record payment. Please try again."}
             </Text>
           </Box>
         )}
 
-        {!member ? (
+        {isLoading ? (
+          <Box className="p-8 items-center bg-background border border-border rounded-2xl">
+            <Spinner color="#C8F135" />
+            <Text className="text-xs font-mono text-muted-foreground mt-3">
+              Loading member...
+            </Text>
+          </Box>
+        ) : isError || !member ? (
           <Box className="p-8 items-center bg-background border border-border rounded-2xl">
             <Text className="text-sm font-mono text-muted-foreground text-center">
               Member not found.
@@ -168,46 +203,95 @@ export default function CollectFee() {
                   {member.status}
                 </Text>
               </Box>
+              {isPending && member.expiryDate && (
+                <Box className="flex-row items-center justify-between">
+                  <Text className="text-xs font-mono text-muted-foreground uppercase">
+                    Activates
+                  </Text>
+                  <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                    {member.startDate ? formatDate(member.startDate) : "—"} →{" "}
+                    {formatDate(member.expiryDate)} (dates unchanged)
+                  </Text>
+                </Box>
+              )}
+              {isExpired && renewalExpiry && (
+                <Box className="flex-row items-center justify-between">
+                  <Text className="text-xs font-mono text-muted-foreground uppercase">
+                    Renews to
+                  </Text>
+                  <Text className="text-xs font-mono text-foreground flex-1 text-right ml-4">
+                    Today → {formatDate(renewalExpiry)}
+                  </Text>
+                </Box>
+              )}
+              {!canCollect && (
+                <Box className="p-3 bg-warning/15 border border-warning/40 rounded-xl">
+                  <Text className="text-xs font-mono text-foreground">
+                    Only pending or expired memberships can collect payment.
+                  </Text>
+                </Box>
+              )}
             </Box>
-
-            <Box>
-              <Label>Amount (৳)</Label>
-              <Input className="w-full bg-background border-border rounded-xl px-3 h-11">
-                <InputField
-                  value={amount}
-                  onChangeText={setAmount}
-                  placeholder="Amount"
-                  keyboardType="numeric"
-                  className="w-full text-sm font-mono text-foreground"
-                />
-              </Input>
-            </Box>
-
             <Box className="flex-row gap-4">
               <Box className="flex-1">
                 <Label>Category</Label>
-                <FormSelect
-                  value={category}
-                  options={CATEGORIES.map((c) => ({ label: c, value: c }))}
-                  onChange={(v) => setCategory(v as TxCategory)}
+                <Controller
+                  control={control}
+                  name="category"
+                  render={({ field: { onChange, value } }) => (
+                    <FormSelect
+                      value={value}
+                      options={CATEGORIES.map((c) => ({ label: c, value: c }))}
+                      onChange={(v) => onChange(v as TxCategory)}
+                    />
+                  )}
                 />
+                <FieldError message={errors.category?.message} />
               </Box>
               <Box className="flex-1">
                 <Label>Method</Label>
-                <FormSelect
-                  value={method}
-                  options={METHODS.map((m) => ({ label: m, value: m }))}
-                  onChange={(v) => setMethod(v as TxMethod)}
+                <Controller
+                  control={control}
+                  name="method"
+                  render={({ field: { onChange, value } }) => (
+                    <FormSelect
+                      value={value}
+                      options={METHODS.map((m) => ({ label: m, value: m }))}
+                      onChange={(v) => onChange(v as TxMethod)}
+                    />
+                  )}
                 />
+                <FieldError message={errors.method?.message} />
               </Box>
             </Box>
+
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Box>
+                  <Label>Amount (৳)</Label>
+                  <Input className="w-full bg-background border-border rounded-xl px-3 h-11">
+                    <InputField
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="Amount"
+                      keyboardType="numeric"
+                      className="w-full text-sm font-mono text-foreground"
+                    />
+                  </Input>
+                  <FieldError message={errors.amount?.message} />
+                </Box>
+              )}
+            />
 
             <Box className="bg-background border border-border rounded-2xl p-4 flex-row items-center justify-between">
               <Text className="text-xs font-mono text-muted-foreground uppercase">
                 Total
               </Text>
               <Text className="font-display font-black text-2xl text-primary tracking-tight">
-                ৳{Number(amount) || 0}
+                ৳{Number(amountValue) || 0}
               </Text>
             </Box>
 
@@ -221,8 +305,8 @@ export default function CollectFee() {
                 </ButtonText>
               </Button>
               <Button
-                onPress={handleSubmit}
-                isDisabled={createTx.isPending}
+                onPress={onSubmit}
+                isDisabled={createTx.isPending || !canCollect}
                 className="px-5 py-2.5 rounded-xl bg-primary flex-row items-center justify-center gap-2"
               >
                 <ButtonIcon

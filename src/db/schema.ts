@@ -7,6 +7,7 @@ export const membershipTier = pgEnum("membership_tier", ["basic", "standard", "p
 export const paymentMethod = pgEnum("payment_method", ["card", "cash", "online", "apple_pay", "google_pay"])
 export const paymentStatus = pgEnum("payment_status", ["pending", "completed", "failed", "refunded"])
 export const userRole = pgEnum("user_role", ["member", "trainer", "admin"])
+export const txCategory = pgEnum("tx_category", ["Monthly Fee", "Yearly Fee", "Admission Fee"]);
 
 export const authSchema = pgSchema('auth');
 export const users = authSchema.table('users', {
@@ -108,6 +109,7 @@ export const transactions = pgTable("transactions", {
   id: uuid().defaultRandom().primaryKey(),
   memberId: uuid("member_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
+  category: txCategory().default("Monthly Fee").notNull(),
   currency: text().default("BDT").notNull(),
   status: paymentStatus().default("pending").notNull(),
   method: paymentMethod().default("card").notNull(),
