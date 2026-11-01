@@ -82,6 +82,7 @@ export const members = pgTable("members", {
   startDate: date("start_date").default(sql`now()`).notNull(),
   expiryDate: date("expiry_date"),
   qrPassToken: uuid("qr_pass_token").defaultRandom().notNull(),
+  pinCodeHash: text("pin_code_hash"),
   emergencyContact: jsonb("emergency_contact"),
   notes: text(),
   goal: text(),
@@ -103,7 +104,11 @@ export const profiles = pgTable("profiles", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).default(sql`now()`).notNull(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
 }, (table) => [
-  unique("profiles_user_id_unique").on(table.userId),]);
+  unique("profiles_user_id_unique").on(table.userId),
+  uniqueIndex("idx_profiles_phone_member")
+    .using("btree", table.phone.asc().nullsLast())
+    .where(sql`role = 'member'`),
+]);
 
 export const transactions = pgTable("transactions", {
   id: uuid().defaultRandom().primaryKey(),
