@@ -1,4 +1,5 @@
 import type { MemberForm } from '@/api/member.schema';
+import { toDateInputValue } from '@/lib/date';
 import { supabase } from '@/lib/supabase';
 import { getFacilitySettings } from '@/services/settings.service';
 import type { MembershipTier, MemberStatus } from '@/types/member';
@@ -366,26 +367,44 @@ interface WorkoutProgramRow {
   id: string;
   member_id: string;
   title: string;
-  split_day: string;
-  split_schedule: string | null;
-  notes: string | null;
-  assigned_by: string | null;
   assigned_date: string;
-  exercises: WorkoutExercise[];
-  completed: boolean;
+  exercises: unknown;
+}
+
+function normalizeExercises(value: unknown): WorkoutExercise[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item, index) => {
+    if (!item || typeof item !== 'object') return [];
+    const raw = item as Record<string, unknown>;
+
+    const name = typeof raw.name === 'string' ? raw.name : '';
+    if (!name) return [];
+
+    const sets = Number(raw.sets);
+    const rawWeight = raw.weightKg ?? raw.targetWeightKg;
+    const weight = rawWeight == null ? NaN : Number(rawWeight);
+
+    return [
+      {
+        id:
+          typeof raw.id === 'string' && raw.id ? raw.id : `ex-${index + 1}`,
+        name,
+        sets: Number.isFinite(sets) && sets > 0 ? Math.round(sets) : 3,
+        reps: typeof raw.reps === 'string' ? raw.reps : '',
+        weightKg: Number.isFinite(weight) ? weight : null,
+      },
+    ];
+  });
 }
 
 function emptyProgram(memberId: string): WorkoutProgram {
   return {
     id: '',
     memberId,
-    programTitle: '',
-    currentDayTitle: '',
-    splitSchedule: '',
+    title: '',
     exercises: [],
-    notes: '',
-    assignedBy: '',
-    assignedDate: new Date().toISOString().split('T')[0],
+    assignedDate: toDateInputValue(),
   };
 }
 
@@ -393,12 +412,8 @@ function rowToProgram(row: WorkoutProgramRow, memberId: string): WorkoutProgram 
   return {
     id: row.id,
     memberId,
-    programTitle: row.title,
-    currentDayTitle: row.split_day,
-    splitSchedule: row.split_schedule ?? '',
-    exercises: row.exercises ?? [],
-    notes: row.notes ?? '',
-    assignedBy: row.assigned_by ?? '',
+    title: row.title,
+    exercises: normalizeExercises(row.exercises),
     assignedDate: row.assigned_date,
   };
 }
@@ -430,11 +445,11 @@ export async function saveWorkoutProgram(program: WorkoutProgram): Promise<void>
 
   const payload = {
     member_id: program.memberId,
-    title: program.programTitle,
-    split_day: program.currentDayTitle,
-    split_schedule: program.splitSchedule || null,
-    notes: program.notes || null,
-    assigned_by: program.assignedBy || null,
+    title: program.title,
+    split_day: program.title,
+    split_schedule: null,
+    notes: null,
+    assigned_by: null,
     assigned_date: program.assignedDate,
     exercises: program.exercises,
     completed: false,
