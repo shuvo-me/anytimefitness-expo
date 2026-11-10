@@ -2,6 +2,15 @@ import {
   workoutWeekSchema,
   type WorkoutWeekForm,
 } from "@/api/routine.schema";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionIcon,
+  AccordionItem,
+  AccordionTitleText,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
@@ -26,13 +35,14 @@ import type { Weekday, WorkoutDay } from "@/types/routine";
 import { WEEKDAYS } from "@/types/routine";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDown, Plus, Save, Trash2 } from "lucide-react-native";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Controller,
   useFieldArray,
   useForm,
   useWatch,
   type Control,
+  type FieldErrors,
 } from "react-hook-form";
 import { FieldError, MiniLabel } from "./fields";
 import { SaveFeedback } from "./SaveFeedback";
@@ -100,7 +110,7 @@ export function WorkoutEditor({
   const saveMutation = useSaveWorkoutWeek(memberId);
   const days = data ?? [];
 
-  const { control, handleSubmit, reset } = useForm<WorkoutWeekForm>({
+  const { control, handleSubmit, reset, getValues } = useForm<WorkoutWeekForm>({
     resolver: zodResolver(workoutWeekSchema),
     defaultValues: toForm(days),
   });
@@ -108,7 +118,13 @@ export function WorkoutEditor({
   const { fields, append, remove } = useFieldArray({
     control,
     name: "days",
+    keyName: "key",
   });
+
+  const [openDays, setOpenDays] = useState<string[]>([]);
+  const openDayValues = openDays.filter((id) =>
+    fields.some((field) => field.id === id),
+  );
 
   const watchedDays = useWatch({ control, name: "days" });
   const usedWeekdays = new Set(
@@ -161,8 +177,10 @@ export function WorkoutEditor({
     );
     if (!nextWeekday) return;
 
+    const dayId = newId("day");
+    setOpenDays((prev) => [...prev, dayId]);
     append({
-      id: newId("day"),
+      id: dayId,
       weekday: nextWeekday,
       title: "",
       focus: "",
@@ -170,8 +188,31 @@ export function WorkoutEditor({
     });
   };
 
+  const handleRemoveDay = (dayId: string, index: number) => {
+    setOpenDays((prev) => prev.filter((id) => id !== dayId));
+    remove(index);
+  };
+
   const onSubmit = (values: WorkoutWeekForm) => {
     saveMutation.mutate(toDomain(values, memberId, days));
+  };
+
+  const onInvalid = (errors: FieldErrors<WorkoutWeekForm>) => {
+    const errorDays = errors.days;
+    if (!errorDays) return;
+
+    const formDays = getValues("days") ?? [];
+    const rootError = (errorDays as unknown as { root?: unknown }).root;
+    const errorEntries = errorDays as unknown as Record<string, unknown>;
+
+    const dayIds = rootError
+      ? formDays.map((day) => day.id)
+      : formDays
+          .filter((_, index) => Boolean(errorEntries[String(index)]))
+          .map((day) => day.id);
+
+    if (dayIds.length === 0) return;
+    setOpenDays((prev) => Array.from(new Set([...prev, ...dayIds])));
   };
 
   return (
@@ -194,7 +235,7 @@ export function WorkoutEditor({
             </ButtonText>
           </Button>
           <Button
-            onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit, onInvalid)}
             isDisabled={saveMutation.isPending}
             size="sm"
             className="rounded-xl"
@@ -223,94 +264,136 @@ export function WorkoutEditor({
         />
       )}
 
-      {fields.map((field, index) => (
-        <Box
-          key={field.id}
-          className="bg-background border border-border-subtle p-3 rounded-xl gap-3"
-        >
-          <HStack space="sm" className="items-start justify-between">
-            <Box className="flex-1">
-              <MiniLabel>Day</MiniLabel>
-              <Controller
-                control={control}
-                name={`days.${index}.weekday`}
-                render={({ field: weekdayField, fieldState }) => (
-                  <Box className="gap-1">
-                    <WeekdaySelect
-                      value={weekdayField.value}
-                      onChange={weekdayField.onChange}
+      <Accordion
+        type="multiple"
+        value={openDayValues}
+        onValueChange={setOpenDays}
+      >
+        <VStack space="sm">
+          {fields.map((field, index) => {
+            const summary = watchedDays?.[index];
+            const weekdayLabel = summary?.weekday || "Select day";
+            const titleLabel = summary?.title?.trim() || "Untitled workout";
+            const focusLabel = summary?.focus?.trim() || "No body part";
+            const exerciseCount = summary?.exercises?.length ?? 0;
+
+            return (
+              <AccordionItem
+                key={field.key}
+                value={field.id}
+                className="bg-background border border-border-subtle rounded-xl overflow-hidden"
+              >
+                <AccordionHeader className="m-0 px-0 py-0">
+                  <AccordionTrigger className="px-3 py-2.5">
+                    <Box className="flex-1 mr-2">
+                      <HStack space="sm" className="items-center">
+                        <Text className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
+                          {weekdayLabel}
+                        </Text>
+                        <AccordionTitleText className="text-xs font-bold text-foreground">
+                          {titleLabel}
+                        </AccordionTitleText>
+                      </HStack>
+                      <Text className="text-[10px] font-mono text-muted-foreground mt-0.5">
+                        {focusLabel} • {exerciseCount}{" "}
+                        {exerciseCount === 1 ? "exercise" : "exercises"}
+                      </Text>
+                    </Box>
+                    <AccordionIcon
+                      as={ChevronDown}
+                      className="text-muted-foreground w-4 h-4"
                     />
-                    <FieldError message={fieldState.error?.message} />
-                  </Box>
-                )}
-              />
-            </Box>
-            <Button
-              onPress={() => remove(index)}
-              size="sm"
-              variant="outline"
-              className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1 mt-4"
-            >
-              <ButtonIcon
-                as={Trash2}
-                className="text-destructive w-3.5 h-3.5"
-              />
-              <ButtonText className="text-[10px] font-mono font-bold uppercase text-destructive">
-                Remove
-              </ButtonText>
-            </Button>
-          </HStack>
+                  </AccordionTrigger>
+                </AccordionHeader>
+                <AccordionContent className="px-3 pt-3 pb-3 border-t border-border-subtle">
+                  <VStack space="md">
+                    <HStack space="sm" className="items-start">
+                      <Box className="w-[140px]">
+                        <MiniLabel>Day</MiniLabel>
+                        <Controller
+                          control={control}
+                          name={`days.${index}.weekday`}
+                          render={({ field: weekdayField, fieldState }) => (
+                            <Box className="gap-1">
+                              <WeekdaySelect
+                                value={weekdayField.value}
+                                onChange={weekdayField.onChange}
+                              />
+                              <FieldError message={fieldState.error?.message} />
+                            </Box>
+                          )}
+                        />
+                      </Box>
+                      <Box className="flex-1">
+                        <MiniLabel>Workout Title</MiniLabel>
+                        <Controller
+                          control={control}
+                          name={`days.${index}.title`}
+                          render={({ field: titleField, fieldState }) => (
+                            <Box className="gap-1">
+                              <Input className={inputClassName}>
+                                <InputField
+                                  value={titleField.value}
+                                  onChangeText={titleField.onChange}
+                                  onBlur={titleField.onBlur}
+                                  placeholder="e.g. Push Day"
+                                  placeholderTextColor="#555566"
+                                  className="w-full text-xs text-foreground font-bold font-mono"
+                                />
+                              </Input>
+                              <FieldError message={fieldState.error?.message} />
+                            </Box>
+                          )}
+                        />
+                      </Box>
+                    </HStack>
 
-          <HStack space="sm" className="items-start">
-            <Box className="flex-1">
-              <MiniLabel>Workout Title</MiniLabel>
-              <Controller
-                control={control}
-                name={`days.${index}.title`}
-                render={({ field: titleField, fieldState }) => (
-                  <Box className="gap-1">
-                    <Input className={inputClassName}>
-                      <InputField
-                        value={titleField.value}
-                        onChangeText={titleField.onChange}
-                        onBlur={titleField.onBlur}
-                        placeholder="e.g. Push Day"
-                        placeholderTextColor="#555566"
-                        className="w-full text-xs text-foreground font-bold font-mono"
+                    <Box>
+                      <MiniLabel>Body Part</MiniLabel>
+                      <Controller
+                        control={control}
+                        name={`days.${index}.focus`}
+                        render={({ field: focusField, fieldState }) => (
+                          <Box className="gap-1">
+                            <Input className={inputClassName}>
+                              <InputField
+                                value={focusField.value}
+                                onChangeText={focusField.onChange}
+                                onBlur={focusField.onBlur}
+                                placeholder="e.g. Chest & Triceps"
+                                placeholderTextColor="#555566"
+                                className="w-full text-xs text-primary font-bold font-mono"
+                              />
+                            </Input>
+                            <FieldError message={fieldState.error?.message} />
+                          </Box>
+                        )}
                       />
-                    </Input>
-                    <FieldError message={fieldState.error?.message} />
-                  </Box>
-                )}
-              />
-            </Box>
-            <Box className="flex-1">
-              <MiniLabel>Body Part</MiniLabel>
-              <Controller
-                control={control}
-                name={`days.${index}.focus`}
-                render={({ field: focusField, fieldState }) => (
-                  <Box className="gap-1">
-                    <Input className={inputClassName}>
-                      <InputField
-                        value={focusField.value}
-                        onChangeText={focusField.onChange}
-                        onBlur={focusField.onBlur}
-                        placeholder="e.g. Chest & Triceps"
-                        placeholderTextColor="#555566"
-                        className="w-full text-xs text-primary font-bold font-mono"
-                      />
-                    </Input>
-                    <FieldError message={fieldState.error?.message} />
-                  </Box>
-                )}
-              />
-            </Box>
-          </HStack>
+                    </Box>
 
-          <DayExercises control={control} dayIndex={index} />
-        </Box>
-      ))}
+                    <DayExercises control={control} dayIndex={index} />
+
+                    <Button
+                      onPress={() => handleRemoveDay(field.id, index)}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1 self-start"
+                    >
+                      <ButtonIcon
+                        as={Trash2}
+                        className="text-destructive w-3.5 h-3.5"
+                      />
+                      <ButtonText className="text-[10px] font-mono font-bold uppercase text-destructive">
+                        Remove Day
+                      </ButtonText>
+                    </Button>
+                  </VStack>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </VStack>
+      </Accordion>
 
       {fields.length === 0 && (
         <Box className="p-6 items-center bg-background border border-border-subtle rounded-xl">
