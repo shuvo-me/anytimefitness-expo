@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/date-time-picker";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
+import { Pressable } from "@/components/ui/pressable";
 import { ScrollView } from "@/components/ui/scroll-view";
 import {
   Select,
@@ -31,6 +32,7 @@ import {
   useWorkoutProgram,
 } from "@/hooks/useMembers";
 import { useFacilitySettings } from "@/hooks/useSettings";
+import { openWhatsApp } from "@/lib/whatsapp";
 import { emptyProgram, type MemberDetail } from "@/services/members.service";
 import type { MembershipTier, MemberStatus } from "@/types/member";
 import { TIER_OPTIONS } from "@/types/member";
@@ -44,6 +46,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Dumbbell,
+  MessageCircle,
   Plus,
   Receipt,
   Save,
@@ -282,6 +285,7 @@ function OverviewTab({ member }: { member: MemberDetail }) {
           <DetailRow
             label="Phone"
             value={member.phone}
+            onPress={() => openWhatsApp(member.phone)}
             last={
               !member.weightKg && !member.heightCm && !member.attendanceGoalDays
             }
@@ -403,22 +407,36 @@ function DetailRow({
   value,
   bold,
   last,
+  onPress,
 }: {
   label: string;
   value: string;
   bold?: boolean;
   last?: boolean;
+  onPress?: () => void;
 }) {
+  const valueClassName = `text-xs text-right flex-1 ml-3 ${bold ? "font-bold" : ""}`;
+
   return (
     <Box
       className={`flex-row justify-between py-1.5 ${last ? "" : "border-b border-border-subtle"}`}
     >
       <Text className="text-muted-foreground font-mono text-xs">{label}:</Text>
-      <Text
-        className={`text-foreground text-xs text-right flex-1 ml-3 ${bold ? "font-bold" : ""}`}
-      >
-        {value}
-      </Text>
+      {onPress ? (
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="link"
+          accessibilityLabel={`${label}: ${value}`}
+          className="flex-row items-center justify-end flex-1 ml-3 gap-1 active:opacity-70"
+        >
+          <Text className={`${valueClassName} text-primary underline`}>
+            {value}
+          </Text>
+          <MessageCircle size={12} color="#C8F135" />
+        </Pressable>
+      ) : (
+        <Text className={`${valueClassName} text-foreground`}>{value}</Text>
+      )}
     </Box>
   );
 }
