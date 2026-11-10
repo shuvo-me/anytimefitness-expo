@@ -3,16 +3,16 @@ import {
   addMember,
   deleteMember,
   getMemberById,
-  getWorkoutProgram,
+  getWorkoutDays,
   listMembers,
-  saveWorkoutProgram,
+  saveWorkoutWeek,
   updateMember,
 } from '@/services/members.service';
 import type {
   UpdateMemberInput,
 } from '@/services/members.service';
 import type { MemberForm } from '@/api/member.schema';
-import type { WorkoutProgram } from '@/types/routine';
+import type { WorkoutDay } from '@/types/routine';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useMembers() {
@@ -67,19 +67,19 @@ export function useDeleteMember() {
   });
 }
 
-export function useWorkoutProgram(memberId: string) {
+export function useWorkoutDays(memberId: string) {
   return useQuery({
     queryKey: queryKeys.workoutPrograms.byMember(memberId),
-    queryFn: () => getWorkoutProgram(memberId),
+    queryFn: () => getWorkoutDays(memberId),
     enabled: Boolean(memberId),
   });
 }
 
-export function useSaveWorkoutProgram(memberId: string) {
+export function useSaveWorkoutWeek(memberId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (program: WorkoutProgram) => saveWorkoutProgram(program),
+    mutationFn: (days: WorkoutDay[]) => saveWorkoutWeek(memberId, days),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutPrograms.byMember(memberId),

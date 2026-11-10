@@ -1,3 +1,15 @@
+export const WEEKDAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+] as const;
+
+export type Weekday = (typeof WEEKDAYS)[number];
+
 export interface WorkoutExercise {
   id: string;
   name: string;
@@ -6,10 +18,12 @@ export interface WorkoutExercise {
   weightKg: number | null;
 }
 
-export interface WorkoutProgram {
+export interface WorkoutDay {
   id: string;
   memberId: string;
+  weekday: Weekday | "";
   title: string;
+  focus: string;
   exercises: WorkoutExercise[];
   assignedDate: string;
 }

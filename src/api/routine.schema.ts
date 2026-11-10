@@ -1,3 +1,4 @@
+import { WEEKDAYS } from '@/types/routine';
 import { z } from 'zod';
 
 const numericString = (message: string, min = 0) =>
@@ -31,12 +32,43 @@ export const workoutExerciseSchema = z.object({
     }),
 });
 
-export const workoutProgramSchema = z.object({
+const weekdaySchema = z.union([z.enum(WEEKDAYS), z.literal('')]);
+
+export const workoutDaySchema = z.object({
+  id: z.string(),
+  weekday: weekdaySchema,
   title: z.string().trim().min(1, 'Workout title is required'),
+  focus: z.string().trim().min(1, 'Body part is required'),
   exercises: z.array(workoutExerciseSchema),
 });
 
-export type WorkoutProgramForm = z.infer<typeof workoutProgramSchema>;
+export const workoutWeekSchema = z.object({
+  days: z.array(workoutDaySchema).superRefine((days, ctx) => {
+    const seen = new Set<string>();
+
+    days.forEach((day, index) => {
+      if (!day.weekday) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Select a weekday',
+          path: [index, 'weekday'],
+        });
+        return;
+      }
+
+      if (seen.has(day.weekday)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `${day.weekday} is already scheduled`,
+          path: [index, 'weekday'],
+        });
+      }
+      seen.add(day.weekday);
+    });
+  }),
+});
+
+export type WorkoutWeekForm = z.infer<typeof workoutWeekSchema>;
 
 export const mealItemSchema = z.object({
   id: z.string(),

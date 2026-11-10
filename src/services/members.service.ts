@@ -4,9 +4,11 @@ import { supabase } from '@/lib/supabase';
 import { getFacilitySettings } from '@/services/settings.service';
 import type { MembershipTier, MemberStatus } from '@/types/member';
 import type {
+  Weekday,
+  WorkoutDay,
   WorkoutExercise,
-  WorkoutProgram,
 } from '@/types/routine';
+import { WEEKDAYS } from '@/types/routine';
 
 const DB_TIER_TO_UI: Record<string, MembershipTier> = {
   basic: 'Monthly',
@@ -361,14 +363,22 @@ export async function deleteMember(id: string): Promise<void> {
   if (error) throw error;
 }
 
-/* ── Workout programs ──────────────────────────────────────────────── */
+/* ── Workout days (weekly split) ───────────────────────────────────── */
 
-interface WorkoutProgramRow {
+interface WorkoutDayRow {
   id: string;
   member_id: string;
   title: string;
+  split_day: string;
+  split_schedule: string | null;
   assigned_date: string;
   exercises: unknown;
+}
+
+function normalizeWeekday(value: unknown): Weekday | '' {
+  if (typeof value !== 'string') return '';
+  const normalized = value.trim().toLowerCase();
+  return WEEKDAYS.find((day) => day.toLowerCase() === normalized) ?? '';
 }
 
 function normalizeExercises(value: unknown): WorkoutExercise[] {
@@ -398,76 +408,102 @@ function normalizeExercises(value: unknown): WorkoutExercise[] {
   });
 }
 
-function emptyProgram(memberId: string): WorkoutProgram {
-  return {
-    id: '',
-    memberId,
-    title: '',
-    exercises: [],
-    assignedDate: toDateInputValue(),
-  };
-}
-
-function rowToProgram(row: WorkoutProgramRow, memberId: string): WorkoutProgram {
+function rowToWorkoutDay(row: WorkoutDayRow, memberId: string): WorkoutDay {
   return {
     id: row.id,
     memberId,
+    weekday: normalizeWeekday(row.split_schedule),
     title: row.title,
+    focus: row.split_day,
     exercises: normalizeExercises(row.exercises),
     assignedDate: row.assigned_date,
   };
 }
 
-export async function getWorkoutProgram(
+export function emptyWorkoutDay(
   memberId: string,
-): Promise<WorkoutProgram | null> {
+  weekday: Weekday = 'Monday',
+): WorkoutDay {
+  return {
+    id: '',
+    memberId,
+    weekday,
+    title: '',
+    focus: '',
+    exercises: [],
+    assignedDate: toDateInputValue(),
+  };
+}
+
+export async function getWorkoutDays(memberId: string): Promise<WorkoutDay[]> {
   const { data, error } = await supabase
     .from('workout_programs' as any)
     .select('*')
     .eq('member_id', memberId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order('created_at', { ascending: true });
   if (error) throw error;
 
-  const row = data as WorkoutProgramRow | null;
-  if (!row) return null;
-  return rowToProgram(row, memberId);
+  const rows = (data ?? []) as WorkoutDayRow[];
+
+  return rows
+    .map((row) => rowToWorkoutDay(row, memberId))
+    .sort((a, b) => {
+      const aIndex = a.weekday ? WEEKDAYS.indexOf(a.weekday) : WEEKDAYS.length;
+      const bIndex = b.weekday ? WEEKDAYS.indexOf(b.weekday) : WEEKDAYS.length;
+      return aIndex - bIndex;
+    });
 }
 
-export async function saveWorkoutProgram(program: WorkoutProgram): Promise<void> {
-  let targetId = program.id;
-
-  if (!targetId) {
-    const existing = await getWorkoutProgram(program.memberId);
-    targetId = existing?.id ?? '';
-  }
-
-  const payload = {
-    member_id: program.memberId,
-    title: program.title,
-    split_day: program.title,
-    split_schedule: null,
-    notes: null,
-    assigned_by: null,
-    assigned_date: program.assignedDate,
-    exercises: program.exercises,
-    completed: false,
-  };
-
-  if (targetId) {
-    const { error } = await (supabase
-      .from('workout_programs' as any) as any)
-      .update(payload as any)
-      .eq('id', targetId);
-    if (error) throw error;
-    return;
-  }
-
-  const { error } = await supabase
+export async function saveWorkoutWeek(
+  memberId: string,
+  days: WorkoutDay[],
+): Promise<void> {
+  const { data, error } = await supabase
     .from('workout_programs' as any)
-    .insert(payload as any);
+    .select('id')
+    .eq('member_id', memberId);
   if (error) throw error;
+
+  const existingRows = (data ?? []) as { id: string }[];
+  const existingIds = new Set(existingRows.map((row) => row.id));
+  const keptIds = new Set(
+    days.map((day) => day.id).filter((id) => existingIds.has(id)),
+  );
+  const removedIds = [...existingIds].filter((id) => !keptIds.has(id));
+
+  if (removedIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from('workout_programs' as any)
+      .delete()
+      .in('id', removedIds);
+    if (deleteError) throw deleteError;
+  }
+
+  for (const day of days) {
+    const payload = {
+      member_id: memberId,
+      title: day.title,
+      split_day: day.focus,
+      split_schedule: day.weekday || null,
+      notes: null,
+      assigned_by: null,
+      assigned_date: day.assignedDate,
+      exercises: day.exercises,
+      completed: false,
+    };
+
+    if (existingIds.has(day.id)) {
+      const { error: updateError } = await (supabase
+        .from('workout_programs' as any) as any)
+        .update(payload as any)
+        .eq('id', day.id);
+      if (updateError) throw updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from('workout_programs' as any)
+        .insert(payload as any);
+      if (insertError) throw insertError;
+    }
+  }
 }
 
-export { emptyProgram };
