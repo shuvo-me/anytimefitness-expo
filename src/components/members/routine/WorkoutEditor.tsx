@@ -44,11 +44,8 @@ import {
   type Control,
   type FieldErrors,
 } from "react-hook-form";
-import { FieldError, MiniLabel } from "./fields";
+import { FieldError, MiniLabel, routineInputClassName } from "./fields";
 import { SaveFeedback } from "./SaveFeedback";
-
-const inputClassName =
-  "w-full bg-card border border-border-subtle rounded-lg px-2 py-1";
 
 function newId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -331,7 +328,7 @@ export function WorkoutEditor({
                           name={`days.${index}.title`}
                           render={({ field: titleField, fieldState }) => (
                             <Box className="gap-1">
-                              <Input className={inputClassName}>
+                              <Input className={routineInputClassName}>
                                 <InputField
                                   value={titleField.value}
                                   onChangeText={titleField.onChange}
@@ -355,7 +352,7 @@ export function WorkoutEditor({
                         name={`days.${index}.focus`}
                         render={({ field: focusField, fieldState }) => (
                           <Box className="gap-1">
-                            <Input className={inputClassName}>
+                            <Input className={routineInputClassName}>
                               <InputField
                                 value={focusField.value}
                                 onChangeText={focusField.onChange}
@@ -460,7 +457,7 @@ function DayExercises({
                 name={`days.${dayIndex}.exercises.${exerciseIndex}.name`}
                 render={({ field: nameField, fieldState }) => (
                   <Box className="gap-1">
-                    <Input className={inputClassName}>
+                    <Input className={routineInputClassName}>
                       <InputField
                         value={nameField.value}
                         onChangeText={nameField.onChange}
@@ -496,7 +493,7 @@ function DayExercises({
                 name={`days.${dayIndex}.exercises.${exerciseIndex}.sets`}
                 render={({ field: setsField, fieldState }) => (
                   <Box className="gap-1">
-                    <Input className={inputClassName}>
+                    <Input className={routineInputClassName}>
                       <InputField
                         value={setsField.value}
                         onChangeText={setsField.onChange}
@@ -519,7 +516,7 @@ function DayExercises({
                 name={`days.${dayIndex}.exercises.${exerciseIndex}.reps`}
                 render={({ field: repsField, fieldState }) => (
                   <Box className="gap-1">
-                    <Input className={inputClassName}>
+                    <Input className={routineInputClassName}>
                       <InputField
                         value={repsField.value}
                         onChangeText={repsField.onChange}
@@ -541,7 +538,7 @@ function DayExercises({
                 name={`days.${dayIndex}.exercises.${exerciseIndex}.weightKg`}
                 render={({ field: weightField, fieldState }) => (
                   <Box className="gap-1">
-                    <Input className={inputClassName}>
+                    <Input className={routineInputClassName}>
                       <InputField
                         value={weightField.value}
                         onChangeText={weightField.onChange}
@@ -584,7 +581,7 @@ function WeekdaySelect({
       <SelectTrigger
         variant="outline"
         size="md"
-        className="bg-card border-border-subtle rounded-lg px-2.5 min-h-9"
+        className="bg-card border-border-subtle rounded-lg px-2.5 h-9 min-h-9"
       >
         <Box className="flex-1 flex-row items-center justify-between">
           <Text

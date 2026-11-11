@@ -13,11 +13,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save, Trash2 } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { FieldError, FieldLabel, MiniLabel } from "./fields";
+import {
+  FieldError,
+  FieldLabel,
+  MiniLabel,
+  routineInputClassName,
+} from "./fields";
 import { SaveFeedback } from "./SaveFeedback";
-
-const inputClassName =
-  "w-full bg-card border border-border-subtle rounded-lg px-2 py-1";
 
 function newMealId(): string {
   return `meal-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -152,7 +154,7 @@ export function DietEditor({
               name="title"
               render={({ field, fieldState }) => (
                 <Box className="gap-1">
-                  <Input className={inputClassName}>
+                  <Input className={routineInputClassName}>
                     <InputField
                       value={field.value}
                       onChangeText={field.onChange}
@@ -174,7 +176,7 @@ export function DietEditor({
               name="waterGoalLiters"
               render={({ field, fieldState }) => (
                 <Box className="gap-1">
-                  <Input className={inputClassName}>
+                  <Input className={routineInputClassName}>
                     <InputField
                       value={field.value}
                       onChangeText={field.onChange}
@@ -233,7 +235,7 @@ export function DietEditor({
                   name={`meals.${index}.time`}
                   render={({ field: timeField, fieldState }) => (
                     <Box className="gap-1">
-                      <Input className={inputClassName}>
+                      <Input className={routineInputClassName}>
                         <InputField
                           value={timeField.value}
                           onChangeText={timeField.onChange}
@@ -255,7 +257,7 @@ export function DietEditor({
                   name={`meals.${index}.title`}
                   render={({ field: titleField, fieldState }) => (
                     <Box className="gap-1">
-                      <Input className={inputClassName}>
+                      <Input className={routineInputClassName}>
                         <InputField
                           value={titleField.value}
                           onChangeText={titleField.onChange}
@@ -290,7 +292,7 @@ export function DietEditor({
                 name={`meals.${index}.description`}
                 render={({ field: descriptionField, fieldState }) => (
                   <Box className="gap-1">
-                    <Input className={inputClassName}>
+                    <Input className={routineInputClassName}>
                       <InputField
                         value={descriptionField.value}
                         onChangeText={descriptionField.onChange}
