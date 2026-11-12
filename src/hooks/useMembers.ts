@@ -2,6 +2,7 @@ import { queryKeys } from '@/hooks/queryKeys';
 import {
   addMember,
   deleteMember,
+  deleteWorkoutDay,
   getMemberById,
   getWorkoutDays,
   listMembers,
@@ -84,6 +85,21 @@ export function useSaveWorkoutWeek(memberId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutPrograms.byMember(memberId),
       });
+    },
+  });
+}
+
+export function useDeleteWorkoutDay(memberId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dayId: string) => deleteWorkoutDay(dayId),
+    onSuccess: (_result, dayId) => {
+      queryClient.setQueryData<WorkoutDay[]>(
+        queryKeys.workoutPrograms.byMember(memberId),
+        (current) =>
+          current?.filter((day) => day.id !== dayId),
+      );
     },
   });
 }

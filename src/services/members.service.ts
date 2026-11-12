@@ -507,3 +507,11 @@ export async function saveWorkoutWeek(
   }
 }
 
+export async function deleteWorkoutDay(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('workout_programs' as any)
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+

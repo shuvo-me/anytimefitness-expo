@@ -29,7 +29,11 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { useSaveWorkoutWeek, useWorkoutDays } from "@/hooks/useMembers";
+import {
+  useDeleteWorkoutDay,
+  useSaveWorkoutWeek,
+  useWorkoutDays,
+} from "@/hooks/useMembers";
 import { toDateInputValue } from "@/lib/date";
 import type { Weekday, WorkoutDay } from "@/types/routine";
 import { WEEKDAYS } from "@/types/routine";
@@ -105,6 +109,7 @@ export function WorkoutEditor({
 }) {
   const { data, isLoading, isError, refetch } = useWorkoutDays(memberId);
   const saveMutation = useSaveWorkoutWeek(memberId);
+  const deleteMutation = useDeleteWorkoutDay(memberId);
   const days = data ?? [];
 
   const { control, handleSubmit, reset, getValues } = useForm<WorkoutWeekForm>({
@@ -185,7 +190,23 @@ export function WorkoutEditor({
     });
   };
 
-  const handleRemoveDay = (dayId: string, index: number) => {
+  const handleRemoveDay = async (dayId: string, index: number) => {
+    const isPersisted = days.some((day) => day.id === dayId);
+
+    if (isPersisted) {
+      const previousSignature = initializedSignature.current;
+      const remainingDays = days.filter((day) => day.id !== dayId);
+      initializedSignature.current =
+        remainingDays.map((day) => day.id).join("|") || "empty";
+
+      try {
+        await deleteMutation.mutateAsync(dayId);
+      } catch {
+        initializedSignature.current = previousSignature;
+        return;
+      }
+    }
+
     setOpenDays((prev) => prev.filter((id) => id !== dayId));
     remove(index);
   };
@@ -224,24 +245,30 @@ export function WorkoutEditor({
             isDisabled={!canAddDay}
             size="sm"
             variant="outline"
-            className="rounded-xl"
+            className="rounded-xl shrink-0 h-8 min-h-8"
           >
             <ButtonIcon as={Plus} className="text-foreground w-3.5 h-3.5" />
-            <ButtonText className="font-display font-bold text-xs uppercase text-foreground">
+            <ButtonText
+              numberOfLines={1}
+              className="font-display font-bold text-xs uppercase text-foreground"
+            >
               Add Day
             </ButtonText>
           </Button>
           <Button
             onPress={handleSubmit(onSubmit, onInvalid)}
-            isDisabled={saveMutation.isPending}
+            isDisabled={saveMutation.isPending || deleteMutation.isPending}
             size="sm"
-            className="rounded-xl"
+            className="rounded-xl shrink-0 h-8 min-h-8"
           >
             <ButtonIcon
               as={Save}
               className="text-primary-foreground w-3.5 h-3.5"
             />
-            <ButtonText className="font-display font-bold text-xs uppercase text-primary-foreground">
+            <ButtonText
+              numberOfLines={1}
+              className="font-display font-bold text-xs uppercase text-primary-foreground"
+            >
               {saveMutation.isPending ? "Saving..." : "Save Week"}
             </ButtonText>
           </Button>
@@ -258,6 +285,12 @@ export function WorkoutEditor({
         <SaveFeedback
           kind="error"
           message="Failed to save the weekly workout. Please try again."
+        />
+      )}
+      {deleteMutation.isError && (
+        <SaveFeedback
+          kind="error"
+          message="Failed to remove the day. Please try again."
         />
       )}
 
@@ -372,6 +405,7 @@ export function WorkoutEditor({
 
                     <Button
                       onPress={() => handleRemoveDay(field.id, index)}
+                      isDisabled={deleteMutation.isPending}
                       size="sm"
                       variant="outline"
                       className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1 self-start"
@@ -381,7 +415,10 @@ export function WorkoutEditor({
                         className="text-destructive w-3.5 h-3.5"
                       />
                       <ButtonText className="text-[10px] font-mono font-bold uppercase text-destructive">
-                        Remove Day
+                        {deleteMutation.isPending &&
+                        deleteMutation.variables === field.id
+                          ? "Removing..."
+                          : "Remove Day"}
                       </ButtonText>
                     </Button>
                   </VStack>
