@@ -31,6 +31,7 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import {
   useDeleteWorkoutDay,
+  useDeleteWorkoutExercise,
   useSaveWorkoutWeek,
   useWorkoutDays,
 } from "@/hooks/useMembers";
@@ -401,7 +402,12 @@ export function WorkoutEditor({
                       />
                     </Box>
 
-                    <DayExercises control={control} dayIndex={index} />
+                    <DayExercises
+                      control={control}
+                      dayIndex={index}
+                      memberId={memberId}
+                      persistedDay={days.find((day) => day.id === field.id)}
+                    />
 
                     <Button
                       onPress={() => handleRemoveDay(field.id, index)}
@@ -444,14 +450,40 @@ export function WorkoutEditor({
 function DayExercises({
   control,
   dayIndex,
+  memberId,
+  persistedDay,
 }: {
   control: Control<WorkoutWeekForm>;
   dayIndex: number;
+  memberId: string;
+  persistedDay?: WorkoutDay;
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `days.${dayIndex}.exercises`,
   });
+  const deleteMutation = useDeleteWorkoutExercise(memberId);
+  const watchedExercises = useWatch({
+    control,
+    name: `days.${dayIndex}.exercises`,
+  });
+
+  const handleRemoveExercise = async (exerciseIndex: number) => {
+    const exerciseId = watchedExercises?.[exerciseIndex]?.id;
+
+    if (persistedDay?.id && exerciseId) {
+      try {
+        await deleteMutation.mutateAsync({
+          dayId: persistedDay.id,
+          exerciseId,
+        });
+      } catch {
+        return;
+      }
+    }
+
+    remove(exerciseIndex);
+  };
 
   return (
     <VStack space="sm">
@@ -510,7 +542,8 @@ function DayExercises({
               />
             </Box>
             <Button
-              onPress={() => remove(exerciseIndex)}
+              onPress={() => handleRemoveExercise(exerciseIndex)}
+              isDisabled={deleteMutation.isPending}
               size="sm"
               variant="outline"
               className="rounded-lg px-2.5 py-1.5 flex-row items-center gap-1 mt-1"
@@ -594,6 +627,13 @@ function DayExercises({
           </HStack>
         </Box>
       ))}
+
+      {deleteMutation.isError && (
+        <SaveFeedback
+          kind="error"
+          message="Failed to remove the exercise. Please try again."
+        />
+      )}
 
       {fields.length === 0 && (
         <Box className="p-4 items-center bg-card border border-border-subtle rounded-lg">

@@ -3,6 +3,7 @@ import {
   addMember,
   deleteMember,
   deleteWorkoutDay,
+  deleteWorkoutExercise,
   getMemberById,
   getWorkoutDays,
   listMembers,
@@ -99,6 +100,36 @@ export function useDeleteWorkoutDay(memberId: string) {
         queryKeys.workoutPrograms.byMember(memberId),
         (current) =>
           current?.filter((day) => day.id !== dayId),
+      );
+    },
+  });
+}
+
+export function useDeleteWorkoutExercise(memberId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      dayId,
+      exerciseId,
+    }: {
+      dayId: string;
+      exerciseId: string;
+    }) => deleteWorkoutExercise(dayId, exerciseId),
+    onSuccess: (_result, { dayId, exerciseId }) => {
+      queryClient.setQueryData<WorkoutDay[]>(
+        queryKeys.workoutPrograms.byMember(memberId),
+        (current) =>
+          current?.map((day) =>
+            day.id === dayId
+              ? {
+                  ...day,
+                  exercises: day.exercises.filter(
+                    (exercise) => exercise.id !== exerciseId,
+                  ),
+                }
+              : day,
+          ),
       );
     },
   });

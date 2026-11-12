@@ -515,3 +515,27 @@ export async function deleteWorkoutDay(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function deleteWorkoutExercise(
+  dayId: string,
+  exerciseId: string,
+): Promise<void> {
+  const { data, error } = await supabase
+    .from('workout_programs' as any)
+    .select('exercises')
+    .eq('id', dayId)
+    .single();
+  if (error) throw error;
+
+  const current = normalizeExercises(
+    (data as { exercises: unknown } | null)?.exercises,
+  );
+  const next = current.filter((exercise) => exercise.id !== exerciseId);
+  if (next.length === current.length) return;
+
+  const { error: updateError } = await (supabase
+    .from('workout_programs' as any) as any)
+    .update({ exercises: next } as any)
+    .eq('id', dayId);
+  if (updateError) throw updateError;
+}
+
